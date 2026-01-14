@@ -3,70 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edulinki</title>
-    <meta http-equiv="refresh" content="2; url=./public/login/index.html">
-    
+    <title>QuickPost - Shared Feed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #ffffff;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        .logo-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .logo-container img {
-            width: 80px; /* Adjust size to match your preference */
-            height: auto;
-            /* Suble pulse animation like Instagram */
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .footer {
-            padding-bottom: 40px;
-            color: #8e8e8e;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .loading { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen pb-10">
 
-    <div class="logo-container">
-        <img src="https://i.imghippo.com/files/fRGt5603uII.png" alt="Loading...">
-    </div>
+    <header class="bg-blue-600 text-white p-4 shadow-md mb-6">
+        <div class="max-w-2xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">QuickPost</h1>
+            <span id="status" class="text-xs bg-blue-700 px-2 py-1 rounded">Connecting...</span>
+        </div>
+    </header>
 
-    <div class="footer">
-        <p>from</p>
-        <p style="font-weight: 600; color: #262626; letter-spacing: 1px; margin-top: 5px;">EDULINKI</p>
-    </div>
+    <main class="max-w-2xl mx-auto px-4">
+        
+        <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+            <h2 class="text-lg font-semibold mb-4">Create a Post</h2>
+            <div class="space-y-3">
+                <input type="text" id="userName" placeholder="Your Name" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none">
+                <textarea id="postCaption" placeholder="What's on your mind?" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none h-24"></textarea>
+                <button onclick="createPost()" id="postBtn" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition w-full font-medium">Post to Feed</button>
+            </div>
+        </div>
+
+        <div id="feed" class="space-y-6">
+            <div class="text-center py-10 text-gray-500">Loading posts...</div>
+        </div>
+    </main>
 
     <script>
-        // Backup JavaScript redirect in case meta refresh fails
-        setTimeout(() => {
-            window.location.href = "./public/login/index.html";
-        }, 2000); // 2 seconds delay to show the animation
+        const API_KEY = '$2a$10$FPROQuWuC7uLh8SBJqOUwe3aPd6Ga9wj6PQx.eW466yacwBhrHj22';
+        let BIN_ID = localStorage.getItem('my_bin_id'); // Saves the database ID locally
+        let posts = [];
+
+        // 1. Initialize App
+        async function init() {
+            if (!BIN_ID) {
+                updateStatus("Setting up database...");
+                await createNewBin();
+            } else {
+                fetchPosts();
+            }
+        }
+
+        // 2. Create a new Bin if one doesn't exist
+        async function createNewBin() {
+            try {
+                const response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY,
+                        'X-Bin-Private': 'false'
+                    },
+                    body: JSON.stringify({ posts: [] })
+                });
+                const data = await response.json();
+                BIN_ID = data.metadata.id;
+                localStorage.setItem('my_bin_id', BIN_ID);
+                updateStatus("Ready");
+                fetchPosts();
+            } catch (err) {
+                console.error("Setup failed", err);
+                updateStatus("Error: Check Console");
+            }
+        }
+
+        // 3. Fetch all posts
+        async function fetchPosts() {
+            updateStatus("Syncing...");
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const data = await response.json();
+                posts = data.record.posts || [];
+                renderFeed();
+                updateStatus("Live");
+            } catch (err) {
+                updateStatus("Sync Error");
+            }
+        }
+
+        // 4. Save to JSONBin
+        async function saveData() {
+            document.body.classList.add('loading');
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ posts: posts })
+                });
+                renderFeed();
+            } catch (err) {
+                alert("Failed to save data.");
+            }
+            document.body.classList.remove('loading');
+        }
+
+        // 5. App Logic
+        async function createPost() {
+            const name = document.getElementById('userName').value;
+            const caption = document.getElementById('postCaption').value;
+
+            if (!name || !caption) return alert("Fill in both fields!");
+
+            const newPost = {
+                id: Date.now(),
+                name: name,
+                caption: caption,
+                likes: 0,
+                comments: [],
+                date: new Date().toLocaleString()
+            };
+
+            posts.unshift(newPost); // Add to top
+            document.getElementById('postCaption').value = ''; // Clear input
+            await saveData();
+        }
+
+        async function addLike(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes++;
+                await saveData();
+            }
+        }
+
+        async function addComment(postId, inputId) {
+            const commentText = document.getElementById(inputId).value;
+            if (!commentText) return;
+
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.comments.push(commentText);
+                await saveData();
+            }
+        }
+
+        // 6. UI Rendering
+        function renderFeed() {
+            const feed = document.getElementById('feed');
+            if (posts.length === 0) {
+                feed.innerHTML = `<div class="bg-white p-6 rounded text-center text-gray-400">No posts yet. Be the first!</div>`;
+                return;
+            }
+
+            feed.innerHTML = posts.map(post => `
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-blue-600">${post.name}</h3>
+                            <span class="text-xs text-gray-400">${post.date}</span>
+                        </div>
+                        <p class="text-gray-800 mt-2">${post.caption}</p>
+                        
+                        <div class="mt-4 flex items-center space-x-4">
+                            <button onclick="addLike(${post.id})" class="text-gray-500 hover:text-red-500 flex items-center space-x-1">
+                                <span>❤️</span> <span>${post.likes}</span>
+                            </button>
+                            <span class="text-gray-400 text-sm">${post.comments.length} Comments</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 border-t border-gray-100">
+                        <div class="space-y-2 mb-4">
+                            ${post.comments.map(c => `<div class="text-sm bg-white p-2 rounded shadow-sm border border-gray-100">${c}</div>`).join('')}
+                        </div>
+                        <div class="flex space-x-2">
+                            <input type="text" id="input-${post.id}" placeholder="Write a comment..." class="flex-1 text-sm p-2 border rounded outline-none">
+                            <button onclick="addComment(${post.id}, 'input-${post.id}')" class="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStatus(text) {
+            document.getElementById('status').innerText = text;
+        }
+
+        // Run on load
+        init();
     </script>
 </body>
 </html>
