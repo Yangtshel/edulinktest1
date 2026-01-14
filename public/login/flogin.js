@@ -45,26 +45,32 @@ const authAvatar = document.getElementById("authAvatar");
 let isSignup = false;
 
 function openOverlay() {
-  overlay.classList.add("active");
-  document.body.style.overflow = "hidden";
-  isSignup = false;
-  updateUI();
+  if (overlay) {
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    isSignup = false;
+    updateUI();
+  }
 }
 
 function closeOverlay() {
-  overlay.classList.remove("active");
-  document.body.style.overflow = "auto";
+  if (overlay) {
+    overlay.classList.remove("active");
+    document.body.style.overflow = "auto";
+  }
 }
 
-getStartedBtn.onclick = openOverlay;
-heroGetStartedBtn.onclick = openOverlay;
-closeBtn.onclick = closeOverlay;
+if (getStartedBtn) getStartedBtn.onclick = openOverlay;
+if (heroGetStartedBtn) heroGetStartedBtn.onclick = openOverlay;
+if (closeBtn) closeBtn.onclick = closeOverlay;
 
 // TOGGLE LOGIN / SIGNUP
-toggleAuthBtn.onclick = () => {
-  isSignup = !isSignup;
-  updateUI();
-};
+if (toggleAuthBtn) {
+  toggleAuthBtn.onclick = () => {
+    isSignup = !isSignup;
+    updateUI();
+  };
+}
 
 function updateUI() {
   if (isSignup) {
@@ -87,65 +93,69 @@ function updateUI() {
 }
 
 // DYNAMIC AVATAR
-inputName.addEventListener("input", (e) => {
-  if (isSignup && e.target.value.length > 1) {
-    authAvatar.src = `https://api.dicebear.com/9.x/lorelei/svg?seed=${
-      e.target.value
-    }&backgroundColor=transparent`;
-  }
-});
+if (inputName) {
+  inputName.addEventListener("input", (e) => {
+    if (isSignup && e.target.value.length > 1) {
+      authAvatar.src = `https://api.dicebear.com/9.x/lorelei/svg?seed=${
+        e.target.value
+      }&backgroundColor=transparent`;
+    }
+  });
+}
 
 // HANDLE SUBMIT
-btnSubmit.onclick = async () => {
-  const email = inputEmail.value.trim();
-  const pass = inputPass.value.trim();
-  const name = inputName.value.trim();
+if (btnSubmit) {
+  btnSubmit.onclick = async () => {
+    const email = inputEmail.value.trim();
+    const pass = inputPass.value.trim();
+    const name = inputName.value.trim();
 
-  if (!email || !pass) {
-    alert("Please fill in email and password");
-    return;
-  }
-
-  btnSubmit.innerText = "Processing...";
-  btnSubmit.style.opacity = "0.7";
-  btnSubmit.disabled = true;
-
-  try {
-    if (isSignup) {
-      if (!name) {
-        alert("Please enter your name");
-        btnSubmit.innerText = "Sign Up";
-        btnSubmit.disabled = false;
-        btnSubmit.style.opacity = "1";
-        return;
-      }
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        pass
-      );
-      await updateProfile(cred.user, {
-        displayName: name,
-        photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${name}&backgroundColor=transparent`,
-      });
-    } else {
-      await signInWithEmailAndPassword(auth, email, pass);
+    if (!email || !pass) {
+      alert("Please fill in email and password");
+      return;
     }
 
-    window.location.href = "home.html";
-  } catch (err) {
-    console.error(err);
-    alert("Error: " + err.message);
-  } finally {
-    btnSubmit.style.opacity = "1";
-    btnSubmit.disabled = false;
-    btnSubmit.innerText = isSignup ? "Sign Up" : "Log in";
-  }
-};
+    btnSubmit.innerText = "Processing...";
+    btnSubmit.style.opacity = "0.7";
+    btnSubmit.disabled = true;
+
+    try {
+      if (isSignup) {
+        if (!name) {
+          alert("Please enter your name");
+          btnSubmit.innerText = "Sign Up";
+          btnSubmit.disabled = false;
+          btnSubmit.style.opacity = "1";
+          return;
+        }
+        const cred = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          pass
+        );
+        await updateProfile(cred.user, {
+          displayName: name,
+          photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${name}&backgroundColor=transparent`,
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
+
+      window.location.href = "../home/index.html";
+    } catch (err) {
+      console.error(err);
+      alert("Error: " + err.message);
+    } finally {
+      btnSubmit.style.opacity = "1";
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = isSignup ? "Sign Up" : "Log in";
+    }
+  };
+}
 
 // AUTH LISTENER
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = "/home/index.html";
+    window.location.href = "../home/index.html";
   }
 });
