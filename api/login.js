@@ -1,11 +1,8 @@
 // api/login.js
 export default function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
+  // We send the config from the server to the frontend
+  // In a real production app, you would store these in Vercel Project Settings > Environment Variables
   const firebaseConfig = {
-    // Reminder for me ---- In Vercel, replace these strings with process.env.YOUR_VARIABLE_NAME
     apiKey: process.env.FIREBASE_API_KEY || "AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno",
     authDomain: "edulinki.firebaseapp.com",
     projectId: "edulinki",
