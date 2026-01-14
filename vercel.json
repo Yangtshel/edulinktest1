@@ -3,6 +3,11 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/login"
+      "destination": "/login.html"
     },
+    {
+      "source": "/home",
+      "destination": "/public/home/index.html"
+    }
+  ]
 }
