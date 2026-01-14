@@ -4,50 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 320px;
-        }
-        h1 { color: #1a1a1a; margin-bottom: 10px; }
-        p { color: #666; margin-bottom: 30px; }
-        
-        .btn-hi {
-            display: block;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: transform 0.2s, background 0.3s;
-        }
-        .btn-hi:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-    </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Welcome</h1>
-        <p>You are currently at /home</p>
-        <a href="/hi" class="btn-hi">Click to Say Hi</a>
-    </div>
+    <h1>Main Page</h1>
+    
+    <a href="/hi">
+        <button style="padding: 10px 20px; cursor: pointer;">Go to Hi</button>
+    </a>
 
 </body>
 </html>
