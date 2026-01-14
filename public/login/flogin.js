@@ -146,6 +146,6 @@ btnSubmit.onclick = async () => {
 // AUTH LISTENER
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = "/home";
+    window.location.href = "/home/index.html";
   }
 });
