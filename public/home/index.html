@@ -3,158 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion Blue Sky - Clean</title>
-    <style>
-        /* 1. RESET & BASE STYLES */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            /* Notion Font Stack */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Dark text for contrast against ligher background */
-            color: #1c2b3a;
-            position: relative;
-        }
-
-        /* 2. THE BACKGROUND (Lighter Notion Fade) */
-        .background-sky {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            /* Lighter gradient: Bright Sky Blue to Pale White-Blue */
-            background: linear-gradient(180deg, #77B6FF 0%, #E6F4FF 100%);
-        }
-
-        /* 3. THE CLOUDS (Static & Blurred) */
-        .cloud {
-            width: 350px;
-            height: 120px;
-            background: #ffffff;
-            border-radius: 100px;
-            position: absolute;
-            /* KEY CHANGES: High blur, static position, lower opacity */
-            filter: blur(40px);
-            opacity: 0.6;
-            z-index: -1; /* Ensure they are behind the content */
-        }
-
-        /* Cloud fluffiness */
-        .cloud::after, .cloud::before {
-            content: '';
-            position: absolute;
-            background: inherit;
-            border-radius: 50%;
-        }
-        .cloud::after { width: 100px; height: 100px; top: -50px; left: 50px; }
-        .cloud::before { width: 180px; height: 180px; top: -90px; right: 50px; }
-
-        /* Static positions for composition */
-        .c1 {
-            top: 15%;
-            left: 10%;
-            transform: scale(1.5);
-            opacity: 0.7;
-        }
-
-        .c2 {
-            top: 60%;
-            right: 5%;
-            transform: scale(1.8);
-        }
-
-        .c3 {
-            bottom: -10%;
-            left: 30%;
-            transform: scale(2);
-            opacity: 0.5;
-        }
-
-        /* 4. MAIN CONTENT (Cleaner Glass Card) */
-        .container {
-            text-align: center;
-            z-index: 10;
-            /* Subtle lighter glass effect */
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 4rem 3rem;
-            border-radius: 24px;
-            /* Very subtle border */
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            /* Soft shadow for depth */
-            box-shadow: 0 20px 40px rgba(35, 131, 226, 0.1);
-            max-width: 550px;
-            width: 90%;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 1.5rem;
-            color: #111; /* Darker heading */
-        }
-
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 3rem;
-            color: #555; /* Slightly softer body text */
-            font-weight: 500;
-        }
-
-        /* Notion-style Solid Button for contrast */
-        .btn {
-            background-color: #2383e2; /* Notion Blue background */
-            color: white; /* White text */
-            border: none;
-            padding: 14px 32px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(35, 131, 226, 0.3);
-        }
-
-        .btn:hover {
-            background-color: #1c6fb5;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(35, 131, 226, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-    </style>
+    <title>Main Page</title>
 </head>
 <body>
 
-    <div class="background-sky"></div>
+    <h1>Welcome to my Website</h1>
+    <p>Click the button below to go to the Hi page.</p>
 
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-
-    <main class="container">
-        <h1>Clarity awaits.</h1>
-        <p>A simpler workspace for a clearer mind. Remove the noise and focus on what truly matters.</p>
-        <button class="btn">Get Started Free</button>
-    </main>
+    <a href="hi.html">
+        <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+            Say Hi!
+        </button>
+    </a>
 
 </body>
 </html>
