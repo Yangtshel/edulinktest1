@@ -1,12 +1,9 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/hi",
-      "destination": "/hi.html"
-    },
-    {
-      "source": "/home",
-      "destination": "/home/index.html"
+      "source": "/",
+      "destination": "/home"
     }
   ]
 }
