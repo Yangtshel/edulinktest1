@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduLink</title>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,600;1,700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="loginOverlay" aria-hidden="true">
+    <div class="login-card" role="dialog" aria-modal="true">
+      <button class="close-btn" id="closeOverlayBtn" aria-label="Close">
+        <i data-lucide="x" size="24"></i>
+      </button>
+      <h2 class="auth-title" id="authTitle">Welcome back</h2>
+      <img
+        src="https://api.dicebear.com/9.x/lorelei/svg?seed=User&backgroundColor=transparent"
+        class="auth-avatar-preview"
+        id="authAvatar"
+        alt="User avatar preview"
+      />
+      <form id="authForm" onsubmit="event.preventDefault();">
+        <div class="input-group hidden" id="groupName">
+          <label for="inputName">Display Name</label>
+          <input type="text" id="inputName" placeholder="Your Name" />
+        </div>
+        <div class="input-group">
+          <label for="inputEmail">Work Email</label>
+          <input
+            type="email"
+            id="inputEmail"
+            placeholder="name@company.com"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <label for="inputPass">Password</label>
+          <input
+            type="password"
+            id="inputPass"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <button type="submit" class="login-btn" id="btnSubmit">
+          Log in
+        </button>
+      </form>
+      <div class="auth-toggle-text" id="toggleAuth">
+        Don't have an account? <span>Create one</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        EduLink
+        <span style="font-size: 10px; opacity: 0.5; font-weight: 700">®</span>
+      </div>
+      <nav>
+        <a href="#products">Products</a>
+        <a href="#showcase">Showcase</a>
+        <a href="#about">About</a>
+      </nav>
+      <button id="getStartedBtn" class="btn-black">Get Started</button>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero-jigsaw" id="products">
+      <div class="notch-bridge">
+        <div class="av-group">
+          <img
+            src="https://api.dicebear.com/7.x/lorelei/svg?seed=A"
+            class="av-img"
+            alt="User avatar A"
+          />
+          <img
+            src="https://api.dicebear.com/7.x/lorelei/svg?seed=B"
+            class="av-img"
+            alt="User avatar B"
+          />
+          <div
+            style="
+              width: 50px;
+              height: 50px;
+              background: var(--primary);
+              color: white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 3px solid white;
+              margin-left: 5px;
+              font-weight: 700;
+              font-size: 12px;
+            "
+          >
+            10+
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-left">
+        <h1>
+          Make a change,<br />
+          <i>Be</i> the change.
+        </h1>
+        <p>
+         Edulink is a scoail medai platform where users are exposed to
+          healthy conetents (no brainrots and others)
+        </p>
+        <div class="btn-group">
+          <button id="heroGetStartedBtn" class="btn btn-p">
+            Get Started Free
+          </button>
+          <a href="#showcase" class="btn btn-w">
+            <i data-lucide="play-circle" size="22"></i>
+            Watch Demo
+          </a>
+        </div>
+      </div>
+
+      <div class="card card-right" aria-hidden="true">
+        <img
+          src="https://i.imghippo.com/files/RKf5890obo.png"
+          style="width: 100%; height: 100%; object-fit: cover"
+          alt="Hero visual"
+        />
+        <div class="arrow-notch">
+          <div class="arr-circ">
+            <i data-lucide="arrow-up-right" size="40"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOWCASE -->
+    <section class="showcase" id="showcase">
+      <div class="bg-spot"></div>
+      <h2>AI-Driven Learning<br />Growth Right Away</h2>
+      <p>From concept to teaching — manage everything in one platform</p>
+
+      <div class="visual-area">
+        <svg class="connector-svg" viewBox="0 0 1100 800">
+          <path
+            class="connector-path"
+            d="M400 350 Q 250 350, 180 160"
+          ></path>
+          <path
+            class="connector-path"
+            d="M400 450 Q 250 450, 180 500"
+          ></path>
+          <path
+            class="connector-path"
+            d="M700 300 Q 850 300, 920 180"
+          ></path>
+          <path
+            class="connector-path"
+            d="M700 500 Q 850 500, 900 580"
+          ></path>
+        </svg>
+
+        <div class="phone-frame">
+          <div class="phone-inner">
+            <div class="phone-post-header">
+              <div class="user-info">
+                <img
+                  src="https://api.dicebear.com/7.x/lorelei/svg?seed=Creative"
+                  class="user-avatar"
+                  alt="User avatar creative"
+                />
+                <span class="user-name">anith_dev</span>
+              </div>
+              <span class="follow-btn">Follow</span>
+            </div>
+            <img
+              src="https://i.imghippo.com/files/PUV6696ko.png"
+              class="phone-post-img"
+              alt="Post content"
+            />
+            <div class="phone-post-footer">
+              <div class="post-actions">
+                <i data-lucide="heart" size="20"></i>
+                <i data-lucide="message-circle" size="20"></i>
+                <i data-lucide="send" size="20"></i>
+              </div>
+              <div class="post-caption">
+                <b>alex_design</b>
+                Learn something from edulink and make a impact by teaching others #newton
+                #impact
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ui-card card-stat">
+          <i data-lucide="trending-up" size="24"></i>
+          <span
+            style="
+              font-size: 34px;
+              font-weight: 700;
+              display: block;
+              margin-top: 10px;
+            "
+            >+40.2%</span
+          >
+          <span
+            style="
+              font-size: 11px;
+              text-transform: uppercase;
+              font-weight: 700;
+              opacity: 0.6;
+            "
+            >Engagement</span
+          >
+        </div>
+
+        <div class="ui-card card-sale">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span style="font-size: 26px; font-weight: 700">100 tokens</span>
+            <i data-lucide="book-open-text" size="24"></i>
+          </div>
+          <p style="font-size: 13px; color: #444; margin-top: 4px; font-weight: 500">
+            Weekly Learning
+          </p>
+        </div>
+
+        <div class="ui-card card-vid">
+          <img
+            src="https://i.imghippo.com/files/fRGt5603uII.png"
+            style="width: 100%; height: 100%; object-fit: cover"
+            alt="Video preview"
+          />
+        </div>
+
+        <div class="ui-card card-ig">
+          <div class="ig-img-wrap">
+            <img
+              src="https://i.imghippo.com/files/dHY4195dOA.png"
+              alt="Instagram style post"
+            />
+          </div>
+          <div class="ig-actions">
+            <i data-lucide="heart" size="20"></i>
+            <i data-lucide="message-circle" size="20"></i>
+            <i data-lucide="send" size="20"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALL TO KNOW ABOUT US -->
+    <section class="section-best" id="about">
+      <div class="best-header">
+        <h2 class="best-title">
+          <i>All</i> to know about us
+        </h2>
+        <a href="#about" class="see-all">
+          Be a part of us <i data-lucide="arrow-right" size="18"></i>
+        </a>
+      </div>
+
+      <div class="best-grid">
+        <!-- Large Blog Card -->
+        <div class="b-card b-card-lg">
+          <img
+            src="https://i.imghippo.com/files/mIPL1722DKk.png"
+            class="b-img-bg"
+            alt="EduLink Blog"
+          />
+          <div class="grain-overlay"></div>
+          <div class="b-tags">
+            <div class="tag-white">EduLink</div>
+            <div class="tag-blur">Blog</div>
+          </div>
+          <div class="travel-float-box">
+            <div class="travel-cat">Blog</div>
+            <h3>The Prototype Of EduLink</h3>
+          </div>
+          <div class="arrow-circle-white" aria-hidden="true">
+            <i data-lucide="arrow-up-right" size="24"></i>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-right">
+          <!-- Events Card -->
+          <div class="b-card b-card-ads">
+            <div class="ads-top">
+              <div class="ads-badge">
+                <span class="dot-black"></span>
+                EVENTS
+              </div>
+              <div class="ads-plus">+</div>
+            </div>
+            <div class="ads-content">
+              <div class="ads-sub">Updates</div>
+              <h3>Get to know about the future of EduLink</h3>
+            </div>
+            <a href="#about" class="ads-link">Learn more</a>
+          </div>
+
+          <!-- Policy Card -->
+          <div class="b-card b-card-sm">
+            <img
+              src="https://i.imghippo.com/files/okly8861Yd.jpg"
+              class="b-img-bg"
+              alt="Policy"
+            />
+            <div class="pick-badge">24</div>
+            <button class="btn-picks">
+              See our policy <i data-lucide="arrow-right" size="16"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TRUST CLOUD -->
+  <section class="trust-cloud">
+    <div
+      style="
+        text-align: center;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 24px;
+        opacity: 0.7;
+      "
+    >
+      Trusted by
+    </div>
+    <div class="marquee-track">
+      <span class="trust-item serif">The Royal Academy</span>
+      <span class="trust-item sans">DGI</span>
+      <span class="trust-item serif">Gravitas</span>
+      <span class="trust-item sans">Newton</span>
+
+      <span class="trust-item serif">The Royal Academy</span>
+      <span class="trust-item sans">DGI</span>
+      <span class="trust-item serif">Gravitas</span>
+      <span class="trust-item sans">Newton</span>
+    </div>
+  </section>
+
+  <!-- External JS -->
+  <script type="module" src="flogin.js"></script>
+</body>
+</html>
