@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/home",
-      "destination": "/home/index.html"
+      "source": "/",
+      "destination": "/public/home/index.html"
     }
   ]
 }
