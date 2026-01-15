@@ -1,5 +1,3 @@
-lucide.createIcons();
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -9,12 +7,17 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-let auth;
+// Initialize Lucide icons
+lucide.createIcons();
+
+let auth = null; // Start as null
 
 // 1. FETCH CONFIG FROM BACKEND API
 async function initFirebase() {
   try {
     const response = await fetch('/api/login');
+    if (!response.ok) throw new Error("Could not fetch config from API");
+    
     const firebaseConfig = await response.json();
     
     const app = initializeApp(firebaseConfig);
@@ -26,8 +29,10 @@ async function initFirebase() {
         window.location.href = "/home";
       }
     });
+    console.log("Firebase initialized successfully");
   } catch (err) {
     console.error("Failed to load Firebase config:", err);
+    alert("Connection Error: Server config is missing.");
   }
 }
 
@@ -35,42 +40,17 @@ initFirebase();
 
 // UI ELEMENTS
 const overlay = document.getElementById("loginOverlay");
-const closeBtn = document.getElementById("closeOverlayBtn");
-const getStartedBtn = document.getElementById("getStartedBtn");
-const heroGetStartedBtn = document.getElementById("heroGetStartedBtn");
-const toggleAuthBtn = document.getElementById("toggleAuth");
-
-// FORM ELEMENTS
-const authTitle = document.getElementById("authTitle");
 const btnSubmit = document.getElementById("btnSubmit");
-const groupName = document.getElementById("groupName");
-const inputName = document.getElementById("inputName");
 const inputEmail = document.getElementById("inputEmail");
 const inputPass = document.getElementById("inputPass");
-const authAvatar = document.getElementById("authAvatar");
+const inputName = document.getElementById("inputName");
+const authTitle = document.getElementById("authTitle");
+const toggleAuthBtn = document.getElementById("toggleAuth");
+const groupName = document.getElementById("groupName");
 
 let isSignup = false;
 
-function openOverlay() {
-  if(overlay) {
-    overlay.classList.add("active");
-    document.body.style.overflow = "hidden";
-    isSignup = false;
-    updateUI();
-  }
-}
-
-function closeOverlay() {
-  if(overlay) {
-    overlay.classList.remove("active");
-    document.body.style.overflow = "auto";
-  }
-}
-
-if (getStartedBtn) getStartedBtn.onclick = openOverlay;
-if (heroGetStartedBtn) heroGetStartedBtn.onclick = openOverlay;
-if (closeBtn) closeBtn.onclick = closeOverlay;
-
+// UI TOGGLE LOGIC
 if (toggleAuthBtn) {
   toggleAuthBtn.onclick = () => {
     isSignup = !isSignup;
@@ -79,16 +59,13 @@ if (toggleAuthBtn) {
 }
 
 function updateUI() {
-  if (!authTitle || !btnSubmit || !toggleAuthBtn) return;
   if (isSignup) {
     authTitle.innerText = "Create Account";
     btnSubmit.innerText = "Sign Up";
-    toggleAuthBtn.innerHTML = 'Already have an account? <span>Log in</span>';
     groupName.classList.remove("hidden");
   } else {
     authTitle.innerText = "Welcome back";
     btnSubmit.innerText = "Log in";
-    toggleAuthBtn.innerHTML = "Don't have an account? <span>Create one</span>";
     groupName.classList.add("hidden");
   }
 }
@@ -96,7 +73,11 @@ function updateUI() {
 // HANDLE SUBMIT
 if (btnSubmit) {
   btnSubmit.onclick = async () => {
-    if (!auth) return; // Wait for config to load
+    // CRITICAL: Check if auth is loaded from the API first
+    if (!auth) {
+      alert("System is still connecting... please try again in 2 seconds.");
+      return;
+    }
 
     const email = inputEmail.value.trim();
     const pass = inputPass.value.trim();
@@ -115,14 +96,14 @@ if (btnSubmit) {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await updateProfile(cred.user, {
           displayName: name,
-          photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${name}&backgroundColor=transparent`,
+          photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${name}`,
         });
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
       window.location.href = "/home";
     } catch (err) {
-      alert("Error: " + err.message);
+      alert("Auth Error: " + err.message);
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.innerText = isSignup ? "Sign Up" : "Log in";
