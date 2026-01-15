@@ -7,179 +7,144 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Global auth variable
-let auth = null;
+// Initialize Lucide icons if applicable
+if (window.lucide) {
+  lucide.createIcons();
+}
 
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initialize Icons
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+let auth;
 
-  // 2. Select DOM Elements
-  const ui = {
-    overlay: document.getElementById("loginOverlay"),
-    closeBtn: document.getElementById("closeOverlayBtn"),
-    getStartedBtn: document.getElementById("getStartedBtn"),
-    heroGetStartedBtn: document.getElementById("heroGetStartedBtn"),
-    toggleAuthBtn: document.getElementById("toggleAuth"),
-    authTitle: document.getElementById("authTitle"),
-    btnSubmit: document.getElementById("btnSubmit"),
-    groupName: document.getElementById("groupName"),
-    inputName: document.getElementById("inputName"),
-    inputEmail: document.getElementById("inputEmail"),
-    inputPass: document.getElementById("inputPass"),
-  };
+// 1. FETCH CONFIG FROM BACKEND API & INITIALIZE
+async function initFirebase() {
+  try {
+    const response = await fetch('/api/login');
+    const firebaseConfig = await response.json();
 
-  // State
-  let isSignup = false;
-
-  // 3. Initialize Firebase
-  async function initFirebase() {
-    // Disable button while loading config
-    if (ui.btnSubmit) {
-      ui.btnSubmit.disabled = true;
-      ui.btnSubmit.innerText = "Loading...";
+    if (firebaseConfig.error) {
+      throw new Error(firebaseConfig.error);
     }
+
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+
+    // Monitor Authentication State
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "/home";
+      }
+    });
+  } catch (err) {
+    console.error("Failed to load Firebase config:", err);
+  }
+}
+
+initFirebase();
+
+// --- UI ELEMENTS ---
+const overlay = document.getElementById("loginOverlay");
+const closeBtn = document.getElementById("closeOverlayBtn");
+const getStartedBtn = document.getElementById("getStartedBtn");
+const heroGetStartedBtn = document.getElementById("heroGetStartedBtn");
+const toggleAuthBtn = document.getElementById("toggleAuth");
+
+// --- FORM ELEMENTS ---
+const authTitle = document.getElementById("authTitle");
+const btnSubmit = document.getElementById("btnSubmit");
+const groupName = document.getElementById("groupName");
+const inputName = document.getElementById("inputName");
+const inputEmail = document.getElementById("inputEmail");
+const inputPass = document.getElementById("inputPass");
+
+let isSignup = false;
+
+// --- UI FUNCTIONS ---
+function openOverlay() {
+  if (overlay) {
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    isSignup = false;
+    updateUI();
+  }
+}
+
+function closeOverlay() {
+  if (overlay) {
+    overlay.classList.remove("active");
+    document.body.style.overflow = "auto";
+  }
+}
+
+function updateUI() {
+  if (!authTitle || !btnSubmit || !toggleAuthBtn) return;
+  
+  if (isSignup) {
+    authTitle.innerText = "Create Account";
+    btnSubmit.innerText = "Sign Up";
+    toggleAuthBtn.innerHTML = 'Already have an account? <span>Log in</span>';
+    if (groupName) groupName.classList.remove("hidden");
+  } else {
+    authTitle.innerText = "Welcome back";
+    btnSubmit.innerText = "Log in";
+    toggleAuthBtn.innerHTML = "Don't have an account? <span>Create one</span>";
+    if (groupName) groupName.classList.add("hidden");
+  }
+}
+
+// --- EVENT LISTENERS ---
+if (getStartedBtn) getStartedBtn.onclick = openOverlay;
+if (heroGetStartedBtn) heroGetStartedBtn.onclick = openOverlay;
+if (closeBtn) closeBtn.onclick = closeOverlay;
+
+if (toggleAuthBtn) {
+  toggleAuthBtn.onclick = () => {
+    isSignup = !isSignup;
+    updateUI();
+  };
+}
+
+// --- HANDLE SUBMIT ---
+if (btnSubmit) {
+  btnSubmit.onclick = async () => {
+    // Safety check: ensure Firebase has loaded via the API first
+    if (!auth) {
+      alert("System is still initializing. Please wait a moment.");
+      return;
+    }
+
+    const email = inputEmail.value.trim();
+    const pass = inputPass.value.trim();
+    const name = inputName.value.trim();
+
+    if (!email || !pass) {
+      alert("Please fill in email and password");
+      return;
+    }
+
+    btnSubmit.innerText = "Processing...";
+    btnSubmit.disabled = true;
 
     try {
-      const response = await fetch('/api/login');
+      if (isSignup) {
+        // Sign Up Logic
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, {
+          displayName: name,
+          photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${encodeURIComponent(name)}&backgroundColor=transparent`,
+        });
+      } else {
+        // Login Logic
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
       
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const firebaseConfig = await response.json();
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-
-      // Re-enable button now that Auth is ready
-      if (ui.btnSubmit) {
-        ui.btnSubmit.disabled = false;
-        updateUI(); // Reset button text
-      }
-
-      // Listen for auth state
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // Optional: Verify we aren't already on the home page to prevent loops
-          if (window.location.pathname !== "/home") {
-            window.location.href = "/home";
-          }
-        }
-      });
+      // Redirect on success (redundant but safe due to onAuthStateChanged)
+      window.location.href = "/home";
+      
     } catch (err) {
-      console.error("Failed to load Firebase config:", err);
-      if (ui.btnSubmit) {
-        ui.btnSubmit.innerText = "Error Loading System";
-      }
-      alert("Could not connect to authentication server. Please refresh.");
+      console.error(err);
+      alert("Authentication Error: " + err.message);
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = isSignup ? "Sign Up" : "Log in";
     }
-  }
-
-  // Start Initialization
-  initFirebase();
-
-  // 4. UI Functions
-  function openOverlay() {
-    if (ui.overlay) {
-      ui.overlay.classList.add("active");
-      document.body.style.overflow = "hidden";
-      isSignup = false;
-      updateUI();
-    }
-  }
-
-  function closeOverlay() {
-    if (ui.overlay) {
-      ui.overlay.classList.remove("active");
-      document.body.style.overflow = "auto";
-    }
-  }
-
-  function updateUI() {
-    if (!ui.authTitle || !ui.btnSubmit || !ui.toggleAuthBtn) return;
-    
-    // Ensure we don't overwrite "Loading..." state if auth isn't ready
-    if (!auth) return; 
-
-    if (isSignup) {
-      ui.authTitle.innerText = "Create Account";
-      ui.btnSubmit.innerText = "Sign Up";
-      ui.toggleAuthBtn.innerHTML = 'Already have an account? <span>Log in</span>';
-      ui.groupName.classList.remove("hidden");
-    } else {
-      ui.authTitle.innerText = "Welcome back";
-      ui.btnSubmit.innerText = "Log in";
-      ui.toggleAuthBtn.innerHTML = "Don't have an account? <span>Create one</span>";
-      ui.groupName.classList.add("hidden");
-    }
-  }
-
-  // 5. Event Listeners
-  if (ui.getStartedBtn) ui.getStartedBtn.onclick = openOverlay;
-  if (ui.heroGetStartedBtn) ui.heroGetStartedBtn.onclick = openOverlay;
-  if (ui.closeBtn) ui.closeBtn.onclick = closeOverlay;
-
-  if (ui.toggleAuthBtn) {
-    ui.toggleAuthBtn.onclick = () => {
-      isSignup = !isSignup;
-      updateUI();
-    };
-  }
-
-  // 6. Handle Submit
-  if (ui.btnSubmit) {
-    ui.btnSubmit.onclick = async () => {
-      if (!auth) return; // Should be handled by disabled state, but double check
-
-      const email = ui.inputEmail.value.trim();
-      const pass = ui.inputPass.value.trim();
-      const name = ui.inputName.value.trim();
-
-      if (!email || !pass) {
-        alert("Please fill in email and password");
-        return;
-      }
-
-      if (isSignup && !name) {
-         alert("Please enter a name for your account");
-         return;
-      }
-
-      // Lock UI
-      ui.btnSubmit.innerText = "Processing...";
-      ui.btnSubmit.disabled = true;
-
-      try {
-        if (isSignup) {
-          const cred = await createUserWithEmailAndPassword(auth, email, pass);
-          // Set Profile Picture
-          await updateProfile(cred.user, {
-            displayName: name,
-            photoURL: `https://api.dicebear.com/9.x/lorelei/svg?seed=${encodeURIComponent(name)}&backgroundColor=transparent`,
-          });
-        } else {
-          await signInWithEmailAndPassword(auth, email, pass);
-        }
-        
-        // Success - Redirect
-        window.location.href = "/home";
-      } catch (err) {
-        console.error(err);
-        
-        // Better error messages for users
-        let msg = err.message;
-        if(msg.includes("auth/invalid-credential")) msg = "Incorrect email or password.";
-        if(msg.includes("auth/email-already-in-use")) msg = "This email is already registered.";
-        if(msg.includes("auth/weak-password")) msg = "Password should be at least 6 characters.";
-        
-        alert(msg);
-        
-        // Reset UI
-        ui.btnSubmit.disabled = false;
-        ui.btnSubmit.innerText = isSignup ? "Sign Up" : "Log in";
-      }
-    };
-  }
-});
+  };
+}
