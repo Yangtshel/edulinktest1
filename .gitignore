@@ -1,8 +1,16 @@
-# Secrets and Environment Variables
+# Local environment variables (IMPORTANT)
 .env
 .env.local
-edulink.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Folders we don't need on GitHub
+# Vercel folders
+.vercel
+
+# Dependency folders
 node_modules/
+
+# OS metadata
 .DS_Store
+Thumbs.db
