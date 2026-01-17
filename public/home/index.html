@@ -34,6 +34,8 @@ i[data-lucide],svg { flex-shrink:0; }
 .create-btn { display:flex; align-items:center; justify-content:flex-start; gap:12px; background:#1f1f1f; color:white; padding:12px 20px; border-radius:12px; font-weight:500; font-size:14px; transition:all 0.2s ease; width:100%; margin-bottom:24px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); line-height:1; min-width:0; white-space:nowrap; }
 .create-btn:hover { background:#000; transform:translateY(-1px); box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); }
 .post-card { background:var(--surface); border-bottom:1px solid var(--outline); border-radius:0; transition:background-color 0.2s ease; margin-bottom:0; box-shadow:none; overflow:visible; }
+.post-card.discussion-card { border: 2px solid #e5e7eb; margin: 8px 0; border-radius: 16px; overflow: hidden; }
+@media (max-width: 768px) { .post-card.discussion-card { border-radius: 0; border-left: none; border-right: none; margin: 0; border-top: 4px solid #e5e7eb; } }
 .post-card:hover { background-color:#fdfdfd; cursor:pointer; transform:none; }
 .post-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
 .post-avatar-container { position:relative; }
@@ -246,6 +248,18 @@ body.modal-open #mobile-bottom-nav { display: none !important; }
 #settings-modal .icon-circle, #feed-filter-modal .icon-circle { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #1f1f1f; flex-shrink: 0; }
 .toggle-setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #f0f0f0; }
 .toggle-setting-row:last-child { border-bottom: none; }
+
+/* Discussion Status Headers */
+.status-header { padding: 6px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; display: flex; align-items: center; gap: 8px; }
+.status-header.open { background: #f3f4f6; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+.status-header.answered { background: #dcfce7; color: #166534; border-bottom: 1px solid #bbf7d0; }
+.status-indicator-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.answer-card { border: 1px solid #e5e7eb; padding: 16px; border-radius: 12px; margin-bottom: 12px; background: white; transition: all 0.2s; position: relative; }
+.answer-card.best { border: 2px solid #22c55e; background: #f0fdf4; box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1); order: -1; }
+.best-badge { display: inline-flex; align-items: center; gap: 4px; background: #22c55e; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+.pin-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #e5e7eb; color: #9ca3af; background: white; cursor: pointer; transition: all 0.2s; }
+.pin-btn:hover { border-color: #22c55e; color: #22c55e; }
+.pin-btn.active { background: #22c55e; border-color: #22c55e; color: white; }
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
@@ -272,7 +286,7 @@ body.modal-open #mobile-bottom-nav { display: none !important; }
 <div id="privacy-overlay" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closePrivacySettings()"><div id="privacy-modal" class="bg-white w-full h-full md:h-auto md:w-[450px] md:max-h-[90vh] md:rounded-[24px] rounded-none shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="flex justify-between items-center h-16 px-4 border-b border-gray-100 shrink-0 bg-white"><div class="flex items-center gap-3"><img id="privacy-user-avatar" src="" class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 object-cover"><span id="privacy-user-name" class="font-bold text-gray-900 text-sm">User</span></div><button onclick="closePrivacySettings()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div><div class="flex-1 overflow-y-auto p-4 space-y-2"><div class="p-4 bg-gray-50 rounded-xl"><div class="toggle-setting-row"><div><div class="font-bold text-gray-900 text-[15px]">Private Account</div><div class="text-xs text-gray-500 mt-0.5">Only followers can see your posts</div></div><div id="toggle-privacy-main" class="toggle-switch" onclick="updatePrivacySetting('privateNetwork')"><div class="toggle-dot"></div></div></div><div class="toggle-setting-row"><div><div class="font-bold text-gray-900 text-[15px]">Hide Connections</div><div class="text-xs text-gray-500 mt-0.5">Hide your following and followers lists</div></div><div id="toggle-hide-connections" class="toggle-switch" onclick="updatePrivacySetting('hideConnections')"><div class="toggle-dot"></div></div></div></div><div class="p-4"><p class="text-xs text-gray-400 text-center leading-relaxed">Changes are saved automatically and applied immediately.</p></div></div></div></div>
 <div id="profile-filter-overlay" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeProfileFilter()"><div id="profile-filter-modal" class="bg-white w-full h-auto md:w-[400px] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeProfileFilter()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg">Filter</span><div class="w-10"></div></div><div class="p-4"><div class="mb-0"><h3 class="text-xs font-bold text-gray-500 uppercase mb-3 px-1">Sort By</h3><div class="flex flex-col gap-2"><button onclick="setProfileSort('latest')" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group"><span class="font-bold text-gray-900">Latest</span><i id="sort-check-latest" data-lucide="check" class="w-5 h-5 text-blue-600 hidden"></i></button><button onclick="setProfileSort('oldest')" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group"><span class="font-bold text-gray-900">Oldest</span><i id="sort-check-oldest" data-lucide="check" class="w-5 h-5 text-blue-600 hidden"></i></button><button onclick="setProfileSort('popular')" class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group"><span class="font-bold text-gray-900">Popular</span><i id="sort-check-popular" data-lucide="check" class="w-5 h-5 text-blue-600 hidden"></i></button></div></div></div></div></div>
 <div id="user-list-overlay" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeUserList()"><div id="user-list-modal" class="bg-white w-full h-[70vh] md:h-auto md:w-[400px] md:max-h-[80vh] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeUserList()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg" id="user-list-title">Users</span><div class="w-10"></div></div><div id="user-list-content" class="flex-1 overflow-y-auto p-2"></div></div></div>
-<div id="create-menu-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000]/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200" onclick="closeCreateMenu()"><div id="create-menu-modal" class="bg-white w-[90%] max-w-[500px] rounded-[24px] shadow-2xl p-6 relative transform scale-95 transition-transform duration-200" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-[#1f1f1f] google-font">Create New</h2><button onclick="closeCreateMenu()" class="icon-btn hover:bg-[#f0f4f9]"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="grid grid-cols-1 gap-4"><div class="create-option-card" onclick="openCompose()"><div class="create-icon-bg"><i data-lucide="pen-tool" class="w-6 h-6"></i></div><span class="font-bold text-[#1f1f1f]">Post</span></div><div id="create-option-ad" class="create-option-card hidden" onclick="openPromoModal(event);closeCreateMenu()"><div class="create-icon-bg"><i data-lucide="megaphone" class="w-6 h-6"></i></div><span class="font-bold text-[#1f1f1f]">Ad</span></div></div></div></div>
+<div id="create-menu-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000]/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200" onclick="closeCreateMenu()"><div id="create-menu-modal" class="bg-white w-[90%] max-w-[500px] rounded-[24px] shadow-2xl p-6 relative transform scale-95 transition-transform duration-200" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-[#1f1f1f] google-font">Create New</h2><button onclick="closeCreateMenu()" class="icon-btn hover:bg-[#f0f4f9]"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="grid grid-cols-2 gap-4"><div class="create-option-card" onclick="openCompose()"><div class="create-icon-bg"><i data-lucide="pen-tool" class="w-6 h-6"></i></div><span class="font-bold text-[#1f1f1f]">Post</span></div><div class="create-option-card" onclick="openCompose(false, 'discussion')"><div class="create-icon-bg"><i data-lucide="message-square" class="w-6 h-6"></i></div><span class="font-bold text-[#1f1f1f]">Discussion</span></div><div id="create-option-ad" class="create-option-card hidden" onclick="openPromoModal(event);closeCreateMenu()"><div class="create-icon-bg"><i data-lucide="megaphone" class="w-6 h-6"></i></div><span class="font-bold text-[#1f1f1f]">Ad</span></div></div></div></div>
 <div id="edit-profile-overlay" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeEditProfile()"><div id="edit-profile-modal" class="bg-white w-full h-full md:h-auto md:w-[95%] md:max-w-[500px] md:max-h-[90vh] md:rounded-[24px] rounded-none shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="flex justify-between items-center h-16 px-4 border-b border-gray-100 shrink-0 bg-white"><button onclick="closeEditProfile()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><h2 class="text-lg font-bold google-font">Edit Profile</h2><div class="w-10"></div></div><div class="flex-1 overflow-y-auto p-0 pb-20 md:pb-6 relative"><div class="relative"><div id="banner-edit-area" class="h-36 w-full bg-gray-200 relative overflow-hidden cursor-grab group" onclick="document.getElementById('edit-banner-input').click()"><img id="edit-banner-preview" src="" class="w-full h-full object-cover pointer-events-none select-none"><div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="camera" class="text-white w-8 h-8 drop-shadow-md"></i></div></div><div class="absolute -bottom-10 left-4"><div class="relative group cursor-pointer" onclick="document.getElementById('edit-avatar-input').click()"><img id="edit-avatar-preview" src="" class="w-24 h-24 rounded-full border-4 border-white bg-gray-100 object-cover"><div class="absolute inset-0 rounded-full bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="camera" class="text-white w-6 h-6 drop-shadow-md"></i></div></div></div><div class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded-md pointer-events-none backdrop-blur-sm">Drag to reposition: <span id="banner-pos-hint">50%</span></div></div><div class="mt-12 px-6 flex flex-col gap-6"><input type="file" id="edit-avatar-input" class="hidden" accept="image/*" onchange="handleEditAvatarSelect(event)"><input type="file" id="edit-banner-input" class="hidden" accept="image/*" onchange="handleEditBannerSelect(event)"><div><label class="text-xs font-bold text-gray-500 uppercase">Display Name</label><input type="text" id="edit-name" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 font-medium text-gray-900 text-lg"></div><div><label class="text-xs font-bold text-gray-500 uppercase">Username</label><div class="relative"><span class="absolute left-0 top-2 text-gray-400 font-medium">@</span><input type="text" id="edit-username" class="w-full border-b border-gray-200 py-2 pl-4 outline-none focus:border-blue-500 font-medium text-gray-900"></div></div><div><label class="text-xs font-bold text-gray-500 uppercase">Email</label><input type="text" id="edit-email" class="w-full border-b border-gray-200 py-2 outline-none text-gray-500 bg-transparent select-text" disabled></div><div><label class="text-xs font-bold text-gray-500 uppercase">Bio</label><textarea id="edit-bio" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 text-sm text-gray-700 resize-none" rows="3"></textarea></div></div></div><div class="p-4 border-t border-gray-100 bg-white absolute bottom-0 w-full md:relative"><button id="save-profile-btn" onclick="saveProfileChanges()" class="w-full bg-gray-100 text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all">Save Changes</button></div></div></div>
 <input type="file" id="event-cover-input" class="hidden" accept="image/*" onchange="handleEventCoverSelect(event)">
 <div id="event-overlay" class="fixed inset-0 z-[55] flex items-center justify-center bg-[#000]/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200"><div id="event-modal-box" class="bg-white w-[95%] max-w-[550px] rounded-[16px] shadow-2xl relative transform scale-95 transition-transform duration-200 flex flex-col overflow-hidden p-0"><div id="event-cover-preview-container" class="w-full h-40 bg-gray-100 hidden relative group"><img id="event-cover-preview" class="w-full h-full object-cover"><button onclick="removeEventCover()" class="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 z-20"><i data-lucide="x" class="w-4 h-4"></i></button><button onclick="document.getElementById('event-cover-input').click()" class="absolute top-1/2 -translate-y-1/2 right-2 bg-white/80 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-20 shadow-sm">Change</button></div><button onclick="closeEventComposer()" class="absolute top-4 right-4 icon-btn hover:bg-[#f0f4f9] z-10 bg-white/50 backdrop-blur-sm"><i data-lucide="x" class="w-5 h-5"></i></button><div class="p-8 pt-6"><div id="add-cover-btn" class="mb-6 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-2 text-sm text-[#667085]" onclick="document.getElementById('event-cover-input').click()"><i data-lucide="image" class="w-4 h-4"></i> Add cover</div><input type="text" id="event-title" placeholder="Untitled Event" class="text-3xl font-bold text-[#1f1f1f] placeholder-[#d1d5db] border-none outline-none bg-transparent w-full mb-6 google-font"><div class="flex flex-col gap-1 mb-6"><div class="notion-input-row"><div class="notion-label"><i data-lucide="clock" class="w-4 h-4"></i> Date</div><input type="date" id="event-date" class="notion-input"></div><div class="notion-input-row"><div class="notion-label"><i data-lucide="watch" class="w-4 h-4"></i> Time</div><input type="time" id="event-time" class="notion-input"></div><div class="notion-input-row"><div class="notion-label"><i data-lucide="map-pin" class="w-4 h-4"></i> Location</div><input type="text" id="event-location" placeholder="Add location..." class="notion-input"></div></div><textarea id="event-desc" placeholder="Add description..." class="w-full min-h-[100px] resize-none border-none outline-none text-[#374151] text-[15px] leading-relaxed bg-transparent"></textarea><div class="flex justify-end mt-6 pt-4 border-t border-gray-100"><button onclick="publishEvent()" class="bg-[#0b57d0] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#0b57d0]/90 transition-all shadow-sm">Create Event</button></div></div></div></div>
@@ -308,6 +322,7 @@ window.currentSharePid=null; window.activeFeedFilter = 'all';
 window.currentSuggestionIds = []; window.lastSuggestionRefresh = 0;
 window.composeStep=1; window.composeImages=[null,null,null,null]; window.composeImageBlobs=[...window.composeImages];
 window.expandedTexts = new Set();
+window.composeType = 'post'; 
 let lastScrollTop=0, lastExploreScrollTop=0, html5QrCode, ptrStartY=0, ptrDist=0, isPtr=false, isRefreshing=false;
 let exitAttempt=false;
 window.profileSort = 'latest'; 
@@ -376,7 +391,7 @@ window.manageHistory = (modalId) => {
 };
 
 onAuthStateChanged(auth,async u=>{
-    const l=document.getElementById('app-loader'); if(!u) return window.location.href='/login';
+    const l=document.getElementById('app-loader'); if(!u) return window.location.href='index.html';
     const r=doc(db,"users",u.uid), s=await getDoc(r), off=u.email==='edulinkbht@gmail.com';
     if(s.exists()){ currentUser={id:u.uid,...s.data()}; if(off&&!currentUser.isOfficial) await updateDoc(r,{isOfficial:true}); }
     else{ currentUser={id:u.uid,name:u.displayName||u.email.split('@')[0],email:u.email,avatar:u.photoURL||`https://api.dicebear.com/9.x/lorelei/svg?seed=${u.uid}`,bio:"New EduLink Member",following:[],followers:[],friends:[],saved:[],links:[],isOfficial:off,settings:{privateNetwork:false},username:""}; await setDoc(r,currentUser); }
@@ -484,18 +499,6 @@ function initRealtimeListeners(){
         // Realtime Profile Refresh (Privacy changes for viewed user)
         if(window.currentViewingProfileId && !document.getElementById('view-profile').classList.contains('hidden')) {
              renderProfileContent(window.currentViewingProfileId, window.currentProfileTab);
-             // Also update header stats if visible (re-call showProfile logic partially)
-             const u = users.find(x => x.id === window.currentViewingProfileId);
-             if(u) {
-                 // Check if stats visibility changed due to privacy
-                 const hideConnections = u.settings?.hideConnections && u.id !== currentUser.id;
-                 const canView = (u.id === currentUser.id) || !u.settings?.privateNetwork || (currentUser.following && currentUser.following.includes(u.id));
-                 
-                 // This is a simple re-render of profile header logic
-                 // For now, simpler to re-call showProfile if needed, but that resets scroll.
-                 // Ideally, we'd update specific DOM elements. 
-                 // Let's stick to content re-render for now which handles grid visibility.
-             }
         }
         
         renderRightSidebar(); refreshIcons();
@@ -698,7 +701,6 @@ window.updatePrivacySetting = async (key) => {
     await updateDoc(doc(db,"users",currentUser.id), { settings: settings });
     currentUser.settings = settings; // Local update
     
-    // If updating private network, refresh UI if needed (though onSnapshot usually handles it)
     if(key === 'privateNetwork') {
         const t = newValue ? 'Private' : 'Public';
         showToast(`Account is now ${t}`);
@@ -795,7 +797,6 @@ window.renderFeed=t=>{
             passFilter = isFriend;
         }
 
-        // Basic visibility logic combined with filter
         const isVisible = (p.authorId===currentUser.id||(priv?fol:((!p.settings||p.settings.privacy==='public')||fol)));
         const matchesSearch = (!t||p.content.toLowerCase().includes(t.toLowerCase()));
 
@@ -817,7 +818,6 @@ let touchStartX=0, touchEndX=0;
 window.handleTouchStart=e=>touchStartX=e.changedTouches[0].screenX;
 window.handleTouchEnd=(e,pid,ov)=>{
     touchEndX=e.changedTouches[0].screenX; 
-    // Safely find the closest carousel container
     const w=e.currentTarget.closest('.post-carousel');
     if(w && Math.abs(touchStartX-touchEndX)>50) {
         moveCarousel(w.id, touchStartX>touchEndX?1:-1);
@@ -828,8 +828,18 @@ function createPostElement(p,ctx='feed'){
     const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:'',isOfficial:false,id:p.authorId}, st=p.settings||{privacy:'public',showLikes:true,showComments:true};
     const d=document.createElement('article'); 
     d.id = `post-card-${ctx}-${p.id}`; 
-    d.className="post-card group overflow-hidden fade-in"; 
+    d.className=`post-card group overflow-hidden fade-in ${p.type === 'discussion' ? 'discussion-card' : ''}`; 
     d.onclick=()=>openPostView(p.id);
+
+    // Discussion Status Header
+    let statusHeader = '';
+    if (p.type === 'discussion') {
+        const isAnswered = p.status === 'answered';
+        const txt = isAnswered ? "Answered" : "This discussion is not answered yet";
+        const cls = isAnswered ? "answered" : "open";
+        statusHeader = `<div class="status-header ${cls}"><div class="status-indicator-dot"></div><span>${txt}</span></div>`;
+    }
+
     let mh="", lh="";
     if(p.media){
         const ma=Array.isArray(p.media)?p.media:[p.media];
@@ -837,10 +847,8 @@ function createPostElement(p,ctx='feed'){
             const s=ma[0], iv=s.includes('video')||s.includes('.mp4');
             mh=`<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv?'bg-black flex items-center justify-center':'bg-gray-100 cursor-pointer'}" onclick="event.stopPropagation();${iv?'':`openLightbox('${s}','image')`}">${iv?`<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>`:`<img src="${s}" class="w-full h-full object-cover">`}</div>`;
         } else {
-            // Updated IDs for feed carousels
             const cid=`carousel-${ctx}-${p.id}`, iid=`inner-${ctx}-${p.id}`, cntId=`counter-${ctx}-${p.id}`;
             let sl='', dt=''; ma.forEach((s,i)=>{ sl+=`<div class="post-carousel-item">${(s.includes('video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}">`}</div>`; dt+=`<div class="carousel-dot ${i===0?'active':''}" id="dot-${ctx}-${p.id}-${i}"></div>`});
-            // Update onclick to pass full ID
             mh=`<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button><div class="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm pointer-events-none"><span id="${cntId}">1</span>/${ma.length}</div></div><div class="carousel-dots-outside">${dt}</div></div>`;
             (window.carouselStates=window.carouselStates||{})[cid]={index:0,total:ma.length};
         }
@@ -852,7 +860,12 @@ function createPostElement(p,ctx='feed'){
     const isLiked = p.likes?.includes(currentUser.id);
     const isSaved = savedPosts.includes(p.id);
 
-    d.innerHTML=`<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container"><img src="${a.avatar}" class="post-avatar"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge text-blue-500 ml-1"></i>':''}${st.privacy==='private'?'<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>':''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><div class="flex items-center gap-1"><button class="action-btn like js-like-btn-${p.id} ${isLiked?'active':''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart" class="w-6 h-6"></i></button>${st.showLikes?`<span class="js-like-count-${p.id} text-xs font-medium px-1 hover:underline cursor-pointer" onclick="event.stopPropagation();openLikes('${p.id}')">${(p.likes?.length>0)?p.likes.length:''}</span>`:''}<button class="action-btn comment ml-2" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments===false?'message-circle-off':'message-circle'}" class="w-6 h-6"></i> ${st.showComments?`<span class="js-comment-count-${p.id} text-xs font-medium">${(p.comments?.length>0)?p.comments.length:''}</span>`:''}</button><button class="action-btn share-btn ml-2" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="download" class="w-6 h-6"></i></button></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved?'active':''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark" class="w-6 h-6"></i></button></div></div>`;
+    // Discussion Button Logic
+    const discussBtn = p.type === 'discussion' 
+        ? `<button class="action-btn comment ml-2" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="message-square" class="w-6 h-6"></i> ${st.showComments?`<span class="js-comment-count-${p.id} text-xs font-medium">${(p.comments?.length>0)?p.comments.length:''}</span>`:''}</button>`
+        : `<button class="action-btn comment ml-2" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments===false?'message-circle-off':'message-circle'}" class="w-6 h-6"></i> ${st.showComments?`<span class="js-comment-count-${p.id} text-xs font-medium">${(p.comments?.length>0)?p.comments.length:''}</span>`:''}</button>`;
+
+    d.innerHTML=`${statusHeader}<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container"><img src="${a.avatar}" class="post-avatar"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge text-blue-500 ml-1"></i>':''}${st.privacy==='private'?'<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>':''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><div class="flex items-center gap-1"><button class="action-btn like js-like-btn-${p.id} ${isLiked?'active':''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart" class="w-6 h-6"></i></button>${st.showLikes?`<span class="js-like-count-${p.id} text-xs font-medium px-1 hover:underline cursor-pointer" onclick="event.stopPropagation();openLikes('${p.id}')">${(p.likes?.length>0)?p.likes.length:''}</span>`:''}${discussBtn}<button class="action-btn share-btn ml-2" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="download" class="w-6 h-6"></i></button></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved?'active':''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark" class="w-6 h-6"></i></button></div></div>`;
     return d;
 }
 
@@ -866,12 +879,10 @@ window.moveCarousel=(containerId,dir)=>{
     
     state.index = n;
     
-    // Logic handles both "carousel-" and "overlay-carousel-" prefixes because the inner replacement is consistent
     const innerId = containerId.replace('carousel-', 'inner-');
     const inner = document.getElementById(innerId);
     if(inner) inner.style.transform = `translateX(-${n * 100}%)`;
     
-    // Handle overlay dots differently if needed, or generic dots
     const dotsContainer = document.getElementById(containerId).nextElementSibling;
     if(dotsContainer) {
         dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
@@ -879,7 +890,6 @@ window.moveCarousel=(containerId,dir)=>{
         });
     }
     
-    // Counter update if exists
     const counterId = containerId.replace('carousel-', 'counter-');
     const cnt = document.getElementById(counterId);
     if(cnt) cnt.innerText = n + 1;
@@ -1160,7 +1170,6 @@ window.renderProfileContent=(uid,t)=>{
              refreshIcons();
              return;
         }
-        // Additional per-post privacy check
         tp=tp.filter(p=> (p.settings?.privacy==='public'||currentUser.following.includes(uid)));
     }
 
@@ -1264,6 +1273,11 @@ window.openPostView=pid=>{
     const isLiked = p.likes?.includes(currentUser.id);
     const isSaved = savedPosts.includes(p.id);
     const postBodyHtml = window.renderTextWithReadMore(p.content, `post-${p.id}`);
+    
+    // Discussion Modifications
+    const isDiscussion = p.type === 'discussion';
+    const commentsHeaderTitle = isDiscussion ? "Answers" : "Comments";
+    const authorHeader = isDiscussion ? `<div class="flex items-center gap-2 mb-2"><img src="${a.avatar}" class="w-8 h-8 rounded-full border border-gray-100 object-cover"> <span class="font-bold text-lg text-gray-900">Discussion</span></div>` : '';
 
     // Desktop Layout HTML - Split View
     const desktopHTML = `
@@ -1277,6 +1291,7 @@ window.openPostView=pid=>{
                <button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto p-4">
+               ${isDiscussion ? `<h2 class="text-2xl font-bold mb-4 google-font">Discussion</h2>` : ''}
                <div class="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap mb-4 js-post-body-${p.id}">${postBodyHtml}</div>
                ${mh}
             </div>
@@ -1284,7 +1299,7 @@ window.openPostView=pid=>{
                <div class="flex items-center justify-between mb-2">
                   <div class="flex gap-4">
                      <i id="post-view-like-btn" onclick="toggleLike('${p.id}')" data-lucide="heart" class="w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${isLiked?'fill-red-500 text-red-500':'text-gray-700'}"></i>
-                     <i onclick="document.getElementById('comment-input-desktop').focus()" data-lucide="message-circle" class="w-7 h-7 cursor-pointer text-gray-700 transition-transform hover:scale-110"></i>
+                     <i onclick="document.getElementById('comment-input-desktop').focus()" data-lucide="${isDiscussion?'message-square':'message-circle'}" class="w-7 h-7 cursor-pointer text-gray-700 transition-transform hover:scale-110"></i>
                      <i onclick="sharePost('${p.id}')" data-lucide="download" class="w-7 h-7 cursor-pointer text-gray-700 transition-transform hover:scale-110"></i>
                   </div>
                   <i id="post-view-save-btn" onclick="toggleSave('${p.id}')" data-lucide="bookmark" class="w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${isSaved?'fill-yellow-500 text-yellow-500':'text-gray-700'}"></i>
@@ -1294,12 +1309,12 @@ window.openPostView=pid=>{
             </div>
          </div>
          <div class="desktop-comments-container">
-            <div class="h-16 flex items-center px-4 border-b border-gray-100 font-bold text-lg text-gray-900">Comments</div>
-            <div id="post-view-comments" class="flex-1 overflow-y-auto p-0"></div>
+            <div class="h-16 flex items-center px-4 border-b border-gray-100 font-bold text-lg text-gray-900">${commentsHeaderTitle}</div>
+            <div id="post-view-comments" class="flex-1 overflow-y-auto p-0 ${isDiscussion ? 'p-4 bg-gray-50' : ''}"></div>
             <div class="p-4 border-t border-gray-100">
                <div class="chat-input-wrapper">
                   <img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover">
-                  <textarea id="comment-input-desktop" placeholder="Add a comment..." class="chat-input-field" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitCommentDesktop();}"></textarea>
+                  <textarea id="comment-input-desktop" placeholder="${isDiscussion?'Add an answer...':'Add a comment...'}" class="chat-input-field" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitCommentDesktop();}"></textarea>
                   <button onclick="submitCommentDesktop()" class="text-white bg-[#065fd4] font-medium text-sm px-4 py-2 rounded-full hover:bg-blue-700 transition-colors">Post</button>
                </div>
             </div>
@@ -1311,31 +1326,36 @@ window.openPostView=pid=>{
     const mobileHTML = `
       <div class="mobile-overlay-layout md:hidden">
          <div class="mobile-fixed-header">
-             <span class="font-bold text-lg text-gray-900">Post</span>
+             ${isDiscussion 
+                ? `<div class="flex items-center gap-2"><img src="${a.avatar}" class="w-8 h-8 rounded-full border border-gray-100 object-cover"><span class="font-bold text-lg text-gray-900">Discussion</span></div>` 
+                : `<span class="font-bold text-lg text-gray-900">Post</span>` 
+             }
              <button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button>
          </div>
          <div class="mobile-scroll-content">
+             ${!isDiscussion ? `
              <div class="flex items-center gap-3 p-4 pb-2">
                  <img src="${a.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover" onclick="closePostView();showProfile('${a.id}')">
                  <div onclick="closePostView();showProfile('${a.id}')"><div class="font-bold text-gray-900 text-sm">${a.name}</div><div class="text-xs text-gray-500">@${a.username||'user'}</div></div>
-             </div>
+             </div>` : ''}
              <div class="px-4 py-2 text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap js-post-body-${p.id}">${postBodyHtml}</div>
              <div class="px-4 pb-4">${mh}</div>
              <div class="px-4 py-2 font-bold text-sm text-gray-900 border-b border-gray-50 mb-2">${(p.likes?.length>0)?p.likes.length+' likes':''}</div>
-             <div id="mobile-post-comments" class="flex-1 p-0 pb-4"></div>
+             ${isDiscussion ? '<div class="px-4 py-2 font-bold text-lg text-gray-900">Answers</div>' : ''}
+             <div id="mobile-post-comments" class="flex-1 p-0 pb-4 ${isDiscussion ? 'px-4' : ''}"></div>
          </div>
          <div class="mobile-fixed-footer">
              <div class="flex items-center justify-between mb-3">
                 <div class="flex gap-6">
                    <i onclick="toggleLike('${p.id}')" data-lucide="heart" class="w-7 h-7 cursor-pointer ${isLiked?'fill-red-500 text-red-500':'text-gray-900'}"></i>
-                   <i onclick="document.getElementById('mobile-comment-input').focus()" data-lucide="message-circle" class="w-7 h-7 cursor-pointer text-gray-900"></i>
+                   <i onclick="document.getElementById('mobile-comment-input').focus()" data-lucide="${isDiscussion?'message-square':'message-circle'}" class="w-7 h-7 cursor-pointer text-gray-900"></i>
                    <i onclick="sharePost('${p.id}')" data-lucide="download" class="w-7 h-7 cursor-pointer text-gray-900"></i>
                 </div>
                 <i onclick="toggleSave('${p.id}')" data-lucide="bookmark" class="w-7 h-7 cursor-pointer ${isSaved?'fill-yellow-500 text-yellow-500':'text-gray-900'}"></i>
              </div>
              <div class="flex items-center gap-2">
                   <img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0">
-                  <input type="text" id="mobile-comment-input" placeholder="Add a comment..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500">
+                  <input type="text" id="mobile-comment-input" placeholder="${isDiscussion?'Add an answer...':'Add a comment...'}" class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500">
                   <button onclick="submitCommentMobile()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
              </div>
          </div>
@@ -1347,37 +1367,32 @@ window.openPostView=pid=>{
     refreshIcons();
 };
 
-window.toggleMobileCommentDrawer = () => 
-    document.querySelector('.discussion-panel')?.classList.toggle('open');
-
-window.closePostView = () => {
-    const o = document.getElementById('post-view-overlay'); 
-    o.classList.add('hidden'); 
-    o.classList.remove('flex'); 
-    document.body.classList.remove('reel-mode'); 
-    document.querySelector('.discussion-panel')?.classList.remove('open'); 
-    window.currentViewingPostId = window.replyingToCommentId = null; 
-    document.querySelector('#post-view-media-container video')?.pause();
-};
-
-window.doLogout = async () => { 
-    await auth.signOut(); 
-    window.location.href = "/login"; 
-};
+window.toggleMobileCommentDrawer=()=>document.querySelector('.discussion-panel')?.classList.toggle('open');
+window.closePostView=()=>{const o=document.getElementById('post-view-overlay'); o.classList.add('hidden'); o.classList.remove('flex'); document.body.classList.remove('reel-mode'); document.querySelector('.discussion-panel')?.classList.remove('open'); window.currentViewingPostId=window.replyingToCommentId=null; document.querySelector('#post-view-media-container video')?.pause()};
+window.doLogout=async()=>{ await signOut(auth); window.location.href="index.html" };
 
 function renderCommentsInModal(pid){
     const p=posts.find(x=>x.id===pid); if(!p) return;
     const desktopC = document.getElementById('post-view-comments');
     const mobileC = document.getElementById('mobile-post-comments');
+    const isDiscussion = p.type === 'discussion';
+    const isCreator = p.authorId === currentUser.id;
     
     // Only render top level comments, check for children
-    const topLevel = p.comments?.filter(x=>!x.parentId) || [];
+    let topLevel = p.comments?.filter(x=>!x.parentId) || [];
+    
+    // If discussion, sort by accepted answer first
+    if (isDiscussion && p.acceptedAnswerId) {
+        topLevel.sort((a,b) => (a.id === p.acceptedAnswerId ? -1 : b.id === p.acceptedAnswerId ? 1 : 0));
+    }
+    
     const html = topLevel.length 
         ? topLevel.map(c => {
              const replyCount = p.comments.filter(r => r.parentId === c.id).length;
+             if (isDiscussion) return createAnswerHTML(c, pid, replyCount, isCreator, p.acceptedAnswerId);
              return createCommentHTML(c, pid, replyCount);
           }).join('') 
-        : '<div class="flex flex-col items-center justify-center py-10 text-gray-400"><i data-lucide="message-square" class="w-12 h-12 mb-2 opacity-50"></i><p>No comments yet.</p></div>';
+        : `<div class="flex flex-col items-center justify-center py-10 text-gray-400"><i data-lucide="${isDiscussion?'message-square':'message-circle'}" class="w-12 h-12 mb-2 opacity-50"></i><p>No ${isDiscussion?'answers':'comments'} yet.</p></div>`;
         
     if(desktopC) desktopC.innerHTML = html;
     if(mobileC) mobileC.innerHTML = html;
@@ -1387,8 +1402,6 @@ function renderCommentsInModal(pid){
 function createCommentHTML(c, pid, replyCount) {
     const a = users.find(u=>u.id===c.authorId)||{name:'Unknown',avatar:''};
     const replyHandle = a.username || "user";
-    
-    // Logic: If there are replies, show "View X replies" button instead of the replies themselves.
     const repliesBtn = replyCount > 0 
         ? `<div class="view-replies-btn" onclick="openThread('${pid}','${c.id}')">View ${replyCount} ${replyCount===1?'reply':'replies'}</div>` 
         : '';
@@ -1416,6 +1429,63 @@ function createCommentHTML(c, pid, replyCount) {
     </div>
     `;
 }
+
+function createAnswerHTML(c, pid, replyCount, isCreator, acceptedId) {
+    const a = users.find(u=>u.id===c.authorId)||{name:'Unknown',avatar:''};
+    const replyHandle = a.username || "user";
+    const isAccepted = c.id === acceptedId;
+    
+    // Pin button for creator
+    const pinBtn = isCreator 
+        ? `<button onclick="togglePinAnswer('${pid}','${c.id}')" class="pin-btn ${isAccepted?'active':''} ml-3" title="${isAccepted?'Unpin':'Pin as Best Answer'}"><i data-lucide="check" class="w-4 h-4"></i></button>`
+        : '';
+        
+    return `
+    <div class="answer-card ${isAccepted ? 'best' : ''}">
+        ${isAccepted ? '<div class="best-badge"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Best Answer</div>' : ''}
+        <div class="flex items-start justify-between w-full mb-3">
+             <div class="flex items-center gap-2 cursor-pointer" onclick="closePostView();showProfile('${c.authorId}')">
+                 <img src="${a.avatar}" class="w-8 h-8 rounded-full object-cover bg-gray-100">
+                 <div>
+                     <div class="font-bold text-sm text-gray-900">${a.name}</div>
+                     <div class="text-xs text-gray-500">${formatDate(c.timestamp)}</div>
+                 </div>
+             </div>
+             <div class="flex items-center">
+                 <button class="comment-right-like" onclick="toggleCommentLike('${pid}','${c.id}')">
+                    <i data-lucide="heart" class="w-5 h-5 ${c.likes?.includes(currentUser.id)?'fill-red-500 text-red-500':'text-gray-400'}"></i> 
+                    <span class="text-xs text-gray-500 font-bold mt-1">${(c.likes?.length>0)?c.likes.length:''}</span>
+                 </button>
+                 ${pinBtn}
+             </div>
+        </div>
+        <div class="text-[15px] text-gray-800 leading-relaxed mb-3 js-comment-body-${c.id}">${window.renderTextWithReadMore(c.content, `comment-${c.id}`)}</div>
+        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="replyToComment('${c.id}','${replyHandle}')" class="text-xs font-bold text-gray-500 hover:text-blue-600 flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5"></i> Reply</button>
+                ${replyCount > 0 ? `<button onclick="openThread('${pid}','${c.id}')" class="text-xs font-bold text-blue-600">${replyCount} Replies</button>` : ''}
+            </div>
+             ${c.authorId===currentUser.id?`<button onclick="deleteComment('${pid}','${c.id}')" class="text-xs font-bold text-red-500">Delete</button>`:''}
+        </div>
+    </div>
+    `;
+}
+
+window.togglePinAnswer = async (pid, cid) => {
+    const p = posts.find(x => x.id === pid);
+    if (!p) return;
+    
+    // Toggle logic: if clicking already accepted, unaccept. Else accept new.
+    const newAcceptedId = p.acceptedAnswerId === cid ? null : cid;
+    const newStatus = newAcceptedId ? 'answered' : 'open';
+    
+    await updateDoc(doc(db,"posts",pid), {
+        acceptedAnswerId: newAcceptedId,
+        status: newStatus
+    });
+    
+    showToast(newAcceptedId ? "Answer Pinned" : "Unpinned");
+};
 
 window.openThread=(pid,cid)=>{ 
     manageHistory('thread-overlay');
@@ -1631,9 +1701,10 @@ window.editPost=pid=>{
     openCompose(true); 
 };
 window.deletePost=async(pid)=>{ showAlert("Delete post?",async()=>{ await deleteDoc(doc(db,"posts",pid)); showToast("Deleted"); }); };
-window.openCompose=(isEdit = false)=>{ 
+window.openCompose=(isEdit = false, type = 'post')=>{ 
     manageHistory('compose-overlay');
     closeCreateMenu(); 
+    window.composeType = type;
     document.getElementById('compose-overlay').classList.remove('opacity-0','pointer-events-none'); 
     const modal = document.getElementById('compose-modal');
     modal.classList.remove('scale-95'); 
@@ -1647,7 +1718,7 @@ window.openCompose=(isEdit = false)=>{
         window.selectedCollaborators=[]; 
         window.editingPostId=null;
         document.getElementById('compose-text').value="";
-        document.getElementById('compose-header-title').innerText="Create Post";
+        document.getElementById('compose-header-title').innerText=type === 'discussion' ? "Start Discussion" : "Create Post";
         document.getElementById('compose-step-1').classList.remove('hidden');
         document.getElementById('compose-step-2').classList.add('hidden');
         document.getElementById('compose-action-btn').innerText = "Skip";
@@ -1762,7 +1833,6 @@ window.handleComposeAction = () => {
         publishPost();
     }
 };
-
 window.goToStep2 = () => {
     window.composeStep = 2;
     document.getElementById('compose-step-1').classList.add('hidden');
