@@ -10,183 +10,291 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-body{font-family:'Inter',sans-serif;background-color:#f8fafc;color:#0f172a}
-.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;color:#64748b;font-weight:500;transition:all .2s;cursor:pointer;margin-bottom:4px}
-.nav-item:hover{background:#f1f5f9;color:#0f172a}
-.nav-item.active{background:#eff6ff;color:#2563eb}
-.stat-card{background:white;padding:24px;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.05);transition:transform .2s}
-.stat-card:hover{transform:translateY(-2px)}
-.table-container{background:white;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.025em}
-.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #dbeafe}
-.badge-red{background:#fef2f2;color:#b91c1c;border:1px solid #fee2e2}
-.badge-green{background:#f0fdf4;color:#15803d;border:1px solid #dcfce7}
-.badge-gray{background:#f8fafc;color:#475569;border:1px solid #e2e8f0}
-</style>
-</head>
-<body class="h-screen flex overflow-hidden">
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
 
-<!-- Login Section -->
-<div id="login-section" class="fixed inset-0 z-50 flex items-center justify-center bg-[#f8fafc]">
-    <div class="bg-white p-10 rounded-3xl shadow-2xl max-w-md w-full text-center border border-gray-100">
-        <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-12 h-12">
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Dashboard Transitions */
+.sidebar-link { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.sidebar-link:hover { background-color: #f1f5f9; color: #0f172a; }
+.sidebar-link.active { background-color: #eff6ff; color: #2563eb; border-right: 3px solid #2563eb; }
+
+/* Card Effects */
+.glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border: 1px solid #e2e8f0; }
+.hover-card { transition: transform 0.2s, box-shadow 0.2s; }
+.hover-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+
+/* Mobile Menu Transition */
+#mobile-sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.sidebar-overlay { transition: opacity 0.3s ease; }
+
+/* Loading Animation */
+.loader-dot { animation: loaderDot 1.4s infinite ease-in-out both; }
+.loader-dot:nth-child(1) { animation-delay: -0.32s; }
+.loader-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes loaderDot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+</style>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#2563eb',
+                    secondary: '#475569',
+                    surface: '#ffffff',
+                    background: '#f8fafc'
+                }
+            }
+        }
+    }
+</script>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-sm">
+
+<!-- Login Screen -->
+<div id="login-section" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#f8fafc]">
+    <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 max-w-sm w-full text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm transform rotate-3">
+            <img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-10 h-10 object-contain">
         </div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
-        <p class="text-gray-500 mb-8 text-sm font-medium">EduLink Management System</p>
-        <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3.5 rounded-xl transition-all shadow-sm hover:shadow-md">
-            <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Sign in with Google
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">Admin Portal</h1>
+        <p class="text-slate-500 mb-8">Secure access for EduLink staff</p>
+        <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-semibold py-3 rounded-xl transition-all group">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 group-hover:scale-110 transition-transform">
+            <span>Continue with Google</span>
         </button>
-        <p id="error-msg" class="text-red-500 text-xs mt-4 hidden font-bold bg-red-50 py-2 rounded-lg"></p>
+        <div id="error-msg" class="mt-4 text-red-500 text-xs font-medium hidden bg-red-50 p-2 rounded-lg border border-red-100"></div>
     </div>
 </div>
 
-<!-- Dashboard Layout -->
-<div id="dashboard-section" class="flex-1 flex hidden">
+<!-- Main App Layout -->
+<div id="dashboard-section" class="flex-1 flex hidden h-full">
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 hidden sidebar-overlay md:hidden"></div>
+
     <!-- Sidebar -->
-    <aside class="w-72 bg-white border-r border-gray-200 flex flex-col z-20">
-        <div class="h-20 flex items-center gap-3 px-6 border-b border-gray-100">
-            <img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-8 h-8">
-            <span class="font-bold text-xl text-gray-900 tracking-tight">EduLink Admin</span>
+    <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40 transform -translate-x-full md:translate-x-0 md:static md:flex flex-col transition-transform duration-300">
+        <div class="h-16 flex items-center gap-3 px-6 border-b border-slate-100">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-blue-200 shadow-lg">E</div>
+            <span class="font-bold text-lg text-slate-800 tracking-tight">EduLink <span class="text-blue-600">Admin</span></span>
         </div>
-        
-        <nav class="flex-1 p-4 space-y-1">
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 mb-2 mt-2">Main</div>
-            <div onclick="switchTab('users')" id="nav-users" class="nav-item active">
-                <i data-lucide="users" class="w-5 h-5"></i> Users
+
+        <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+            <div class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Overview</div>
+            <div onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span class="font-medium">Dashboard</span>
             </div>
-            <div onclick="switchTab('analytics')" id="nav-analytics" class="nav-item">
-                <i data-lucide="bar-chart-2" class="w-5 h-5"></i> Analytics
+            
+            <div class="px-3 mb-2 mt-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Management</div>
+            <div onclick="switchTab('users')" id="nav-users" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span class="font-medium">Users</span>
             </div>
+            <div onclick="switchTab('analytics')" id="nav-analytics" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                <span class="font-medium">Analytics</span>
+            </div>
+
+            <div class="px-3 mb-2 mt-6 text-xs font-bold text-slate-400 uppercase tracking-wider">System</div>
+            <a href="/" target="_blank" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-slate-600">
+                <i data-lucide="external-link" class="w-5 h-5"></i>
+                <span class="font-medium">Live Site</span>
+            </a>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-3">
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">A</div>
-                <div class="flex-1 min-w-0">
-                    <div class="text-sm font-bold text-gray-900 truncate" id="admin-email"></div>
-                    <div class="text-xs text-gray-500">Super Admin</div>
+        <div class="p-4 border-t border-slate-100">
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group" onclick="logout()">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                    <span id="admin-avatar-initial">A</span>
                 </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate" id="admin-email"></p>
+                    <p class="text-xs text-slate-500">Super Admin</p>
+                </div>
+                <i data-lucide="log-out" class="w-4 h-4 text-slate-400 group-hover:text-red-500 transition-colors"></i>
             </div>
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-red-600 font-bold text-sm hover:bg-red-50 p-2.5 rounded-lg transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
-            </button>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col min-w-0 bg-[#f8fafc] h-full overflow-hidden">
+    <main class="flex-1 flex flex-col min-w-0 bg-[#f8fafc] relative">
         <!-- Header -->
-        <header class="h-20 bg-white/80 backdrop-blur border-b border-gray-200 px-8 flex items-center justify-between shrink-0 sticky top-0 z-10">
-            <h2 class="text-2xl font-bold text-gray-900" id="page-title">User Management</h2>
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 flex items-center justify-between sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <h2 class="text-lg font-bold text-slate-800" id="page-title">Dashboard</h2>
+            </div>
             <div class="flex items-center gap-4">
-                <button onclick="loadData()" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Refresh Data">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full border border-slate-200">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-medium text-slate-600">System Operational</span>
+                </div>
+                <button onclick="loadData()" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Refresh Data">
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Scrollable Area -->
-        <div class="flex-1 overflow-y-auto p-8">
+        <!-- Content Scroll Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="main-scroll">
             
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="text-gray-500 text-sm font-medium">Total Users</div>
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><i data-lucide="users" class="w-5 h-5"></i></div>
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Total Users -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-blue-50 p-2.5 rounded-xl text-blue-600">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-900 mb-1" id="dash-total-users">-</div>
+                        <p class="text-slate-500 text-xs font-medium">Total Registered Users</p>
                     </div>
-                    <div class="text-3xl font-bold text-gray-900" id="stat-total-users">-</div>
-                    <div class="text-xs text-green-600 font-medium mt-1 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> Active Database</div>
+
+                    <!-- Verified -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-indigo-50 p-2.5 rounded-xl text-indigo-600">
+                                <i data-lucide="badge-check" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-full">Stable</span>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-900 mb-1" id="dash-verified">-</div>
+                        <p class="text-slate-500 text-xs font-medium">Verified Accounts</p>
+                    </div>
+
+                    <!-- Posts -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-purple-50 p-2.5 rounded-xl text-purple-600">
+                                <i data-lucide="file-text" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+5%</span>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-900 mb-1" id="dash-posts">-</div>
+                        <p class="text-slate-500 text-xs font-medium">Total Posts Created</p>
+                    </div>
+
+                    <!-- Banned -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-red-50 p-2.5 rounded-xl text-red-600">
+                                <i data-lucide="ban" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">Action Req</span>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-900 mb-1" id="dash-banned">-</div>
+                        <p class="text-slate-500 text-xs font-medium">Restricted Users</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="text-gray-500 text-sm font-medium">Verified Users</div>
-                        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600"><i data-lucide="badge-check" class="w-5 h-5"></i></div>
+
+                <!-- Recent Activity Table (Mini) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800">Recent Users</h3>
+                        <button onclick="switchTab('users')" class="text-blue-600 text-xs font-bold hover:underline">View All</button>
                     </div>
-                    <div class="text-3xl font-bold text-gray-900" id="stat-verified">-</div>
-                    <div class="text-xs text-gray-500 mt-1">Trust & Safety</div>
-                </div>
-                <div class="stat-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="text-gray-500 text-sm font-medium">Banned Users</div>
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600"><i data-lucide="ban" class="w-5 h-5"></i></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <tbody id="dash-recent-users" class="divide-y divide-slate-50 text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="text-3xl font-bold text-gray-900" id="stat-banned">-</div>
-                    <div class="text-xs text-red-600 mt-1 font-medium">Restricted Access</div>
-                </div>
-                <div class="stat-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="text-gray-500 text-sm font-medium">Total Posts</div>
-                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><i data-lucide="file-text" class="w-5 h-5"></i></div>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-900" id="stat-posts">-</div>
-                    <div class="text-xs text-gray-500 mt-1">Platform Activity</div>
                 </div>
             </div>
 
             <!-- Users View -->
-            <div id="view-users" class="space-y-4">
-                <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+            <div id="view-users" class="space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
                     <div class="relative w-full md:w-96">
-                        <i data-lucide="search" class="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
-                        <input type="text" id="user-search" oninput="handleSearch(this.value)" placeholder="Search by name, email, or ID..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                        <input type="text" id="user-search" oninput="handleSearch(this.value)" placeholder="Search users by name, email..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none">
                     </div>
-                    <div class="flex gap-2">
-                        <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold transition-colors">Export CSV</button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <select id="user-filter" onchange="filterUsers(this.value)" class="bg-slate-50 border-none rounded-xl text-sm font-medium text-slate-600 py-2 px-4 focus:ring-2 focus:ring-blue-500 cursor-pointer outline-none">
+                            <option value="all">All Users</option>
+                            <option value="verified">Verified</option>
+                            <option value="banned">Banned</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="table-container">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                <th class="p-5">User Profile</th>
-                                <th class="p-5">Status</th>
-                                <th class="p-5">Metrics</th>
-                                <th class="p-5 text-right">Management</th>
-                            </tr>
-                        </thead>
-                        <tbody id="user-table-body" class="divide-y divide-gray-100 bg-white">
-                            <!-- Rows -->
-                        </tbody>
-                    </table>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50/50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="p-4 pl-6">User</th>
+                                    <th class="p-4">Role & Status</th>
+                                    <th class="p-4">Stats</th>
+                                    <th class="p-4 text-right pr-6">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body" class="divide-y divide-slate-100">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="empty-state-users" class="hidden p-10 text-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                            <i data-lucide="search-x" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-slate-900 font-bold">No users found</h3>
+                        <p class="text-slate-500 text-xs mt-1">Try adjusting your search or filters.</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Analytics View -->
-            <div id="view-analytics" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6">User Activity Growth</h3>
-                    <div class="h-[400px] w-full">
+            <div id="view-analytics" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-1">Platform Growth</h3>
+                    <p class="text-xs text-slate-500 mb-6">New posts over the last 7 days</p>
+                    <div class="h-[300px] w-full">
                         <canvas id="postsChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Content Distribution</h3>
-                         <div class="h-[300px] flex items-center justify-center">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-6">Content Distribution</h3>
+                         <div class="h-[250px] flex items-center justify-center">
                             <canvas id="typeChart"></canvas>
                          </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                         <h3 class="text-lg font-bold text-gray-900 mb-4">System Health</h3>
-                         <div class="space-y-4">
-                             <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex items-center gap-3">
-                                 <i data-lucide="check-circle" class="text-green-600"></i>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                         <h3 class="font-bold text-slate-800 mb-6">System Health</h3>
+                         <div class="space-y-4 flex-1">
+                             <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex items-center gap-4">
+                                 <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+                                    <i data-lucide="database" class="w-5 h-5"></i>
+                                 </div>
                                  <div>
-                                     <div class="font-bold text-green-800">Operational</div>
-                                     <div class="text-xs text-green-600">Database connections active</div>
+                                     <div class="font-bold text-green-900 text-sm">Database Connected</div>
+                                     <div class="text-xs text-green-700">Firestore operational</div>
                                  </div>
                              </div>
-                             <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3">
-                                 <i data-lucide="server" class="text-gray-600"></i>
+                             <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-4">
+                                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                 </div>
                                  <div>
-                                     <div class="font-bold text-gray-800">Storage Usage</div>
-                                     <div class="text-xs text-gray-500">Normal range (45%)</div>
+                                     <div class="font-bold text-blue-900 text-sm">Auth Services</div>
+                                     <div class="text-xs text-blue-700">Google Auth active</div>
                                  </div>
                              </div>
                          </div>
@@ -199,11 +307,13 @@ body{font-family:'Inter',sans-serif;background-color:#f8fafc;color:#0f172a}
 </div>
 
 <!-- Loading Overlay -->
-<div id="loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[60] flex items-center justify-center hidden">
-    <div class="flex flex-col items-center gap-3">
-        <i data-lucide="loader-2" class="w-10 h-10 text-blue-600 animate-spin"></i>
-        <span class="text-sm font-bold text-blue-600">Loading Data...</span>
+<div id="loader" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-[70] flex flex-col items-center justify-center hidden transition-opacity duration-300">
+    <div class="flex space-x-2 mb-4">
+        <div class="w-3 h-3 bg-blue-600 rounded-full loader-dot"></div>
+        <div class="w-3 h-3 bg-blue-600 rounded-full loader-dot"></div>
+        <div class="w-3 h-3 bg-blue-600 rounded-full loader-dot"></div>
     </div>
+    <span class="text-sm font-bold text-slate-600 tracking-wide uppercase">Loading Data</span>
 </div>
 
 <script type="module">
@@ -219,17 +329,22 @@ const db = getFirestore(app);
 let allUsers = [];
 let allPosts = [];
 let charts = {};
+let currentFilter = 'all';
+let currentSearch = '';
 
+// Auth State Listener
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         if (user.email === 'edulinkbht@gmail.com') {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('admin-email').innerText = user.email;
+            document.getElementById('admin-avatar-initial').innerText = user.email.charAt(0).toUpperCase();
             loadData();
         } else {
-            document.getElementById('error-msg').innerText = "Access Denied. Admin only.";
-            document.getElementById('error-msg').classList.remove('hidden');
+            const err = document.getElementById('error-msg');
+            err.innerText = "Access Denied. Admin privileges required.";
+            err.classList.remove('hidden');
             await signOut(auth);
         }
     } else {
@@ -243,26 +358,58 @@ window.loginWithGoogle = async () => {
     try {
         await signInWithPopup(auth, provider);
     } catch (error) {
-        document.getElementById('error-msg').innerText = error.message;
-        document.getElementById('error-msg').classList.remove('hidden');
+        const err = document.getElementById('error-msg');
+        err.innerText = error.message;
+        err.classList.remove('hidden');
     }
 };
 
 window.logout = () => signOut(auth);
 
-window.switchTab = (tab) => {
-    document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-    document.getElementById(`nav-${tab}`).classList.add('active');
+// Sidebar Toggle (Mobile)
+window.toggleSidebar = () => {
+    const sb = document.getElementById('mobile-sidebar');
+    const ov = document.getElementById('sidebar-overlay');
+    const hidden = sb.classList.contains('-translate-x-full');
     
-    document.getElementById('view-users').classList.add('hidden');
-    document.getElementById('view-analytics').classList.add('hidden');
-    document.getElementById(`view-${tab}`).classList.remove('hidden');
-    
-    document.getElementById('page-title').innerText = tab === 'users' ? 'User Management' : 'Analytics & Insights';
-    
-    if(tab === 'analytics') renderCharts();
+    if (hidden) {
+        sb.classList.remove('-translate-x-full');
+        ov.classList.remove('hidden');
+        setTimeout(() => ov.classList.remove('opacity-0'), 10);
+    } else {
+        sb.classList.add('-translate-x-full');
+        ov.classList.add('opacity-0');
+        setTimeout(() => ov.classList.add('hidden'), 300);
+    }
 };
 
+// Tab Switching
+window.switchTab = (tab) => {
+    document.querySelectorAll('.sidebar-link').forEach(e => e.classList.remove('active'));
+    // Handle dashboard link special case or direct ID matching
+    const navId = tab === 'dashboard' ? 'nav-dashboard' : `nav-${tab}`;
+    document.getElementById(navId)?.classList.add('active');
+    
+    // Hide all views
+    document.getElementById('view-dashboard').classList.add('hidden');
+    document.getElementById('view-users').classList.add('hidden');
+    document.getElementById('view-analytics').classList.add('hidden');
+    
+    // Show selected view
+    document.getElementById(`view-${tab}`).classList.remove('hidden');
+    
+    // Update Header Title
+    const titles = { dashboard: 'Overview', users: 'User Management', analytics: 'Platform Analytics' };
+    document.getElementById('page-title').innerText = titles[tab];
+    
+    // Mobile: Close sidebar after selection
+    if (window.innerWidth < 768) toggleSidebar();
+    
+    // Trigger charts if analytics
+    if(tab === 'analytics') setTimeout(renderCharts, 100);
+};
+
+// Data Loading
 window.loadData = async () => {
     setLoading(true);
     try {
@@ -272,86 +419,132 @@ window.loadData = async () => {
         const postsSnap = await getDocs(query(collection(db, "posts"), orderBy("timestamp", "desc")));
         allPosts = postsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         
-        updateStats();
-        renderUsers(allUsers);
+        updateDashboardStats();
+        renderRecentUsers();
+        applyUserFilter(); // Renders main user table
         if(!document.getElementById('view-analytics').classList.contains('hidden')) renderCharts();
     } catch(e) {
         console.error(e);
-        alert("Failed to load data");
+        alert("Failed to fetch data from server.");
     }
     setLoading(false);
 };
 
-function updateStats() {
-    document.getElementById('stat-total-users').innerText = allUsers.length;
-    document.getElementById('stat-verified').innerText = allUsers.filter(u => u.isOfficial).length;
-    document.getElementById('stat-banned').innerText = allUsers.filter(u => u.banned).length;
-    document.getElementById('stat-posts').innerText = allPosts.length;
+function updateDashboardStats() {
+    document.getElementById('dash-total-users').innerText = allUsers.length;
+    document.getElementById('dash-verified').innerText = allUsers.filter(u => u.isOfficial).length;
+    document.getElementById('dash-banned').innerText = allUsers.filter(u => u.banned).length;
+    document.getElementById('dash-posts').innerText = allPosts.length;
 }
 
-window.handleSearch = (val) => {
-    const term = val.toLowerCase();
-    const filtered = allUsers.filter(u => 
-        (u.name || '').toLowerCase().includes(term) || 
-        (u.email || '').toLowerCase().includes(term) ||
-        (u.username || '').toLowerCase().includes(term) ||
-        u.id.toLowerCase().includes(term)
-    );
-    renderUsers(filtered);
-};
-
-function renderUsers(users) {
-    const tbody = document.getElementById('user-table-body');
+function renderRecentUsers() {
+    const tbody = document.getElementById('dash-recent-users');
     tbody.innerHTML = '';
+    // Take last 5 users (assuming array order or sort by timestamp if available)
+    // Here we just take first 5 for demo since we fetched all
+    const recent = allUsers.slice(0, 5); 
+    
+    recent.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors cursor-pointer";
+        tr.onclick = () => { switchTab('users'); document.getElementById('user-search').value = u.name; handleSearch(u.name); };
+        tr.innerHTML = `
+            <td class="p-4 flex items-center gap-3">
+                <img src="${u.avatar || 'https://api.dicebear.com/9.x/lorelei/svg?seed=' + u.id}" class="w-8 h-8 rounded-full bg-slate-200 object-cover">
+                <div class="min-w-0">
+                    <div class="font-bold text-slate-800 text-sm truncate">${u.name}</div>
+                    <div class="text-xs text-slate-500 truncate">${u.email}</div>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// User Filtering Logic
+window.handleSearch = (val) => { currentSearch = val.toLowerCase(); applyUserFilter(); };
+window.filterUsers = (val) => { currentFilter = val; applyUserFilter(); };
+
+function applyUserFilter() {
+    let filtered = allUsers;
+    
+    // Status Filter
+    if (currentFilter === 'verified') filtered = filtered.filter(u => u.isOfficial);
+    if (currentFilter === 'banned') filtered = filtered.filter(u => u.banned);
+    
+    // Search Filter
+    if (currentSearch) {
+        filtered = filtered.filter(u => 
+            (u.name || '').toLowerCase().includes(currentSearch) || 
+            (u.email || '').toLowerCase().includes(currentSearch) ||
+            (u.username || '').toLowerCase().includes(currentSearch) ||
+            u.id.toLowerCase().includes(currentSearch)
+        );
+    }
+    
+    renderUsersTable(filtered);
+}
+
+function renderUsersTable(users) {
+    const tbody = document.getElementById('user-table-body');
+    const empty = document.getElementById('empty-state-users');
+    tbody.innerHTML = '';
+    
+    if (users.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
     
     users.forEach(u => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-gray-50 transition-colors group";
+        tr.className = "hover:bg-slate-50/80 transition-colors group border-b border-slate-50 last:border-0";
         
         const isVerified = u.isOfficial;
         const isBanned = u.banned;
-        
-        // Count user posts
         const userPostCount = allPosts.filter(p => p.authorId === u.id).length;
         
         tr.innerHTML = `
-            <td class="p-5">
+            <td class="p-4 pl-6">
                 <div class="flex items-center gap-4">
-                    <img src="${u.avatar || 'https://api.dicebear.com/9.x/lorelei/svg?seed=' + u.id}" class="w-12 h-12 rounded-full bg-gray-100 object-cover border border-gray-200">
+                    <div class="relative">
+                        <img src="${u.avatar || 'https://api.dicebear.com/9.x/lorelei/svg?seed=' + u.id}" class="w-10 h-10 rounded-full bg-slate-100 object-cover border border-slate-200">
+                        ${isVerified ? '<div class="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5 border border-white"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>' : ''}
+                    </div>
                     <div>
-                        <div class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                        <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                             ${u.name}
-                            ${isVerified ? '<i data-lucide="badge-check" class="w-4 h-4 text-blue-600 fill-blue-50"></i>' : ''}
-                            ${isBanned ? '<i data-lucide="ban" class="w-4 h-4 text-red-600"></i>' : ''}
                         </div>
-                        <div class="text-xs text-gray-500 font-mono mt-0.5">@${u.username || 'user'}</div>
-                        <div class="text-[10px] text-gray-400 mt-0.5">${u.email}</div>
+                        <div class="text-xs text-slate-500 font-medium">@${u.username || 'user'}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${u.email}</div>
                     </div>
                 </div>
             </td>
-            <td class="p-5">
-                <div class="flex flex-col gap-2 items-start">
-                    ${isBanned ? '<span class="badge badge-red flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Banned</span>' : '<span class="badge badge-green flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Active</span>'}
-                    ${isVerified ? '<span class="badge badge-blue">Verified Account</span>' : '<span class="badge badge-gray">Standard</span>'}
+            <td class="p-4">
+                <div class="flex flex-col gap-1.5 items-start">
+                    ${isBanned ? 
+                        '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Banned</span>' : 
+                        '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span>'}
+                    ${isVerified ? '<span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 uppercase tracking-wide">Verified</span>' : ''}
                 </div>
             </td>
-            <td class="p-5">
-                <div class="text-sm text-gray-600 font-medium space-y-1">
-                    <div class="flex items-center gap-2"><i data-lucide="file-text" class="w-3 h-3 text-gray-400"></i> ${userPostCount} Posts</div>
-                    <div class="flex items-center gap-2"><i data-lucide="users" class="w-3 h-3 text-gray-400"></i> ${u.followers ? u.followers.length : 0} Followers</div>
+            <td class="p-4">
+                <div class="text-xs font-medium text-slate-600 space-y-1">
+                    <div class="flex items-center gap-2"><i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-400"></i> ${userPostCount} Posts</div>
+                    <div class="flex items-center gap-2"><i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i> ${u.followers ? u.followers.length : 0} Followers</div>
                 </div>
             </td>
-            <td class="p-5 text-right">
-                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="toggleVerify('${u.id}', ${!isVerified})" class="p-2.5 rounded-xl border transition-all ${isVerified ? 'border-gray-200 bg-white hover:bg-gray-50 text-gray-600' : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'}" title="${isVerified ? 'Revoke Verification' : 'Verify User'}">
+            <td class="p-4 pr-6 text-right">
+                <div class="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button onclick="toggleVerify('${u.id}', ${!isVerified})" class="w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${isVerified ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50' : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'}" title="${isVerified ? 'Revoke Verification' : 'Verify User'}">
                         <i data-lucide="${isVerified ? 'shield-off' : 'badge-check'}" class="w-4 h-4"></i>
                     </button>
                     
-                    <button onclick="toggleBan('${u.id}', ${!isBanned})" class="p-2.5 rounded-xl border transition-all ${isBanned ? 'border-gray-200 bg-white hover:bg-gray-50 text-gray-600' : 'border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-100'}" title="${isBanned ? 'Unban User' : 'Ban User'}">
+                    <button onclick="toggleBan('${u.id}', ${!isBanned})" class="w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${isBanned ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50' : 'border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-100'}" title="${isBanned ? 'Unban User' : 'Ban User'}">
                         <i data-lucide="${isBanned ? 'undo-2' : 'ban'}" class="w-4 h-4"></i>
                     </button>
                     
-                    <button onclick="confirmDelete('${u.id}')" class="p-2.5 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all" title="Delete User Permanently">
+                    <button onclick="confirmDelete('${u.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:shadow-sm transition-all" title="Delete User Permanently">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -362,25 +555,25 @@ function renderUsers(users) {
     lucide.createIcons();
 }
 
+// Charts Logic
 function renderCharts() {
-    // 1. Posts Per Day (Line Chart)
+    // 1. Posts Per Day (Area Line Chart)
     const ctx = document.getElementById('postsChart').getContext('2d');
     
-    // Process Data
+    // Prepare Data
     const dates = {};
     const today = new Date();
-    // Initialize last 7 days with 0
     for(let i=6; i>=0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
-        dates[d.toLocaleDateString()] = 0;
+        dates[d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })] = 0;
     }
     
     allPosts.forEach(p => {
         if(p.timestamp) {
             let d;
             try { d = p.timestamp.toDate(); } catch(e) { d = new Date(p.timestamp); }
-            const ds = d.toLocaleDateString();
+            const ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             if(dates[ds] !== undefined) dates[ds]++;
         }
     });
@@ -398,27 +591,32 @@ function renderCharts() {
                 label: 'New Posts',
                 data: dataPoints,
                 borderColor: '#2563eb',
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                backgroundColor: (context) => {
+                    const ctx = context.chart.ctx;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+                    gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                    return gradient;
+                },
                 borderWidth: 3,
-                tension: 0.4,
+                tension: 0.3,
                 fill: true,
                 pointBackgroundColor: '#ffffff',
                 pointBorderColor: '#2563eb',
                 pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8 } },
             scales: {
-                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#e2e8f0' } },
-                x: { grid: { display: false } }
-            }
+                y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, ticks: { font: { family: "'Plus Jakarta Sans', sans-serif" } } },
+                x: { grid: { display: false }, ticks: { font: { family: "'Plus Jakarta Sans', sans-serif" } } }
+            },
+            interaction: { mode: 'nearest', axis: 'x', intersect: false }
         }
     });
     
@@ -427,62 +625,57 @@ function renderCharts() {
     let textPosts = 0;
     let imagePosts = 0;
     
-    allPosts.forEach(p => {
-        if(p.media) imagePosts++; else textPosts++;
-    });
+    allPosts.forEach(p => { if(p.media) imagePosts++; else textPosts++; });
     
     if(charts.types) charts.types.destroy();
     
     charts.types = new Chart(ctxType, {
         type: 'doughnut',
         data: {
-            labels: ['Text Posts', 'Media Posts'],
+            labels: ['Text Only', 'Media (Img/Vid)'],
             datasets: [{
                 data: [textPosts, imagePosts],
-                backgroundColor: ['#64748b', '#3b82f6'],
+                backgroundColor: ['#e2e8f0', '#3b82f6'],
                 borderWidth: 0,
-                hoverOffset: 4
+                hoverOffset: 10
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '75%',
+            cutout: '70%',
             plugins: {
-                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: "'Plus Jakarta Sans', sans-serif" } } }
             }
         }
     });
 }
 
+// User Actions
 window.toggleVerify = async (uid, status) => {
     try {
         await updateDoc(doc(db, "users", uid), { isOfficial: status });
         const idx = allUsers.findIndex(u => u.id === uid);
         if(idx > -1) allUsers[idx].isOfficial = status;
-        renderUsers(allUsers);
-        updateStats();
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
+        applyUserFilter();
+        updateDashboardStats();
+    } catch (e) { alert("Error: " + e.message); }
 };
 
 window.toggleBan = async (uid, status) => {
-    if(confirm(status ? "Ban this user? Access will be revoked." : "Unban this user?")) {
+    if(confirm(status ? "Are you sure you want to ban this user? They will lose access immediately." : "Lift the ban for this user?")) {
         try {
             await updateDoc(doc(db, "users", uid), { banned: status });
             const idx = allUsers.findIndex(u => u.id === uid);
             if(idx > -1) allUsers[idx].banned = status;
-            renderUsers(allUsers);
-            updateStats();
-        } catch (e) {
-            alert("Error: " + e.message);
-        }
+            applyUserFilter();
+            updateDashboardStats();
+        } catch (e) { alert("Error: " + e.message); }
     }
 };
 
 window.confirmDelete = async (uid) => {
-    const conf = prompt("Type 'DELETE' to confirm. This action is irreversible.");
+    const conf = prompt("WARNING: This will permanently delete the user and all their data.\nType 'DELETE' to confirm.");
     if (conf === 'DELETE') {
         setLoading(true);
         try {
@@ -490,19 +683,21 @@ window.confirmDelete = async (uid) => {
             // Delete user doc
             batch.delete(doc(db, "users", uid));
             
-            // Delete user posts (basic batch, limited to first 500 for demo)
+            // Delete user posts (basic batch, limited to first 500 for safety)
             const postsQ = query(collection(db, "posts"), where("authorId", "==", uid));
             const postsSnap = await getDocs(postsQ);
             postsSnap.forEach(d => batch.delete(d.ref));
             
             await batch.commit();
             
+            // Local Update
             allUsers = allUsers.filter(u => u.id !== uid);
             allPosts = allPosts.filter(p => p.authorId !== uid);
-            renderUsers(allUsers);
-            updateStats();
             
-            alert("User deleted.");
+            applyUserFilter();
+            updateDashboardStats();
+            
+            alert("User deleted successfully.");
         } catch (e) {
             console.error(e);
             alert("Delete failed: " + e.message);
@@ -518,6 +713,7 @@ function setLoading(state) {
     else l.classList.add('hidden');
 }
 
+// Init Icons
 lucide.createIcons();
 </script>
 </body>
