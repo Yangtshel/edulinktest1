@@ -89,7 +89,7 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
 <!-- Login Section -->
 <div id="login-section" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
     <div class="max-w-sm w-full text-center p-8 fade-in">
-        <img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-16 h-16 mx-auto mb-6 object-contain">
+        <img src="https://i.imghippo.com/files/vgr8207c.png" class="w-16 h-16 mx-auto mb-6 object-contain">
         <h1 class="text-3xl font-bold google-font mb-2 text-[#1f1f1f]">Admin Access</h1>
         <p class="text-gray-500 mb-8">Sign in to manage EduLink</p>
         
@@ -107,7 +107,7 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); colo
     <!-- Navbar -->
     <header class="py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-10 h-10 object-contain">
+            <img src="https://i.imghippo.com/files/vgr8207c.png" class="w-10 h-10 object-contain">
             <div>
                 <h1 class="text-xl font-bold google-font text-[#1f1f1f]">EduLink Workspace</h1>
                 <p class="text-xs text-gray-400">Admin Console</p>
@@ -462,10 +462,6 @@ window.sendBroadcast = async () => {
     btn.innerHTML = 'Sending...';
     
     try {
-        // We create a notification for every user (Batching logic needed for production, simpler here)
-        // For efficiency in big apps, use a 'global_announcements' collection that users listen to.
-        // Here we'll simulate it by adding to 'notifications' for the first 500 users (Firestore limit).
-        
         const batch = writeBatch(db);
         const usersToNotify = allUsers.slice(0, 400); // Limit for demo safety
         
@@ -473,8 +469,10 @@ window.sendBroadcast = async () => {
             const ref = doc(collection(db, "notifications"));
             batch.set(ref, {
                 receiverId: u.id,
-                senderId: 'admin',
-                type: 'official', // Icons map to this in index.html
+                senderId: 'EduLink', 
+                senderName: 'EduLink',
+                senderAvatar: 'https://i.imghippo.com/files/vgr8207c.png',
+                type: 'official', 
                 content: `${t}: ${m}`,
                 timestamp: serverTimestamp(),
                 read: false
