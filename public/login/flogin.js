@@ -5,6 +5,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Initialize Lucide icons if applicable
@@ -46,6 +48,7 @@ const closeBtn = document.getElementById("closeOverlayBtn");
 const getStartedBtn = document.getElementById("getStartedBtn");
 const heroGetStartedBtn = document.getElementById("heroGetStartedBtn");
 const toggleAuthBtn = document.getElementById("toggleAuth");
+const btnGoogle = document.getElementById("btnGoogle");
 
 // --- FORM ELEMENTS ---
 const authTitle = document.getElementById("authTitle");
@@ -99,6 +102,26 @@ if (toggleAuthBtn) {
   toggleAuthBtn.onclick = () => {
     isSignup = !isSignup;
     updateUI();
+  };
+}
+
+// --- GOOGLE SIGN IN ---
+if (btnGoogle) {
+  btnGoogle.onclick = async () => {
+    if (!auth) {
+      alert("System is still initializing. Please wait a moment.");
+      return;
+    }
+    
+    const provider = new GoogleAuthProvider();
+    
+    try {
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle the redirect
+    } catch (error) {
+      console.error(error);
+      alert("Google Sign-In Error: " + error.message);
+    }
   };
 }
 
