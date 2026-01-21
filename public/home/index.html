@@ -238,24 +238,17 @@ window.toggleTextExpansion=id=>{if(window.expandedTexts.has(id))window.expandedT
 window.searchTag=t=>{closePostView();switchView('explore');document.getElementById('mobile-explore-search').value=document.getElementById('global-search').value=`#${t}`;handleSearch(`#${t}`)};
 window.manageHistory=m=>window.history.pushState({modal:m},"");
 
-// Helper function to check if current user can view a post based on privacy settings
+// Privacy helper: returns true if current user can view post
 const canSeePost = (p) => {
     if(!p || !currentUser) return false;
-    if(p.authorId === currentUser.id) return true; // Can always see own posts
-    
+    if(p.authorId === currentUser.id) return true; 
     const author = users.find(u => u.id === p.authorId);
-    if(!author) return false; // Should not happen if data integrity is good
-
+    if(!author) return false; 
     const isFollowing = currentUser.following.includes(p.authorId);
-    const isAccountPrivate = author.settings?.privateNetwork; // Account-level privacy
-    const isPostPrivate = p.settings?.privacy === 'private'; // Post-level privacy
-
-    // If account is private, ONLY followers can see posts, regardless of post setting
+    const isAccountPrivate = author.settings?.privateNetwork;
+    const isPostPrivate = p.settings?.privacy === 'private';
     if (isAccountPrivate && !isFollowing) return false;
-
-    // If account is public but post is set to private/followers-only, only followers can see
     if (isPostPrivate && !isFollowing) return false;
-
     return true; 
 };
 
@@ -346,10 +339,7 @@ window.renderFeed=t=>{
     const c=document.getElementById('feed-container');
     c.innerHTML="";
     posts.filter(p=>{
-        // Check core privacy using helper
         if (!canSeePost(p)) return false;
-
-        // Apply feed-specific filters
         const a=users.find(u=>u.id===p.authorId);
         const fol=currentUser.following.includes(p.authorId);
         let pf=true;
@@ -358,10 +348,7 @@ window.renderFeed=t=>{
             const isF=fol&&(a.following&&a.following.includes(currentUser.id));
             pf=isF;
         }
-
-        // Apply search term filter if exists
         const ms=(!t||p.content.toLowerCase().includes(t.toLowerCase()));
-        
         return pf && ms;
     }).forEach(p=>c.appendChild(createPostElement(p,'feed')));
     refreshIcons();
@@ -375,13 +362,80 @@ const isLiked=p.likes?.includes(currentUser.id),isSaved=savedPosts.includes(p.id
 window.moveCarousel=(cid,dir)=>{const s=window.carouselStates[cid];if(!s)return;let n=s.index+dir;if(n<0)n=0;if(n>=s.total)n=s.total-1;s.index=n;const outer=document.getElementById(cid),inner=outer?outer.querySelector('.post-carousel-inner'):null;if(inner)inner.style.transform=`translateX(-${n*100}%)`;const dc=document.getElementById(cid).nextElementSibling;if(dc)dc.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===n));const ctid=cid.replace('carousel-','counter-'),cnt=document.getElementById(ctid);if(cnt)cnt.innerText=n+1};
 window.switchExploreMainTab=t=>{window.activeExploreTab=t;const m=t==='explore'?'main':t;['main','video','people','tags'].forEach(x=>{const el=document.getElementById(`tab-explore-${x}`),ed=document.getElementById(`tab-explore-${x}-d`);if(el)el.classList.remove('active');if(ed)ed.classList.remove('active')});document.getElementById(`tab-explore-${m}`)?.classList.add('active');document.getElementById(`tab-explore-${m}-d`)?.classList.add('active');window.activeExploreCategory=t==='video'?'All':'For You';handleSearch(document.getElementById('mobile-explore-search').value)};
 window.toggleExploreSearch=()=>{const b=document.getElementById('explore-search-bar');if(b){b.classList.toggle('hidden');if(!b.classList.contains('hidden'))document.getElementById('mobile-explore-search').focus()}};
-window.handleSearch=q=>{if(document.getElementById('view-explore').classList.contains('hidden'))switchView('explore');const t=q?q.toLowerCase().trim():'',pl=document.getElementById('explore-people-results'),v=document.getElementById('explore-results');if(window.activeExploreTab==='people'){pl.classList.remove('hidden');pl.classList.add('flex');v.innerHTML='';pl.innerHTML='';const fu=t?users.filter(u=>(u.name||"").toLowerCase().includes(t)||(u.username||"").toLowerCase().includes(t)):users.slice(0,10);if(fu.length)fu.forEach(u=>{const d=document.createElement('div');d.className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer last:border-b-0";d.onclick=()=>showProfile(u.id);d.innerHTML=`<div class="flex items-center gap-3"><img src="${u.avatar}" class="w-12 h-12 rounded-full border border-gray-100 object-cover bg-gray-50"><div><div class="font-bold text-[#1f1f1f] text-[15px] flex items-center gap-1">${u.name}${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge"></i>':''}${u.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>':''}</div><div class="text-xs text-gray-500 font-medium">@${u.username||'user'} • ${u.followers?.length||0} followers</div></div></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="bg-black text-white text-xs px-4 py-1.5 rounded-full font-bold hover:bg-gray-800 transition-colors shadow-sm">Follow</button>`;pl.appendChild(d)});else pl.innerHTML='<div class="text-gray-400 text-xs italic text-center py-4">No people found</div>'}else{pl.classList.add('hidden');pl.classList.remove('flex');v.innerHTML='';let fp=posts.filter(p=>{if(window.activeExploreTab==='video')return p.media&&(Array.isArray(p.media)?p.media.some(m=>m.includes('video')||m.endsWith('.mp4')):(p.media.includes('video')||p.media.endsWith('.mp4')));if(window.activeExploreTab==='tags')return p.content.includes('#');return true});if(t)fp=fp.filter(p=>p.content.toLowerCase().includes(t));else if(window.activeExploreTab!=='tags')fp.sort(()=>.5-Math.random());
-fp = fp.filter(p => canSeePost(p)); // APPLY PRIVACY FILTER HERE
-if(!fp.length)v.innerHTML='<div class="text-center py-20 text-gray-400"><p>No posts found.</p></div>';else{const l=document.createElement('div');l.className="flex flex-col gap-0.5 md:gap-4";fp.forEach(p=>l.appendChild(createPostElement(p,'explore')));v.appendChild(l)}}refreshIcons()};
+window.handleSearch=q=>{
+    if(document.getElementById('view-explore').classList.contains('hidden'))switchView('explore');
+    const t=q?q.toLowerCase().trim():'',pl=document.getElementById('explore-people-results'),v=document.getElementById('explore-results');
+    if(window.activeExploreTab==='people'){
+        pl.classList.remove('hidden');pl.classList.add('flex');v.innerHTML='';pl.innerHTML='';
+        const fu=t?users.filter(u=>(u.name||"").toLowerCase().includes(t)||(u.username||"").toLowerCase().includes(t)):users.slice(0,10);
+        if(fu.length)fu.forEach(u=>{
+            const d=document.createElement('div');d.className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer last:border-b-0";d.onclick=()=>showProfile(u.id);
+            d.innerHTML=`<div class="flex items-center gap-3"><img src="${u.avatar}" class="w-12 h-12 rounded-full border border-gray-100 object-cover bg-gray-50"><div><div class="font-bold text-[#1f1f1f] text-[15px] flex items-center gap-1">${u.name}${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge"></i>':''}${u.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>':''}</div><div class="text-xs text-gray-500 font-medium">@${u.username||'user'} • ${u.followers?.length||0} followers</div></div></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="bg-black text-white text-xs px-4 py-1.5 rounded-full font-bold hover:bg-gray-800 transition-colors shadow-sm">Follow</button>`;pl.appendChild(d)
+        });
+        else pl.innerHTML='<div class="text-gray-400 text-xs italic text-center py-4">No people found</div>'
+    } else {
+        pl.classList.add('hidden');pl.classList.remove('flex');v.innerHTML='';
+        let fp=posts.filter(p=>{
+            if(window.activeExploreTab==='video')return p.media&&(Array.isArray(p.media)?p.media.some(m=>m.includes('video')||m.endsWith('.mp4')):(p.media.includes('video')||p.media.endsWith('.mp4')));
+            if(window.activeExploreTab==='tags')return p.content.includes('#');
+            return true
+        });
+        if(t)fp=fp.filter(p=>p.content.toLowerCase().includes(t));
+        else if(window.activeExploreTab!=='tags')fp.sort(()=>.5-Math.random());
+
+        // Privacy Filter for Search/Explore
+        fp = fp.filter(p => {
+             const author = users.find(u => u.id === p.authorId);
+             if (!author) return false;
+             // Strict Rule: If account is private OR post is private, do NOT show in Search/Explore.
+             // Even if following. Explore implies public discovery.
+             const isAccountPrivate = author.settings?.privateNetwork;
+             const isPostPrivate = p.settings?.privacy === 'private';
+             if (isAccountPrivate || isPostPrivate) return false;
+             return true; 
+        });
+
+        if(!fp.length)v.innerHTML='<div class="text-center py-20 text-gray-400"><p>No posts found.</p></div>';
+        else{const l=document.createElement('div');l.className="flex flex-col gap-0.5 md:gap-4";fp.forEach(p=>l.appendChild(createPostElement(p,'explore')));v.appendChild(l)}
+    }
+    refreshIcons()
+};
 window.openCollabSelector=()=>{manageHistory('user-list-overlay');const o=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText="Tag Collaborators";c.innerHTML='';const r=users.filter(u=>u.id!==currentUser.id&&(currentUser.following.includes(u.id)||currentUser.followers.includes(u.id)));if(!r.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No contacts.</div>';else r.forEach(u=>{const sel=window.selectedCollaborators.find(x=>x.id===u.id),d=document.createElement('div');d.className=`flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer ${sel?'bg-gray-100':''}`;d.onclick=()=>toggleCollaborator(u);d.innerHTML=`<div class="flex items-center gap-3"><img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500">@${u.username||'user'}</div></div></div>${sel?'<i data-lucide="check" class="text-gray-600 w-5 h-5"></i>':''}`;c.appendChild(d)});o.classList.remove('hidden');refreshIcons()};
 window.toggleCollaborator=u=>{const i=window.selectedCollaborators.findIndex(x=>x.id===u.id);if(i>-1)window.selectedCollaborators.splice(i,1);else window.selectedCollaborators.push({id:u.id,name:u.name,avatar:u.avatar,username:u.username,status:'pending'});closeUserList();openCollabSelector();renderCollabChips()};window.renderCollabChips=()=>{const c=document.getElementById('collab-chips-container');c.innerHTML='';window.selectedCollaborators.forEach(u=>{const ch=document.createElement('div');ch.className='collab-chip';ch.innerHTML=`<img src="${u.avatar}" class="w-4 h-4 rounded-full mr-2"> <span>${u.name}</span> <i onclick="event.stopPropagation(); removeCollaborator('${u.id}')" data-lucide="x" class="w-3 h-3 ml-2 text-gray-500 hover:text-red-500 cursor-pointer"></i>`;c.appendChild(ch)});refreshIcons()};window.removeCollaborator=id=>{window.selectedCollaborators=window.selectedCollaborators.filter(u=>u.id!==id);renderCollabChips()};
 window.openCollabList=pid=>{manageHistory('user-list-overlay');const p=posts.find(x=>x.id===pid);if(!p||!p.collaborators)return;const c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText="Collaborators";c.innerHTML='';p.collaborators.filter(x=>x.status==='accepted').forEach(u=>{const d=document.createElement('div');d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";d.onclick=()=>{closeUserList();showProfile(u.id)};d.innerHTML=`<div class="flex items-center gap-3"><img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500">@${u.username||'user'}</div></div></div>`;c.appendChild(d)});document.getElementById('user-list-overlay').classList.remove('hidden')};
-window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;manageHistory('user-list-overlay');const m=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText=type==='following'?'Following':'Followers';const me=uid===currentUser.id,fol=currentUser.following.includes(uid),priv=u.settings?.privateNetwork,hide=u.settings?.hideConnections;if(!me&&(hide||(priv&&!fol))){c.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide?'eye-off':'lock'}" class="w-16 h-16 mb-2"></i><p>${hide?'Connections hidden':'Account is private'}</p></div>`}else{const ids=type==='following'?(u.following||[]):(u.followers||[]);if(!ids.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No users found.</div>';else{c.innerHTML='';ids.forEach(id=>{const user=users.find(x=>x.id===id);if(user){const d=document.createElement('div');d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";d.onclick=()=>{closeUserList();showProfile(user.id)};d.innerHTML=`<div class="flex items-center gap-3"><img src="${user.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username||'user'}</div></div></div>`;c.appendChild(d)}})}}toggleModalAnim('user-list-overlay','user-list-modal',!0);refreshIcons()};window.closeUserList=()=>toggleModalAnim('user-list-overlay','user-list-modal',!1);
+window.openUserList=(type,uid)=>{
+    const u=users.find(x=>x.id===uid);if(!u)return;
+    manageHistory('user-list-overlay');
+    const m=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');
+    document.getElementById('user-list-title').innerText=type==='following'?'Following':'Followers';
+    
+    const me=uid===currentUser.id,fol=currentUser.following.includes(uid);
+    const priv=u.settings?.privateNetwork || false;
+    const hide=u.settings?.hideConnections || false;
+    
+    // Privacy Logic for User List: If hidden or private+not_following, show restricted message
+    if(!me && (hide || (priv && !fol))){
+        c.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide?'eye-off':'lock'}" class="w-16 h-16 mb-2"></i><p>${hide?'Connections hidden':'Account is private'}</p></div>`;
+    } else {
+        const ids=type==='following'?(u.following||[]):(u.followers||[]);
+        if(!ids.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No users found.</div>';
+        else{
+            c.innerHTML='';
+            ids.forEach(id=>{
+                const user=users.find(x=>x.id===id);
+                if(user){
+                    const d=document.createElement('div');
+                    d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";
+                    d.onclick=()=>{closeUserList();showProfile(user.id)};
+                    d.innerHTML=`<div class="flex items-center gap-3"><img src="${user.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username||'user'}</div></div></div>`;
+                    c.appendChild(d)
+                }
+            })
+        }
+    }
+    toggleModalAnim('user-list-overlay','user-list-modal',!0);refreshIcons()
+};
+window.closeUserList=()=>toggleModalAnim('user-list-overlay','user-list-modal',!1);
 window.toggleLike=async(pid)=>{const isLiking=!document.querySelector(`.js-like-btn-${pid}`)?.classList.contains('active');document.querySelectorAll(`.js-like-btn-${pid}`).forEach(b=>b.classList.toggle('active',isLiking));document.querySelectorAll(`.js-like-count-${pid}`).forEach(el=>{let c=parseInt(el.innerText)||0,nc=Math.max(0,c+(isLiking?1:-1));el.innerText=nc;});
 const ovBtn=document.getElementById('post-view-like-btn');if(ovBtn){if(isLiking){ovBtn.classList.add('fill-red-500','text-red-500');ovBtn.classList.remove('text-gray-700')}else{ovBtn.classList.remove('fill-red-500','text-red-500');ovBtn.classList.add('text-gray-700')}}
 const movBtn=document.getElementById(`mobile-overlay-like-btn-${pid}`);if(movBtn){if(isLiking){movBtn.classList.add('fill-red-500','text-red-500');movBtn.classList.remove('text-gray-900')}else{movBtn.classList.remove('fill-red-500','text-red-500');movBtn.classList.add('text-gray-900')}}
@@ -496,44 +550,26 @@ window.openProfilePreview=(uid)=>{
   const u=users.find(x=>x.id===uid);
   if(!u)return;
   manageHistory('profile-preview-overlay');
-  
-  // Content update
   document.getElementById('pp-avatar').src=u.avatar;
   document.getElementById('pp-banner').style.backgroundImage=`url(${u.banner||'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'})`;
   document.getElementById('pp-name').innerHTML=`${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge"></i>':''}`;
   document.getElementById('pp-username').innerText=`@${u.username||'user'}`;
-  
-  // Filter out any potential ghost posts without content or media to be accurate
   const pCount=posts.filter(p=>p.authorId===uid && (p.content || p.media)).length;
   document.getElementById('pp-posts-count').innerText=pCount;
   document.getElementById('pp-followers-count').innerText=u.followers?u.followers.length:0;
   document.getElementById('pp-following-count').innerText=u.following?u.following.length:0;
-  
   document.getElementById('pp-visit-btn').onclick=()=>{closeProfilePreview();showProfile(uid)};
-  
   document.getElementById('pp-share-btn').onclick=(e)=>{
-     e.stopPropagation();
-     closeProfilePreview(); // Close this overlay
-     manageHistory('share-overlay');
-     window.currentSharePid=null;
+     e.stopPropagation();closeProfilePreview();manageHistory('share-overlay');window.currentSharePid=null;
      const url=`${window.location.origin}${window.location.pathname}?profileId=${uid}`;
-     document.getElementById('share-link-input').value=url;
-     document.getElementById('share-link-text').innerText=url;
-     document.getElementById('share-owner-avatar').src=u.avatar;
+     document.getElementById('share-link-input').value=url;document.getElementById('share-link-text').innerText=url;document.getElementById('share-owner-avatar').src=u.avatar;
      const pc=document.getElementById('share-post-preview');
      pc.innerHTML=`<div class="bg-white border border-gray-200 rounded-xl p-3 mb-6 flex items-center gap-3"><img src="${u.avatar}" class="w-12 h-12 rounded-full border border-gray-100 object-cover"><div class="flex-1 min-w-0"><div class="font-bold text-gray-900">${u.name}</div><div class="text-xs text-gray-500">@${u.username}</div></div><button class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-bold">View</button></div>`;
-     pc.classList.remove('hidden');
-     toggleModalAnim('share-overlay','share-modal',!0);
+     pc.classList.remove('hidden');toggleModalAnim('share-overlay','share-modal',!0);
   };
-  
-  // Use animation helper
-  toggleModalAnim('profile-preview-overlay', 'profile-preview-card', true);
-  refreshIcons();
+  toggleModalAnim('profile-preview-overlay', 'profile-preview-card', true);refreshIcons();
 };
-
-window.closeProfilePreview=()=>{
-  toggleModalAnim('profile-preview-overlay', 'profile-preview-card', false);
-};
+window.closeProfilePreview=()=>{toggleModalAnim('profile-preview-overlay', 'profile-preview-card', false)};
 window.deleteNotification=async id=>showAlert("Delete?",async()=>await deleteDoc(doc(db,"notifications",id)));window.clearAllNotifications=async()=>showAlert("Clear all?",async()=>{const b=writeBatch(db),s=await getDocs(query(collection(db,"notifications"),where("receiverId","==",currentUser.id)));s.forEach(d=>b.delete(d.ref));await b.commit();showToast("Cleared")});window.toggleNotifications=()=>switchView('notifications');
 window.acceptCollab=async(nid,pid)=>{const r=doc(db,"posts",pid),s=await getDoc(r);if(s.exists()){const c=s.data().collaborators||[],i=c.findIndex(x=>x.id===currentUser.id);if(i>-1){c[i].status='accepted';await updateDoc(r,{collaborators:c});showToast("Accepted!")}}await deleteDoc(doc(db,"notifications",nid))};window.declineCollab=async(nid,pid)=>{const r=doc(db,"posts",pid),s=await getDoc(r);if(s.exists())await updateDoc(r,{collaborators:(s.data().collaborators||[]).filter(x=>x.id!==currentUser.id)});showToast("Declined");await deleteDoc(doc(db,"notifications",nid))};window.acceptFollow=async(nid,sid)=>{await Promise.all([updateDoc(doc(db,"users",currentUser.id),{followers:arrayUnion(sid)}),updateDoc(doc(db,"users",sid),{following:arrayUnion(currentUser.id)}),deleteDoc(doc(db,"notifications",nid)),sendNotification(sid,'follow','accepted follow')]);showToast("Accepted")};
 window.toggleFollow=async(uid)=>{const m=doc(db,"users",currentUser.id),t=doc(db,"users",uid),u=users.find(x=>x.id===uid),isF=currentUser.following.includes(uid),priv=u?.settings?.privateNetwork;if(isF){currentUser.following=currentUser.following.filter(id=>id!==uid);showToast("Unfollowed");await Promise.all([updateDoc(m,{following:arrayRemove(uid)}),updateDoc(t,{followers:arrayRemove(currentUser.id)})])}else{if(priv){showToast("Request sent");sendNotification(uid,'follow_request','wants to follow you')}else{currentUser.following.push(uid);showToast("Following");await Promise.all([updateDoc(m,{following:arrayUnion(uid)}),updateDoc(t,{followers:arrayUnion(currentUser.id)}),sendNotification(uid,'follow','started following you')])}}const btn=document.getElementById('profile-follow-btn');if(btn)btn.innerText=isF?(priv?'Request':'Follow'):(priv?'Requested':'Following');const ul=document.getElementById(`ul-btn-${uid}`);if(ul){ul.innerText=!isF?'Following':'Follow';ul.className=!isF?"bg-gray-100 text-gray-900 text-xs px-3 py-1 rounded-full font-bold hover:bg-gray-200":"bg-black text-white text-xs px-3 py-1 rounded-full font-bold hover:bg-gray-800"}renderRightSidebar();if(!document.getElementById('view-network').classList.contains('hidden'))renderNetwork();refreshIcons()};
@@ -542,7 +578,6 @@ stats=`<div class="flex gap-4 mt-3 text-sm text-gray-500"><span class="cursor-po
 const tabs=['posts','saved','liked','tagged','links'].map(t=>(!me&&t==='saved')?'':`<button onclick="switchProfileTab('${t}')" class="tab-btn ${tab===t?'active':''}"><i data-lucide="${{posts:'grid',saved:'bookmark',liked:'heart',tagged:'user-check',links:'link'}[t]}" class="w-5 h-5"></i></button>`).join('');c.innerHTML=`<div class="profile-banner-container"><img src="${u.banner||'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'}" class="profile-banner-img" style="object-position:center ${u.bannerPos||50}%"></div><div class="px-4 md:px-6 relative"><div class="flex justify-between items-end -mt-10 mb-4"><img src="${u.avatar}" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover cursor-pointer" onclick="openLightbox('${u.avatar}')">${ab}</div><div class="mb-6"><h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-6 h-6 official-badge ml-1"></i>':''}${u.banned?'<i data-lucide="ban" class="text-red-600 w-6 h-6"></i>':''}</h1><div class="text-sm font-medium text-gray-500">@${u.username||'user'}</div><p class="text-gray-600 mt-2">${u.bio}</p>${stats}</div><div class="tab-group mb-0">${tabs}</div><div id="profile-content-area" class="pt-1 md:pt-4 pb-20 md:pb-0"></div></div>`;switchView('profile');renderProfileContent(uid,tab);refreshIcons()};
 window.switchProfileTab=t=>{if(t==='posts'&&window.currentProfileTab==='posts'){openProfileFilter();return}document.querySelectorAll('#view-profile .tab-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes(t)));window.currentProfileTab=t;renderProfileContent(window.currentViewingProfileId,t)};
 window.renderProfileContent=(uid,t)=>{const c=document.getElementById('profile-content-area'),u=users.find(x=>x.id===uid);c.innerHTML="";if(t==='links'){const is=uid===currentUser.id,l=u.links||[];c.innerHTML=`<div class="max-w-4xl mx-auto py-6 space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 px-2">${is?`<button onclick="document.getElementById('add-link-modal').classList.remove('hidden')" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold hover:bg-gray-50 flex items-center justify-center gap-2 h-full"><i data-lucide="plus" class="w-5 h-5"></i> Add New Link</button>`:''}${!l.length&&!is?'<div class="col-span-2 text-center text-gray-400 py-10">No links added yet.</div>':l.map((k,i)=>`<a href="${k.url}" target="_blank" class="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-200 group relative"><div class="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200 mr-4 shrink-0"><i data-lucide="link" class="w-5 h-5 text-blue-600"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-gray-900 truncate">${k.title}</div><div class="text-xs text-gray-500 truncate">${k.url}</div></div><i data-lucide="external-link" class="w-4 h-4 text-gray-400 ml-2"></i>${is?`<button onclick="event.preventDefault(); deleteLink(${i})" class="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50"><i data-lucide="trash-2" class="w-3 h-3"></i></button>`:''}</a>`).join('')}</div>`;refreshIcons();return}if(t==='liked'&&uid!==currentUser.id)return c.innerHTML='<div class="flex flex-col items-center justify-center py-20 text-gray-400 opacity-60"><i data-lucide="lock" class="w-16 h-16 mb-2"></i><p>This user\'s likes are private.</p></div>',refreshIcons();let tp=posts.filter(p=>t==='posts'?p.authorId===uid:t==='saved'?savedPosts.includes(p.id):t==='liked'?p.likes?.includes(uid):(p.collaborators?.some(x=>x.id===uid&&x.status==='accepted')||p.mentions?.includes(uid)));if(uid!==currentUser.id&&t==='posts'){const isF=currentUser.following.includes(uid);if(u.settings?.privateNetwork&&!isF){c.innerHTML='<div class="flex flex-col items-center justify-center py-20 text-gray-400 opacity-60"><i data-lucide="lock" class="w-16 h-16 mb-2"></i><p>This account is private.</p></div>';refreshIcons();return}tp=tp.filter(p=>(p.settings?.privacy==='public'||currentUser.following.includes(uid)))}if(window.profileSort==='latest')tp.sort((a,b)=>b.timestamp-a.timestamp);else if(window.profileSort==='oldest')tp.sort((a,b)=>a.timestamp-b.timestamp);else if(window.profileSort==='popular')tp.sort((a,b)=>(b.likes?.length||0)-(a.likes?.length||0));if(tp.length===0)c.innerHTML='<div class="text-center py-20 text-gray-400">No posts yet</div>';else c.innerHTML=`<div class="grid-post-container">${tp.map(p=>{const m=Array.isArray(p.media)?p.media[0]:p.media,isV=m&&(m.includes('video')||m.endsWith('.mp4')||m.startsWith('data:video'));return `<div class="grid-post-item group img-placeholder" onclick="openPostView('${p.id}')">${m?(isV?`<video src="${m}" class="w-full h-full object-cover pointer-events-none"></video><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play" class="w-8 h-8 text-white drop-shadow-md"></i></div>`:`<img src="${m}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">`+(Array.isArray(p.media)&&p.media.length>1?`<div class="absolute top-2 right-2"><i data-lucide="layers" class="w-4 h-4 text-white drop-shadow-md"></i></div>`: '')):`<div class="grid-post-text-preview">${p.content.substring(0,60)}${p.content.length>60?'...':''}</div>`}<div class="grid-post-overlay"><div class="flex items-center gap-1"><i data-lucide="heart" class="w-5 h-5 fill-white"></i> ${p.likes?.length>0?p.likes.length:'0'}</div><div class="flex items-center gap-1"><i data-lucide="message-circle" class="w-5 h-5 fill-white"></i> ${p.comments?.length>0?p.comments.length:''}</div></div></div>`}).join('')}</div>`;refreshIcons()};
-window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;manageHistory('user-list-overlay');const m=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText=type==='following'?'Following':'Followers';const me=uid===currentUser.id,fol=currentUser.following.includes(uid),priv=u.settings?.privateNetwork,hide=u.settings?.hideConnections;if(!me&&(hide||(priv&&!fol))){c.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide?'eye-off':'lock'}" class="w-16 h-16 mb-2"></i><p>${hide?'Connections hidden':'Account is private'}</p></div>`}else{const ids=type==='following'?(u.following||[]):(u.followers||[]);if(!ids.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No users found.</div>';else{c.innerHTML='';ids.forEach(id=>{const user=users.find(x=>x.id===id);if(user){const d=document.createElement('div');d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";d.onclick=()=>{closeUserList();showProfile(user.id)};d.innerHTML=`<div class="flex items-center gap-3"><img src="${user.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username||'user'}</div></div></div>`;c.appendChild(d)}})}}toggleModalAnim('user-list-overlay','user-list-modal',!0);refreshIcons()};window.closeUserList=()=>toggleModalAnim('user-list-overlay','user-list-modal',!1);
 const animModal=(oid,mid,s)=>{const o=document.getElementById(oid),m=document.getElementById(mid);if(s){o.classList.remove('hidden');m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)}else{o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)}};
 window.openEditProfile=()=>{manageHistory('edit-profile-overlay');document.getElementById('edit-banner-preview').src=currentUser.banner||'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80';document.getElementById('edit-banner-preview').style.objectPosition=`center ${currentBannerPos=initialBannerPos=currentUser.bannerPos||50}%`;document.getElementById('banner-pos-hint').innerText=`${currentBannerPos}%`;document.getElementById('edit-email').value=currentUser.email||"";document.getElementById('username-counter').innerText=`${(currentUser.username||"").length}/20`;document.body.classList.add('modal-open');animModal('edit-profile-overlay','edit-profile-modal',!0)};window.closeEditProfile=()=>{document.body.classList.remove('modal-open');animModal('edit-profile-overlay','edit-profile-modal',!1)};
 window.handleEditAvatarSelect=e=>{const f=e.target.files[0];if(f){currentAvatarBlob=f;const r=new FileReader();r.onload=x=>document.getElementById('edit-avatar-preview').src=x.target.result;r.readAsDataURL(f)}};window.handleEditBannerSelect=e=>{const f=e.target.files[0];if(f){currentBannerBlob=f;const r=new FileReader();r.onload=x=>document.getElementById('edit-banner-preview').src=x.target.result;r.readAsDataURL(f)}};
