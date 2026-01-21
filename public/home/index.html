@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -244,20 +245,24 @@ const canSeePost = (p) => {
     if(p.authorId === currentUser.id) return true; // Can always see own posts
     
     const author = users.find(u => u.id === p.authorId);
-    if(!author) return false; // Should not happen if data integrity is good
+    if(!author) return false; 
 
     const isFollowing = currentUser.following.includes(p.authorId);
-    const isAccountPrivate = author.settings?.privateNetwork; // Account-level privacy
-    const isPostPrivate = p.settings?.privacy === 'private'; // Post-level privacy
+    const isAccountPrivate = author.settings?.privateNetwork; 
+    const isPostPrivate = p.settings?.privacy === 'private'; 
 
-    // If account is private, ONLY followers can see posts, regardless of post setting
     if (isAccountPrivate && !isFollowing) return false;
-
-    // If account is public but post is set to private/followers-only, only followers can see
     if (isPostPrivate && !isFollowing) return false;
 
     return true; 
 };
+
+// Helper to extract tags from content
+function extractTags(text) {
+    if (!text) return [];
+    const matches = text.match(/#(\w+)/g);
+    return matches ? matches.map(t => t.substring(1).toLowerCase()) : [];
+}
 
 // --- Personalization & Algorithm Helper Functions ---
 function calculatePostScore(p) {
@@ -266,46 +271,137 @@ function calculatePostScore(p) {
     let score = 0;
     const now = Date.now();
     const postTime = p.timestamp?.toDate ? p.timestamp.toDate().getTime() : new Date(p.timestamp).getTime();
-    const ageHours = (now - postTime) / (3600000); // Hours since posted
+    const ageHours = (now - postTime) / (3600000); 
 
-    // 1. Time Decay (Freshness) - Base Score 1000, decays over time
-    // Standard linear decay: lose 20 points per hour
-    // Score becomes 0 after ~50 hours
+    // 1. Time Decay (Freshness) - Base Score 1000
     score += Math.max(0, 1000 - (ageHours * 20));
 
     // 2. Relationship / Graph Factors
     if (currentUser.following.includes(p.authorId)) {
-        score += 500; // Large boost for direct follows
+        score += 500; 
     }
     
-    // Friends of Friends (Social Proof)
-    // Boost if people I follow have liked this post
+    // Friends of Friends (Social Proof) & Collaborative Filtering Logic (Client-side Simulation)
+    // Find users who liked this post (Affinities)
     if (p.likes && p.likes.length) {
+        // Boost if friends liked it
         const friendsLikes = p.likes.filter(uid => currentUser.following.includes(uid));
-        score += (friendsLikes.length * 50); // 50 points per friend like
+        score += (friendsLikes.length * 50);
+
+        // Collaborative Filtering: "People Also Liked"
+        // Check if I have liked posts that THESE users have also liked.
+        // Simplified: Check my liked history locally.
+        const myLikedPostIds = currentUser.likesHistory || []; // Need to track this locally or fetch
+        // Since we don't have full history, we use 'posts' array available in memory which is limited but works for "feed" logic
+        // Let's find other posts I liked from the current loaded 'posts' array
+        const postsILiked = posts.filter(post => post.likes && post.likes.includes(currentUser.id));
+        
+        // Find users who liked the same posts I did
+        const similarUsers = new Set();
+        postsILiked.forEach(post => {
+            if(post.likes) post.likes.forEach(uid => {
+                if(uid !== currentUser.id) similarUsers.add(uid);
+            });
+        });
+
+        // If this post P is liked by a "similar user", boost it
+        const affinityMatches = p.likes.filter(uid => similarUsers.has(uid));
+        score += (affinityMatches.length * 15); 
     }
 
     // 3. Engagement (Weighted Score)
     const likes = p.likes ? p.likes.length : 0;
     const comments = p.comments ? p.comments.length : 0;
-    const shares = p.shares || 0; // Assuming shares field added or we treat as 0
+    const shares = p.shares || 0; 
     
     score += (likes * 1);
     score += (comments * 5);
     score += (shares * 10);
 
-    // 4. Personalization (Signals)
-    // Explicit "Interested" signal
+    // 4. Tag Matching (Content-Based Filtering)
+    const postTags = extractTags(p.content);
+    const myInterestedTags = currentUser.interestedTags || [];
+    const myNotInterestedTags = currentUser.notInterestedTags || [];
+
+    // Boost for interested tags
+    const matchedTags = postTags.filter(t => myInterestedTags.includes(t));
+    score += (matchedTags.length * 100);
+
+    // Penalty for not interested tags
+    const badTags = postTags.filter(t => myNotInterestedTags.includes(t));
+    score -= (badTags.length * 200);
+
+    // 5. Explicit User Signals
     if (currentUser.interests && currentUser.interests.includes(p.authorId)) {
         score += 300; 
     }
-    // Boost if user explicitly marked "Not Interested" (should be filtered out before, but safe check)
+    
+    // Hard filter mostly handled before, but penalty here just in case
     if (currentUser.hiddenContent && currentUser.hiddenContent.includes(p.id)) {
         return -999999;
     }
 
     return score;
 }
+
+// Action: Mark Interested
+window.markInterested = async (pid) => {
+    const p = posts.find(x => x.id === pid);
+    if (!p) return;
+    
+    const tags = extractTags(p.content);
+    // Optimistic update
+    currentUser.interestedTags = currentUser.interestedTags || [];
+    tags.forEach(t => {
+        if (!currentUser.interestedTags.includes(t)) currentUser.interestedTags.push(t);
+    });
+    
+    // Also add author to interests if not there
+    currentUser.interests = currentUser.interests || [];
+    if (!currentUser.interests.includes(p.authorId)) currentUser.interests.push(p.authorId);
+
+    showToast("We'll show more like this");
+    hidePostMenu();
+    
+    // Persist
+    await updateDoc(doc(db, "users", currentUser.id), {
+        interestedTags: currentUser.interestedTags,
+        interests: currentUser.interests
+    });
+};
+
+// Action: Mark Not Interested
+window.markNotInterested = async (pid) => {
+    const p = posts.find(x => x.id === pid);
+    if (!p) return;
+
+    const tags = extractTags(p.content);
+    
+    // Update local state
+    currentUser.notInterestedTags = currentUser.notInterestedTags || [];
+    tags.forEach(t => {
+        if (!currentUser.notInterestedTags.includes(t)) currentUser.notInterestedTags.push(t);
+    });
+
+    currentUser.hiddenContent = currentUser.hiddenContent || [];
+    if (!currentUser.hiddenContent.includes(pid)) currentUser.hiddenContent.push(pid);
+
+    // Remove from UI immediately
+    const el = document.getElementById(`post-card-feed-${pid}`);
+    if (el) el.remove();
+    
+    showToast("We'll show less like this");
+    hidePostMenu();
+
+    // Persist
+    await updateDoc(doc(db, "users", currentUser.id), {
+        notInterestedTags: currentUser.notInterestedTags,
+        hiddenContent: currentUser.hiddenContent
+    });
+};
+
+window.showPostOptions=(e,pid,aid)=>{e.stopPropagation();manageHistory('post-options-overlay');window.currentOptionPostId=pid;const isMe=aid===currentUser.id,o=document.getElementById('post-options-overlay'),m=document.getElementById('post-options-modal'),c=document.getElementById('post-options-content');c.innerHTML=`${isMe?`<button onclick="deletePost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle bg-red-50 text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Delete Post</div><div class="text-xs text-gray-500">Permanently remove this post</div></div></button><button onclick="openEditPost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="edit-3" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Edit Post</div><div class="text-xs text-gray-500">Make changes</div></div></button>`:''}<button onclick="sharePost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="share-2" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Share</div><div class="text-xs text-gray-500">Share with friends</div></div></button><button onclick="toggleSave('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="bookmark" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">${savedPosts.includes(pid)?'Unsave':'Save'}</div><div class="text-xs text-gray-500">Save for later</div></div></button>${!isMe ? `<div class="h-px bg-gray-100 my-1"></div><button onclick="markInterested('${pid}')" class="post-option-item group"><div class="icon-circle"><i data-lucide="thumbs-up" class="w-5 h-5 text-blue-600"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Interested</div><div class="text-xs text-gray-500">Show more like this</div></div></button><button onclick="markNotInterested('${pid}')" class="post-option-item group"><div class="icon-circle"><i data-lucide="thumbs-down" class="w-5 h-5 text-gray-500"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Not Interested</div><div class="text-xs text-gray-500">Show less like this</div></div></button><div class="h-px bg-gray-100 my-1"></div><button onclick="showToast('Reported'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="flag" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Report</div><div class="text-xs text-gray-500">Concern about this post</div></div></button>` : ''}`;refreshIcons();toggleModalAnim('post-options-overlay','post-options-modal',!0)};
+window.hidePostMenu=()=>toggleModalAnim('post-options-overlay','post-options-modal',!1);window.deletePost=async pid=>showAlert("Delete post?",async()=>{const r=doc(db,"posts",pid);await deleteDoc(r);showToast("Deleted")});window.openEditPost=pid=>{const p=posts.find(x=>x.id===pid);if(p){window.editingPostId=pid;openCompose(p.content,p.media)}};
 
 onAuthStateChanged(auth,async u=>{
 const l=document.getElementById('app-loader');if(!u)return window.location.href='/login';
@@ -336,6 +432,8 @@ if(s.exists()){
 currentUser.following||=[];currentUser.followers||=[];currentUser.friends||=[];currentUser.saved||=[];currentUser.links||=[];currentUser.settings||={privateNetwork:false};
 currentUser.hiddenContent = currentUser.hiddenContent || [];
 currentUser.interests = currentUser.interests || [];
+currentUser.interestedTags = currentUser.interestedTags || [];
+currentUser.notInterestedTags = currentUser.notInterestedTags || [];
 window.currentUser=currentUser;savedPosts=currentUser.saved;
 if(!currentUser.username)document.getElementById('username-modal').classList.remove('hidden');
 updateUserInterface();initRealtimeListeners();refreshIcons();initBannerDrag();window.history.replaceState({root:true},"");
@@ -354,6 +452,8 @@ if(me){
     // Update local currentUser references for new fields
     currentUser.hiddenContent = me.hiddenContent || [];
     currentUser.interests = me.interests || [];
+    currentUser.interestedTags = me.interestedTags || [];
+    currentUser.notInterestedTags = me.notInterestedTags || [];
 }
 if(window.pendingProfileUid&&users.some(u=>u.id===window.pendingProfileUid)){showProfile(window.pendingProfileUid);window.pendingProfileUid=null;window.history.replaceState({},document.title,window.location.pathname)}if(!document.getElementById('view-network').classList.contains('hidden'))renderNetwork();if(!document.getElementById('privacy-overlay').classList.contains('hidden')){const u=users.find(x=>x.id===currentUser.id);if(u&&u.settings){const pt=document.getElementById('toggle-privacy-main'),ht=document.getElementById('toggle-hide-connections');if(u.settings.privateNetwork)pt.classList.add('active');else pt.classList.remove('active');if(u.settings.hideConnections)ht.classList.add('active');else ht.classList.remove('active')}}if(window.currentViewingProfileId&&!document.getElementById('view-profile').classList.contains('hidden'))renderProfileContent(window.currentViewingProfileId,window.currentProfileTab);renderRightSidebar();refreshIcons()});
 onSnapshot(doc(db,"global","promo"),s=>{const sec=document.getElementById('promo-section');if(s.exists()&&s.data().imageUrl){sec.classList.remove('hidden');document.getElementById('promo-image').src=s.data().imageUrl;document.getElementById('promo-link').href=s.data().linkUrl||'#'}else if(currentUser?.email!=='edulinkbht@gmail.com')sec.classList.add('hidden')});
