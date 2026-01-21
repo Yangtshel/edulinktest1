@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,7 +48,7 @@ i[data-lucide],svg{flex-shrink:0}
 .action-btn.like.active svg{fill:#ff0000;stroke:none}
 .action-btn.bookmark.active{color:#eab308;opacity:1}
 .action-btn.bookmark.active svg{fill:#eab308;stroke:#eab308}
-#compose-modal,#create-menu-modal,#edit-profile-modal,#user-list-modal,#settings-modal,#likes-overlay,#username-modal,#add-link-modal,#promo-modal,#upload-options-modal,#share-modal,#post-options-modal,#notif-options-modal,#qr-overlay,#scanner-overlay,#feed-filter-modal,#privacy-overlay,#profile-filter-modal,#download-select-modal,#adjust-image-modal,#comment-options-modal,#announcement-overlay-modal,#profile-preview-card{box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid var(--outline)}
+#compose-modal,#create-menu-modal,#edit-profile-modal,#user-list-modal,#settings-modal,#likes-overlay,#username-modal,#add-link-modal,#promo-modal,#upload-options-modal,#share-modal,#post-options-modal,#notif-options-modal,#qr-overlay,#scanner-overlay,#feed-filter-modal,#privacy-overlay,#profile-filter-modal,#download-select-modal,#adjust-image-modal,#comment-options-modal,#announcement-overlay-modal,#profile-preview-card,#profile-views-modal{box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid var(--outline)}
 #profile-preview-card { border: none !important; }
 .compose-textarea{width:100%;min-height:120px;font-size:17px;line-height:1.6;color:var(--on-surface);border:none;outline:none;resize:none;background:0 0}
 .tool-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background .2s;cursor:pointer}
@@ -135,10 +134,18 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 #adjust-image-wrapper:active{cursor:grabbing;}
 .comment-actions-float { float: right; margin-left: 8px; margin-bottom: 2px; }
 .clearfix::after { content: ""; clear: both; display: table; }
+
+/* Swipe Animations */
 .slide-in-right { animation: slideInRight 0.25s cubic-bezier(0.2, 0, 0, 1) forwards; }
 .slide-in-left { animation: slideInLeft 0.25s cubic-bezier(0.2, 0, 0, 1) forwards; }
-@keyframes slideInRight { from { transform: translateX(20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
-@keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0.8; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0.8; }
+  to { transform: translateX(0); opacity: 1; }
+}
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
@@ -175,6 +182,7 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 <div id="event-overlay" class="fixed inset-0 z-[55] flex items-center justify-center bg-[#000]/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200"><div id="event-modal-box" class="bg-white w-[95%] max-w-[550px] rounded-[16px] shadow-2xl relative transform scale-95 transition-transform duration-200 flex flex-col overflow-hidden p-0"><div id="event-cover-preview-container" class="w-full h-40 bg-gray-100 hidden relative group"><img id="event-cover-preview" class="w-full h-full object-cover"><button onclick="removeEventCover()" class="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 z-20"><i data-lucide="x" class="w-4 h-4"></i></button><button onclick="document.getElementById('event-cover-input').click()" class="absolute top-1/2 -translate-y-1/2 right-2 bg-white/80 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-20 shadow-sm">Change</button></div><button onclick="closeEventComposer()" class="absolute top-4 right-4 icon-btn hover:bg-[#f0f4f9] z-10 bg-white/50 backdrop-blur-sm"><i data-lucide="x" class="w-5 h-5"></i></button><div class="p-8 pt-6"><div id="add-cover-btn" class="mb-6 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-2 text-sm text-[#667085]" onclick="document.getElementById('event-cover-input').click()"><i data-lucide="image" class="w-4 h-4"></i> Add cover</div><input type="text" id="event-title" placeholder="Untitled Event" class="text-3xl font-bold text-[#1f1f1f] placeholder-[#d1d5db] border-none outline-none bg-transparent w-full mb-6 google-font"><div class="flex flex-col gap-1 mb-6"><div class="notion-input-row"><div class="notion-label"><i data-lucide="clock" class="w-4 h-4"></i> Date</div><input type="date" id="event-date" class="notion-input"></div><div class="notion-input-row"><div class="notion-label"><i data-lucide="watch" class="w-4 h-4"></i> Time</div><input type="time" id="event-time" class="notion-input"></div><div class="notion-input-row"><div class="notion-label"><i data-lucide="map-pin" class="w-4 h-4"></i> Location</div><input type="text" id="event-location" placeholder="Add location..." class="notion-input"></div></div><textarea id="event-desc" placeholder="Add description..." class="w-full min-h-[100px] resize-none border-none outline-none text-[#374151] text-[15px] leading-relaxed bg-transparent"></textarea><div class="flex justify-end mt-6 pt-4 border-t border-gray-100"><button onclick="publishEvent()" class="bg-[#0b57d0] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#0b57d0]/90 transition-all shadow-sm">Create Event</button></div></div></div></div>
 <div id="compose-overlay" class="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[#000]/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200" onclick="attemptCloseCompose()"><div id="compose-modal" class="bg-white w-full h-full md:h-auto md:w-[95%] md:max-w-[620px] rounded-none md:rounded-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div id="compose-progress-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center"><div class="w-64 h-2 bg-gray-200 rounded-full overflow-hidden mb-4"><div id="post-progress-bar" class="h-full bg-[#0b57d0] transition-all duration-300 w-0"></div></div><p class="font-bold text-gray-900 animate-pulse">Posting...</p></div><div class="flex items-center justify-between h-16 px-4 border-b border-gray-100 md:h-16"><button onclick="handleComposeBack()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="text-lg font-bold text-gray-900" id="compose-header-title">Create Post</span><div class="w-10"></div></div><div id="compose-body" class="flex-1 overflow-y-auto relative"><div id="compose-step-1" class="p-4 h-full flex flex-col"><div class="grid grid-cols-2 gap-4" id="media-grid-container"></div></div><div id="compose-step-2" class="p-4 hidden"><div class="flex gap-3 mb-4 items-center"><img id="compose-avatar" src="" class="w-10 h-10 rounded-full border border-gray-100 bg-gray-50 object-cover"><div><div id="compose-name" class="text-[15px] font-bold text-[#1f1f1f]">User</div></div></div><div class="relative"><textarea id="compose-text" placeholder="What's on your mind?" class="w-full min-h-[150px] text-lg resize-none border-none outline-none bg-transparent placeholder-gray-400" oninput="checkWordCount(this)"></textarea><div id="word-count-display" class="absolute bottom-2 right-2 text-xs text-gray-400 font-medium pointer-events-none">0/500 words</div></div><div id="collab-chips-container" class="flex flex-wrap mb-2"></div></div></div><div class="bg-white border-t border-gray-100 z-10"><div id="compose-footer-settings" class="hidden border-b border-gray-100"><div class="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleComposeSettings()"><span class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2"><i data-lucide="settings-2" class="w-4 h-4"></i> Post Settings</span><i data-lucide="chevron-up" id="compose-settings-arrow" class="w-4 h-4 text-gray-400 transition-transform"></i></div><div id="compose-settings-area" class="hidden px-4 pb-4 space-y-3 bg-gray-50/50"><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-sm text-gray-700"><i data-lucide="lock" class="w-4 h-4"></i> Private (Followers Only)</div><input type="checkbox" id="post-setting-privacy" class="accent-blue-600 w-4 h-4 cursor-pointer"></div><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-sm text-gray-700"><i data-lucide="heart" class="w-4 h-4"></i> Show Like Count</div><input type="checkbox" id="post-setting-likes" class="accent-blue-600 w-4 h-4 cursor-pointer" checked></div><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-sm text-gray-700"><i data-lucide="message-square" class="w-4 h-4"></i> Show Comment Count</div><input type="checkbox" id="post-setting-comments" class="accent-blue-600 w-4 h-4 cursor-pointer" checked></div><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-sm text-gray-700"><i data-lucide="users" class="w-4 h-4"></i> Allow viewers to see who liked</div><input type="checkbox" id="post-setting-like-view" class="accent-blue-600 w-4 h-4 cursor-pointer" checked></div><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-sm text-gray-700"><i data-lucide="message-circle" class="w-4 h-4"></i> Allow comments</div><input type="checkbox" id="post-setting-allow-comments" class="accent-blue-600 w-4 h-4 cursor-pointer" checked></div></div></div><div class="p-4"><button id="compose-action-btn" class="w-full py-3 bg-gray-100 text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors" onclick="handleComposeAction()">Skip</button></div></div></div></div>
 <div id="profile-preview-overlay" class="fixed inset-0 z-[110] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeProfilePreview()"><div id="profile-preview-card" class="bg-white w-full md:w-[360px] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div id="pp-banner" class="h-32 w-full bg-gray-200 bg-cover bg-center"></div><div class="px-5 relative flex-1"><div class="flex justify-between items-end -mt-10 mb-3"><img id="pp-avatar" src="" class="w-20 h-20 rounded-full border-4 border-white bg-white object-cover shadow-sm"><div class="w-1"></div></div><div class="mb-4"><h3 id="pp-name" class="font-bold text-xl text-gray-900 flex items-center gap-1">User</h3><div id="pp-username" class="text-sm text-gray-500 font-medium">@user</div></div><div class="flex justify-between items-center mb-6 px-2"><div class="text-center"><div id="pp-posts-count" class="font-bold text-gray-900 text-lg">0</div><div class="text-xs text-gray-500 uppercase font-bold tracking-wide">Posts</div></div><div class="text-center"><div id="pp-followers-count" class="font-bold text-gray-900 text-lg">0</div><div class="text-xs text-gray-500 uppercase font-bold tracking-wide">Followers</div></div><div class="text-center"><div id="pp-following-count" class="font-bold text-gray-900 text-lg">0</div><div class="text-xs text-gray-500 uppercase font-bold tracking-wide">Following</div></div></div></div><div class="p-4 border-t border-gray-100 flex items-center gap-3 bg-white pb-6 md:pb-4"><button id="pp-visit-btn" class="flex-1 py-3 bg-[#0b57d0] text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-sm">Visit Profile</button><button id="pp-share-btn" class="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-colors shrink-0"><i data-lucide="redo-2" class="w-5 h-5"></i></button><button onclick="closeProfilePreview()" class="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-colors shrink-0"><i data-lucide="x" class="w-6 h-6"></i></button></div></div></div>
+<div id="profile-views-overlay" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeProfileViews()"><div id="profile-views-modal" class="bg-white w-full h-full md:h-auto md:w-[450px] md:max-h-[90vh] md:rounded-[24px] rounded-none shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="flex items-center gap-3 p-4 border-b border-gray-100 shrink-0 bg-white"><button onclick="closeProfileViews()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5 text-gray-700"></i></button><div class="flex-1"><h2 class="text-lg font-bold text-gray-900">Profile Views</h2><div class="text-xs text-gray-500">Last 7 days</div></div></div><div id="profile-views-content" class="flex-1 overflow-y-auto p-0"></div></div></div>
 <aside id="main-sidebar" class="hidden md:flex app-panel"><div class="h-12 flex items-center gap-3 mb-6 px-2 cursor-pointer" onclick="switchView('feed')"><img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-8 h-8 object-contain"><h1 class="text-[20px] font-bold text-[#1f1f1f] hidden lg:block tracking-tight">EduLink</h1></div><button onclick="openCreateMenu()" class="create-btn hidden lg:flex"><i data-lucide="plus" class="w-5 h-5"></i><span>Create</span></button><nav class="flex-1 space-y-1" id="desktop-nav-items"><a href="#" onclick="switchView('feed');return false;" id="nav-feed" class="nav-item active"><i data-lucide="home" class="w-5 h-5"></i> <span class="hidden lg:block">Home</span></a><a href="#" onclick="switchView('explore');return false;" id="nav-explore" class="nav-item"><i data-lucide="search" class="w-5 h-5"></i> <span class="hidden lg:block">Explore</span></a><a href="#" onclick="switchView('network');return false;" id="nav-network" class="nav-item"><i data-lucide="users" class="w-5 h-5"></i> <span class="hidden lg:block">Network</span></a><a href="#" onclick="switchView('notifications');return false;" id="nav-notifications" class="nav-item relative"><i data-lucide="bell" class="w-5 h-5"></i><span class="hidden lg:block">Activity</span><span id="nav-notif-badge" class="nav-badge">0</span></a><a href="#" onclick="showProfile(auth.currentUser?auth.currentUser.uid:null);return false;" id="nav-profile" class="nav-item"><i data-lucide="user" class="w-5 h-5"></i> <span class="hidden lg:block">Profile</span></a></nav><div class="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2"><div class="sidebar-user group cursor-pointer" onclick="openSettings()"><div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"><i data-lucide="settings" class="w-5 h-5"></i></div><div class="hidden lg:block"><div class="text-sm font-bold text-[#1f1f1f]">Settings</div></div></div><div class="sidebar-user group" onclick="showProfile(auth.currentUser?auth.currentUser.uid:null)"><img id="sidebar-avatar" src="" class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 shrink-0 object-cover"><div class="hidden lg:block"><div id="sidebar-name" class="text-sm font-bold text-[#1f1f1f] group-hover:text-blue-700 transition-colors truncate w-[140px]">User</div><div class="text-xs text-[#667085]">View Profile</div></div></div></div></aside>
 <div id="workspace-layout" class="flex-1 flex min-w-0 gap-4 relative overflow-hidden transition-all duration-300"><main id="main-panel" class="flex-1 app-panel min-w-0 relative"><header id="main-header" class="h-16 md:h-20 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 absolute top-0 w-full bg-white/95 md:bg-white/90 backdrop-blur-md border-b border-[#f0f0f0] transition-transform duration-300"><div class="md:hidden flex items-center gap-3 cursor-pointer" onclick="switchView('feed')"><img src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-8 h-8 object-contain"><h1 class="text-lg font-bold text-[#1f1f1f] tracking-tight">EduLink</h1></div><div class="flex-1 max-w-[600px] relative group hidden md:block"><i data-lucide="search" class="absolute left-5 top-3.5 w-5 h-5 text-[#667085] group-focus-within:text-[#0b57d0] transition-colors"></i><input type="text" placeholder="Search EduLink" id="global-search" oninput="handleSearch(this.value)" class="w-full bg-[#f3f4f6] rounded-full py-3.5 pl-14 pr-6 outline-none focus:bg-[#ffffff] focus:shadow-sm focus:ring-1 focus:ring-gray-200 transition-all text-[#1f1f1f] text-[15px]"></div><div class="flex items-center gap-3 pl-4"><button onclick="openSettings()" class="icon-btn hover:bg-gray-100 md:hidden"><i data-lucide="settings" class="w-6 h-6"></i></button><button class="icon-btn relative" onclick="openFeedFilter()"><i data-lucide="user-round-pen" class="w-6 h-6"></i></button><img id="header-avatar" src="" class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 cursor-pointer hover:ring-2 ring-offset-1 ring-blue-500 transition-all hidden md:block" onclick="showProfile(auth.currentUser?auth.currentUser.uid:null)"></div></header>
 <div id="ptr-spinner"><i data-lucide="arrow-down" class="w-5 h-5"></i></div>
@@ -279,17 +287,12 @@ if(s.exists()){
     currentUser = { id: u.uid, ...newUser };
 }
 currentUser.following||=[];currentUser.followers||=[];currentUser.friends||=[];currentUser.saved||=[];currentUser.links||=[];currentUser.settings||={privateNetwork:false};window.currentUser=currentUser;savedPosts=currentUser.saved;
-// Initialize interest profile if missing
-if(!currentUser.interestProfile) currentUser.interestProfile = {};
-if(!currentUser.ignoredPosts) currentUser.ignoredPosts = [];
-window.currentUser=currentUser;
-
 if(!currentUser.username)document.getElementById('username-modal').classList.remove('hidden');
 updateUserInterface();initRealtimeListeners();refreshIcons();initBannerDrag();window.history.replaceState({root:true},"");
 if(l){l.style.opacity='0';setTimeout(()=>l.remove(),500)}
 const p=new URLSearchParams(window.location.search).get('postId');if(p)setTimeout(()=>{openPostView(p);window.history.pushState({},document.title,window.location.pathname)},1000)});
 window.onpopstate=e=>{
-const modals=[{id:'post-view-overlay',close:window.closePostView},{id:'thread-overlay',close:window.closeThread},{id:'edit-profile-overlay',close:window.closeEditProfile},{id:'likes-overlay',close:window.closeLikes},{id:'user-list-overlay',close:window.closeUserList},{id:'feed-filter-overlay',close:window.closeFeedFilter},{id:'compose-overlay',close:window.attemptCloseCompose},{id:'share-overlay',close:window.closeShareMenu},{id:'post-options-overlay',close:window.hidePostMenu},{id:'settings-overlay',close:window.closeSettings},{id:'notif-options-overlay',close:window.closeNotifOptions},{id:'qr-overlay',close:window.closeQR},{id:'privacy-overlay',close:window.closePrivacySettings},{id:'profile-filter-overlay',close:window.closeProfileFilter},{id:'download-select-overlay',close:window.closeDownloadSelect},{id:'adjust-image-overlay',close:window.closeImageAdjust},{id:'comment-options-overlay',close:window.closeCommentOptions},{id:'create-menu-overlay',close:window.closeCreateMenu},{id:'announcement-overlay',close:window.closeAnnouncement},{id:'profile-preview-overlay',close:window.closeProfilePreview},{id:'view-profile',close:()=>window.switchView('feed')}];
+const modals=[{id:'post-view-overlay',close:window.closePostView},{id:'thread-overlay',close:window.closeThread},{id:'edit-profile-overlay',close:window.closeEditProfile},{id:'likes-overlay',close:window.closeLikes},{id:'user-list-overlay',close:window.closeUserList},{id:'feed-filter-overlay',close:window.closeFeedFilter},{id:'compose-overlay',close:window.attemptCloseCompose},{id:'share-overlay',close:window.closeShareMenu},{id:'post-options-overlay',close:window.hidePostMenu},{id:'settings-overlay',close:window.closeSettings},{id:'notif-options-overlay',close:window.closeNotifOptions},{id:'qr-overlay',close:window.closeQR},{id:'privacy-overlay',close:window.closePrivacySettings},{id:'profile-filter-overlay',close:window.closeProfileFilter},{id:'download-select-overlay',close:window.closeDownloadSelect},{id:'adjust-image-overlay',close:window.closeImageAdjust},{id:'comment-options-overlay',close:window.closeCommentOptions},{id:'create-menu-overlay',close:window.closeCreateMenu},{id:'announcement-overlay',close:window.closeAnnouncement},{id:'profile-preview-overlay',close:window.closeProfilePreview},{id:'profile-views-overlay',close:window.closeProfileViews},{id:'view-profile',close:()=>window.switchView('feed')}];
 let closedAny=false;if(e.state&&e.state.modal){}else{for(let m of modals){const el=document.getElementById(m.id);if(el&&!el.classList.contains('hidden')&&!el.classList.contains('opacity-0')){if(m.id==='view-profile'){if(window.currentViewingProfileId){window.switchView('feed');window.currentViewingProfileId=null;closedAny=true}}else if(m.id==='compose-overlay'){window.closeCompose();closedAny=true}else if(m.id==='create-menu-overlay'){window.closeCreateMenu();closedAny=true}else{m.close();closedAny=true}if(closedAny)break}}}if(!closedAny){if(exitAttempt){}else{window.history.pushState({root:true},"");exitAttempt=true;showToast("Press back again to exit");setTimeout(()=>{exitAttempt=false},2000)}}};
 window.checkUsername=e=>{const v=e.value.trim().toLowerCase(),l=v.length;document.getElementById('username-counter').innerText=`${l}/20`;if(l<3){document.getElementById('username-error').classList.add('hidden');return}const t=users.some(u=>u.username===v&&u.id!==currentUser.id);const err=document.getElementById('username-error');if(t){err.innerText="Username taken";err.classList.remove('hidden')}else err.classList.add('hidden')};
 window.saveUsername=async()=>{const v=document.getElementById('new-username-input').value.trim().toLowerCase();if(v.length<3||v.length>20||/\s/.test(v)||!/^[a-z0-9_.]+$/.test(v))return showToast("Invalid username",true);if(!(await getDocs(query(collection(db,"users"),where("username","==",v)))).empty)return showToast("Taken",true);await updateDoc(doc(db,"users",currentUser.id),{username:v});currentUser.username=v;document.getElementById('username-modal').classList.add('hidden');showToast("Username set!")};
@@ -340,214 +343,30 @@ window.switchView=async (v, direction = 'none')=>{
   document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(e=>e.classList.remove('active'));const nav=document.getElementById(`nav-${v}`),mnav=document.querySelectorAll('.mobile-nav-item');if(nav)nav.classList.add('active');if(v==='feed'){mnav[0]?.classList.add('active');if(document.getElementById('feed-container').children.length===0)renderFeed()}else if(v==='explore'){mnav[1]?.classList.add('active');switchExploreMainTab('explore')}else if(v==='network'){if(nav)nav.classList.add('active');if(document.getElementById('network-content').children.length===0)renderNetwork()}else if(v==='notifications'){if(nav)nav.classList.add('active');mnav[3]?.classList.add('active');renderNotifications();const un=notifications.filter(n=>!n.read);if(un.length>0){const b=writeBatch(db);un.forEach(n=>b.update(doc(db,"notifications",n.id),{read:!0}));await b.commit()}}else if(v==='saved'){if(nav)nav.classList.add('active');if(document.getElementById('saved-container').children.length===0)renderSaved()}else if(v==='profile'){mnav[4]?.classList.add('active');}setTimeout(()=>refreshIcons(),10)};
 window.switchNetworkTab=t=>{activeNetworkTab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(`net-tab-${t}`)?.classList.add('active');renderNetwork()};
 window.renderNetwork=()=>{const c=document.getElementById('network-content'),isP=activeNetworkTab==='people';c.innerHTML="";if(isP){const f=users.filter(u=>currentUser.following.includes(u.id));if(!f.length)c.innerHTML='<div class="flex flex-col items-center justify-center py-10 opacity-60"><p>You aren\'t following anyone yet.</p></div>';else{const g=document.createElement('div');g.className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0";f.forEach(u=>{const d=document.createElement('div');d.className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer";d.onclick=()=>showProfile(u.id);d.innerHTML=`<img src="${u.avatar}" class="w-12 h-12 rounded-full border border-gray-100 bg-gray-50 object-cover" onclick="event.stopPropagation();openProfilePreview('${u.id}')"><div><h4 class="font-bold text-gray-900 flex items-center gap-1">${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${u.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>':''}</h4><p class="text-xs text-gray-500 line-clamp-1">${u.bio}</p></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="ml-auto text-xs border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Unfollow</button>`;g.appendChild(d)});c.appendChild(g)}}else{const fp=posts.filter(p=>currentUser.following.includes(p.authorId) && canSeePost(p));if(!fp.length)c.innerHTML='<div class="text-center py-10 text-gray-400">No posts.</div>';else{const pc=document.createElement('div');pc.className="space-y-4 px-4 md:px-0";fp.forEach(p=>pc.appendChild(createPostElement(p,'network')));c.appendChild(pc)}}refreshIcons()};
+window.renderFeed=t=>{
+    const c=document.getElementById('feed-container');
+    c.innerHTML="";
+    posts.filter(p=>{
+        // Check core privacy using helper
+        if (!canSeePost(p)) return false;
 
-// ============================================
-// STATE OF THE ART RECOMMENDATION LOGIC
-// ============================================
-
-// --- 1. Weighted Interest Logic ---
-
-/**
- * Extracts hashtags from post content
- */
-function extractTags(content) {
-  if (!content) return [];
-  const matches = content.match(/#(\w+)/g);
-  return matches ? matches.map(t => t.substring(1).toLowerCase()) : [];
-}
-
-/**
- * Updates the user's interest profile based on interactions
- * @param {Array} tags - Tags from the post
- * @param {Number} weight - Score delta (+5 for like, -50 for not interested, etc)
- */
-async function updateUserInterest(tags, weight) {
-    if (!tags || tags.length === 0) return;
-    
-    // Decay Factor: 0.1 means interests degrade by 10% effectiveness per day approx
-    const DECAY_FACTOR = 0.1; 
-    const now = Date.now();
-    
-    // Ensure profile exists
-    if (!currentUser.interestProfile) currentUser.interestProfile = {};
-    
-    tags.forEach(tag => {
-        // Calculate Time Decay for existing score
-        // New Score = (OldScore + NewWeight) 
-        // Real-time calculation happens during read, here we just accumulate raw score
-        // For simplicity in this implementation, we just add raw score.
-        // A more advanced db structure would store {score: 5, last_updated: timestamp}
-        
-        const currentScore = currentUser.interestProfile[tag] || 0;
-        currentUser.interestProfile[tag] = currentScore + weight;
-    });
-
-    // Save to Firestore (Debounced in a real app, direct here)
-    await updateDoc(doc(db, "users", currentUser.id), {
-        interestProfile: currentUser.interestProfile
-    });
-}
-
-/**
- * Calculate Affinity Score for a post based on User Profile
- */
-function calculateAffinityScore(post) {
-    const tags = extractTags(post.content);
-    if (!tags.length) return 0;
-    
-    let score = 0;
-    const profile = currentUser.interestProfile || {};
-    
-    tags.forEach(tag => {
-        if (profile[tag]) {
-            score += profile[tag];
-        }
-    });
-    
-    // Normalize: If a post has many tags, average them slightly to prevent tag-spamming winning
-    return score > 0 ? score / Math.sqrt(tags.length) : 0;
-}
-
-// --- 2. Neighbor Logic (Simplified Client-Side) ---
-
-/**
- * Finds posts liked by users who I follow or have common interests with
- * In a real backend, this would use Jaccard Similarity on the whole DB.
- * Here, we use "Follow Neighbors" - posts liked by people I follow.
- */
-function getNeighborBoost(post) {
-    let boost = 0;
-    if (!post.likes) return 0;
-    
-    // Intersection of (People I Follow) AND (People who liked this post)
-    const following = currentUser.following || [];
-    const neighbors = post.likes.filter(uid => following.includes(uid));
-    
-    // Each neighbor like is worth more than a stranger like
-    // Threshold: If > 5 neighbors liked it, it's a "Cluster"
-    boost = neighbors.length * 2; 
-    
-    return boost;
-}
-
-// --- 3. Master Scoring Formula ---
-
-function calculatePostScore(post) {
-    // 1. Freshness (Gravity)
-    // Formula: 1 / (HoursOld + 2)^1.8
-    const now = Date.now();
-    const postTime = post.timestamp?.toDate ? post.timestamp.toDate().getTime() : new Date(post.timestamp).getTime();
-    const hoursOld = (now - postTime) / (1000 * 60 * 60);
-    const freshnessScore = 100 / Math.pow((hoursOld + 2), 1.8);
-
-    // 2. Social Proof (Logarithmic)
-    // Formula: log10(Likes + Comments*2 + 1)
-    const likes = post.likes ? post.likes.length : 0;
-    const comments = post.comments ? post.comments.length : 0;
-    const rawSocial = likes + (comments * 2);
-    const socialProofScore = Math.log10(rawSocial + 1) * 20; // Multiplier to normalize with freshness
-
-    // 3. Affinity (Personalization)
-    const affinityScore = calculateAffinityScore(post);
-
-    // 4. Neighbor Boost
-    const neighborScore = getNeighborBoost(post);
-
-    // 5. Negative Filtering
-    if (currentUser.ignoredPosts && currentUser.ignoredPosts.includes(post.id)) {
-        return -9999;
-    }
-
-    // MASTER FORMULA
-    // Weights: Affinity (0.6), Freshness (0.2), Social (0.2) + Neighbor Bonus
-    // We boost Affinity to make it the primary driver
-    let totalScore = (affinityScore * 2) + (freshnessScore * 5) + (socialProofScore * 3) + (neighborScore * 5);
-    
-    // Random noise for serendipity (prevents feed from becoming static)
-    totalScore += Math.random() * 5;
-
-    return totalScore;
-}
-
-
-// --- 4. Cold Start & Feed Generation ---
-
-window.renderFeed = (t) => {
-    const c = document.getElementById('feed-container');
-    c.innerHTML = "";
-
-    // 1. Filter Pool
-    let candidatePosts = posts.filter(p => {
-        if (!canSeePost(p)) return false; // Basic Privacy
-        
-        // Feed Filter Logic
-        const a = users.find(u => u.id === p.authorId);
-        const fol = currentUser.following.includes(p.authorId);
-        if (window.activeFeedFilter === 'following' && !fol) return false;
-        if (window.activeFeedFilter === 'friends') {
-            const isF = fol && (a.following && a.following.includes(currentUser.id));
-            if (!isF) return false;
+        // Apply feed-specific filters
+        const a=users.find(u=>u.id===p.authorId);
+        const fol=currentUser.following.includes(p.authorId);
+        let pf=true;
+        if(window.activeFeedFilter==='following') pf=fol;
+        else if(window.activeFeedFilter==='friends'){
+            const isF=fol&&(a.following&&a.following.includes(currentUser.id));
+            pf=isF;
         }
 
-        // Search Filter
-        const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase()));
-        return ms;
-    });
-
-    // 2. Score & Rank
-    // If user has 0 interactions (Cold Start), the AffinityScore returns 0,
-    // so sorting relies on Freshness + Social Proof (Trending).
-    candidatePosts.forEach(p => {
-        p._rankScore = calculatePostScore(p);
-    });
-
-    // Sort Descending by Score
-    candidatePosts.sort((a, b) => b._rankScore - a._rankScore);
-
-    // 3. Render
-    if (candidatePosts.length === 0) {
-        c.innerHTML = '<div class="text-center py-20 text-gray-400">No posts found.</div>';
-    } else {
-        candidatePosts.forEach(p => c.appendChild(createPostElement(p, 'feed')));
-    }
-    
+        // Apply search term filter if exists
+        const ms=(!t||p.content.toLowerCase().includes(t.toLowerCase()));
+        
+        return pf && ms;
+    }).forEach(p=>c.appendChild(createPostElement(p,'feed')));
     refreshIcons();
 };
-
-// UI Action: Interested / Not Interested
-window.markInterested = async (pid, positive) => {
-    const p = posts.find(x => x.id === pid);
-    if (!p) return;
-    
-    const tags = extractTags(p.content);
-    
-    if (positive) {
-        // "More like this"
-        await updateUserInterest(tags, 10); // High weight
-        showToast("We'll show more like this");
-    } else {
-        // "Not Interested"
-        await updateUserInterest(tags, -50); // Massive penalty
-        
-        // Add to ignored list locally and DB
-        if (!currentUser.ignoredPosts) currentUser.ignoredPosts = [];
-        currentUser.ignoredPosts.push(pid);
-        await updateDoc(doc(db, "users", currentUser.id), {
-            ignoredPosts: arrayUnion(pid)
-        });
-        
-        // Remove from DOM immediately
-        const card = document.getElementById(`post-card-feed-${pid}`);
-        if(card) {
-            card.style.opacity = '0';
-            setTimeout(() => card.remove(), 300);
-        }
-        showToast("Post removed");
-    }
-    
-    // Trigger re-rank in background for next refresh
-};
-
 window.openFeedFilter=()=>{manageHistory('feed-filter-overlay');toggleModalAnim('feed-filter-overlay','feed-filter-modal',!0)};window.closeFeedFilter=()=>toggleModalAnim('feed-filter-overlay','feed-filter-modal',!1);window.switchFeedFilter=f=>{window.activeFeedFilter=f;closeFeedFilter();renderFeed();const m={all:'All Posts',following:'Following',friends:'Friends Only'};showToast(`Filter: ${m[f]}`)};
 let touchStartX=0,touchEndX=0;window.handleTouchStart=e=>touchStartX=e.changedTouches[0].screenX;window.handleTouchEnd=(e,pid,ov)=>{touchEndX=e.changedTouches[0].screenX;const w=e.currentTarget.closest('.post-carousel');if(w&&Math.abs(touchStartX-touchEndX)>50)moveCarousel(w.id,touchStartX>touchEndX?1:-1)};
 function createPostElement(p,ctx='feed'){
@@ -567,13 +386,7 @@ window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;
 window.toggleLike=async(pid)=>{const isLiking=!document.querySelector(`.js-like-btn-${pid}`)?.classList.contains('active');document.querySelectorAll(`.js-like-btn-${pid}`).forEach(b=>b.classList.toggle('active',isLiking));document.querySelectorAll(`.js-like-count-${pid}`).forEach(el=>{let c=parseInt(el.innerText)||0,nc=Math.max(0,c+(isLiking?1:-1));el.innerText=nc;});
 const ovBtn=document.getElementById('post-view-like-btn');if(ovBtn){if(isLiking){ovBtn.classList.add('fill-red-500','text-red-500');ovBtn.classList.remove('text-gray-700')}else{ovBtn.classList.remove('fill-red-500','text-red-500');ovBtn.classList.add('text-gray-700')}}
 const movBtn=document.getElementById(`mobile-overlay-like-btn-${pid}`);if(movBtn){if(isLiking){movBtn.classList.add('fill-red-500','text-red-500');movBtn.classList.remove('text-gray-900')}else{movBtn.classList.remove('fill-red-500','text-red-500');movBtn.classList.add('text-gray-900')}}
-// Smart Feed: Update Interest based on like
-const p=posts.find(x=>x.id===pid);
-if (p) {
-    const tags = extractTags(p.content);
-    updateUserInterest(tags, isLiking ? 5 : -5); // +5 for Like, -5 for Unlike
-}
-const r=doc(db,"posts",pid);if(p.likes&&p.likes.includes(currentUser.id))await updateDoc(r,{likes:arrayRemove(currentUser.id)});else{await updateDoc(r,{likes:arrayUnion(currentUser.id)});if(p.authorId!==currentUser.id)sendNotification(p.authorId,'like','liked your post',pid)}};
+const r=doc(db,"posts",pid),p=posts.find(x=>x.id===pid);if(p.likes&&p.likes.includes(currentUser.id))await updateDoc(r,{likes:arrayRemove(currentUser.id)});else{await updateDoc(r,{likes:arrayUnion(currentUser.id)});if(p.authorId!==currentUser.id)sendNotification(p.authorId,'like','liked your post',pid)}};
 const toggleModalAnim=(oid,mid,s)=>{const o=document.getElementById(oid),m=document.getElementById(mid);if(s){o.classList.remove('hidden');m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)}else{o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)}};
 window.openLikes=pid=>{manageHistory('likes-overlay');const p=posts.find(x=>x.id===pid),c=document.getElementById('likes-list-content');
 if(p.settings?.allowLikeView===false && p.authorId !== currentUser.id){c.innerHTML='<div class="text-center text-gray-400 py-8">Creator hid likes.</div>';toggleModalAnim('likes-overlay','likes-modal',!0);return;}
@@ -581,12 +394,6 @@ c.innerHTML=!p.likes?.length?'<div class="text-center text-gray-400 py-8">No lik
 window.toggleSave=async(pid)=>{const isSaving=!document.querySelector(`.js-save-btn-${pid}`)?.classList.contains('active');document.querySelectorAll(`.js-save-btn-${pid}`).forEach(b=>b.classList.toggle('active',isSaving));showToast(isSaving?"Saved":"Removed");
 const ovBtn=document.getElementById('post-view-save-btn');if(ovBtn){if(isSaving){ovBtn.classList.add('fill-yellow-500','text-yellow-500');ovBtn.classList.remove('text-gray-700')}else{ovBtn.classList.remove('fill-yellow-500','text-yellow-500');ovBtn.classList.add('text-gray-700')}}
 const movBtn=document.getElementById(`mobile-overlay-save-btn-${pid}`);if(movBtn){if(isSaving){movBtn.classList.add('fill-yellow-500','text-yellow-500');movBtn.classList.remove('text-gray-900')}else{movBtn.classList.remove('fill-yellow-500','text-yellow-500');movBtn.classList.add('text-gray-900')}}
-// Smart Feed: Update Interest
-const p = posts.find(x=>x.id===pid);
-if (p && isSaving) {
-    const tags = extractTags(p.content);
-    updateUserInterest(tags, 10); // +10 for Save
-}
 if(isSaving)savedPosts.push(pid);else savedPosts=savedPosts.filter(x=>x!==pid);await updateDoc(doc(db,"users",currentUser.id),{saved:isSaving?arrayUnion(pid):arrayRemove(pid)})};
 function createCarouselHTML(ma,prefix,pid){let sl='',dt='';ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.startsWith('data:video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="${prefix}-dot-${pid}-${i}"></div>`});const cid=`${prefix}-carousel-${pid}`,iid=`${prefix}-inner-${pid}`;if(!window.carouselStates)window.carouselStates={};window.carouselStates[cid]={index:0,total:ma.length};return `<div class="carousel-wrapper mt-3"><div class="rounded-lg overflow-hidden post-carousel shadow-sm" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${pid}',true)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`}
 window.sharePost=pid=>{manageHistory('share-overlay');window.currentSharePid=pid;const url=`${window.location.origin}${window.location.pathname}?postId=${pid}`,p=posts.find(x=>x.id===pid),pc=document.getElementById('share-post-preview');document.getElementById('share-link-input').value=url;document.getElementById('share-link-text').innerText=url;if(p){const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:''};document.getElementById('share-owner-avatar').src=a.avatar;const m=p.media?(Array.isArray(p.media)?p.media[0]:p.media):null,isV=m&&(m.includes('video')||m.endsWith('.mp4')),mh=m?(isV?`<div class="w-16 h-16 bg-black rounded-lg flex items-center justify-center shrink-0"><i data-lucide="play" class="w-6 h-6 text-white"></i></div>`:`<img src="${m}" class="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-200">`):'';pc.innerHTML=`<div class="bg-white border border-gray-200 rounded-xl p-3 mb-6"><div class="flex items-center gap-2 mb-2"><img src="${a.avatar}" class="w-5 h-5 rounded-full object-cover"><span class="text-xs font-bold text-gray-900 truncate">${a.name}</span></div><div class="flex gap-3 items-center"><div class="flex-1 min-w-0"><p class="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">${p.content||(m?'Shared a post':'')}</p><div class="flex items-center gap-3 text-gray-400"><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="heart" class="w-3 h-3"></i> ${p.likes?.length||0}</div><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="message-circle" class="w-3 h-3"></i> ${p.comments?.length||0}</div></div></div>${mh}</div></div>`;pc.classList.remove('hidden');const dl=document.getElementById('share-dl-btn');if(dl)dl.remove();if(m&&!isV){const g=document.getElementById('share-grid-options');if(!document.getElementById(`share-dl-${pid}`)){const d=document.createElement('div');d.id=`share-dl-${pid}`;d.className="share-icon-btn";d.onclick=()=>triggerShare('download');d.innerHTML=`<div class="share-icon-circle bg-gray-100 text-gray-800 border border-gray-200" id="dl-icon-${pid}"><i data-lucide="download" class="w-6 h-6"></i></div><span class="text-xs font-medium text-gray-700" id="dl-text-${pid}">Download</span>`;g.appendChild(d)}}refreshIcons()}else pc.classList.add('hidden');toggleModalAnim('share-overlay','share-modal',!0)};
@@ -594,7 +401,7 @@ window.closeShareMenu=()=>{const o=document.getElementById('share-overlay'),m=do
 window.openDownloadSelect=i=>{manageHistory('download-select-overlay');window.currentDownloadImages=i;window.selectedDownloadIndices.clear();const m=document.getElementById('download-select-modal'),o=document.getElementById('download-select-overlay'),c=document.getElementById('download-select-content');c.innerHTML=i.map((u,x)=>`<div class="aspect-square rounded-xl overflow-hidden relative border-2 transition-all cursor-pointer border-gray-200 hover:border-gray-300" onclick="toggleDownloadSelect(${x},this)"><img src="${u}" class="w-full h-full object-cover pointer-events-none"><div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 border-white border-2 flex items-center justify-center transition-colors"></div></div>`).join('');updateDownloadBtn();m.style.transform='';m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');o.classList.remove('hidden');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)};window.closeDownloadSelect=()=>{const o=document.getElementById('download-select-overlay'),m=document.getElementById('download-select-modal');o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)};window.toggleDownloadSelect=(i,e)=>{window.selectedDownloadIndices.has(i)?window.selectedDownloadIndices.delete(i):window.selectedDownloadIndices.add(i);const s=window.selectedDownloadIndices.has(i);e.className=`aspect-square rounded-xl overflow-hidden relative border-2 transition-all cursor-pointer ${s?'border-blue-500 ring-2 ring-blue-500/20':'border-gray-200 hover:border-gray-300'}`;const d=e.querySelector('div.absolute');d.className=`absolute top-2 right-2 w-6 h-6 rounded-full ${s?'bg-blue-500 border-blue-500':'bg-black/40 border-white'} border-2 flex items-center justify-center transition-colors`;d.innerHTML=s?'<i data-lucide="check" class="w-3 h-3 text-white"></i>':'';refreshIcons();updateDownloadBtn()};window.updateDownloadBtn=()=>{const c=window.selectedDownloadIndices.size,b=document.getElementById('download-action-btn');b.innerText=`Download ${c>0?`(${c})`:''}`;b.disabled=c===0;b.className=`w-full py-3 rounded-xl font-bold transition-all ${c>0?'bg-[#0b57d0] text-white hover:bg-blue-700':'bg-gray-100 text-gray-400 cursor-not-allowed'}`};window.downloadSelectedImages=async()=>{const idx=Array.from(window.selectedDownloadIndices);if(!idx.length)return;const b=document.getElementById('download-action-btn');b.innerText="Downloading...";for(const i of idx){const u=window.currentDownloadImages[i];try{const r=await fetch(u),bl=await r.blob(),url=window.URL.createObjectURL(bl),a=document.createElement('a');a.style.display='none';a.href=url;a.download=`edulink_img_${Date.now()}_${i}.jpg`;document.body.appendChild(a);a.click();window.URL.revokeObjectURL(url);a.remove();await new Promise(r=>setTimeout(r,500))}catch(e){}}showToast("Saved to device");closeDownloadSelect();closeShareMenu()};
 window.triggerShare=(pf,meta)=>{if(!window.currentSharePid)return;const u=`${window.location.origin}${window.location.pathname}?postId=${window.currentSharePid}`,txt="Check out this post on EduLink!",acts={copy:()=>navigator.clipboard.writeText(u).then(()=>showToast("Link copied!")),twitter:()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}&url=${encodeURIComponent(u)}`,'_blank'),whatsapp:()=>window.open(`https://wa.me/?text=${encodeURIComponent(txt+" "+u)}`,'_blank'),email:()=>window.open(`mailto:?subject=${encodeURIComponent(txt)}&body=${encodeURIComponent(txt+"\n\n"+u)}`),download:async()=>{const pid=window.currentSharePid,p=posts.find(x=>x.id===pid);if(!p||!p.media)return;const ml=Array.isArray(p.media)?p.media:[p.media],imgs=ml.filter(x=>!x.includes('video')&&!x.endsWith('.mp4')&&!x.startsWith('data:video'));if(!imgs.length)return showToast("No images");if(imgs.length===1){const icon=document.getElementById(`dl-icon-${pid}`),txtSpan=document.getElementById(`dl-text-${pid}`);if(icon&&txtSpan){const oi=icon.innerHTML,ot=txtSpan.innerText;icon.innerHTML='<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>';txtSpan.innerText="Saving...";refreshIcons();try{const r=await fetch(imgs[0]),b=await r.blob(),url=window.URL.createObjectURL(b),a=document.createElement('a');a.style.display='none';a.href=url;a.download=`edulink_post_${pid}.jpg`;document.body.appendChild(a);a.click();window.URL.revokeObjectURL(url);a.remove();showToast("Saved to device");closeShareMenu()}catch(e){showToast("Download failed",!0)}finally{icon.innerHTML=oi;txtSpan.innerText=ot;refreshIcons()}}}else openDownloadSelect(imgs)}};acts[pf]?.();if(pf!=='copy'&&pf!=='download')closeShareMenu()};
 window.renderSaved=()=>{const c=document.getElementById('saved-container');c.innerHTML='';if(!savedPosts.length)c.innerHTML='<div class="flex flex-col items-center justify-center h-full text-gray-400 opacity-60"><i data-lucide="bookmark" class="w-16 h-16 mb-2"></i><p>No saved posts</p></div>';else posts.filter(p=>savedPosts.includes(p.id)).forEach(p=>c.appendChild(createPostElement(p,'saved')));refreshIcons()};
-async function sendNotification(rid,t,c,pid=null){await setDoc(doc(db,"notifications",`${t}_${currentUser.id}_${pid||'general'}_${rid}`),{receiverId:rid,senderId:currentUser.id,type:t,content:c,timestamp:serverTimestamp(),read:!1,postId:pid},{merge:!0})}
+async function sendNotification(rid,t,c,pid=null,isLogo=false){await setDoc(doc(db,"notifications",`${t}_${currentUser.id}_${pid||'general'}_${rid}`),{receiverId:rid,senderId:currentUser.id,type:t,content:c,timestamp:serverTimestamp(),read:!1,postId:pid,isEduLinkLogo:isLogo},{merge:!0})}
 window.switchNotifTab=t=>{activeNotifTab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));[`ntab-${t}`,`ntab-${t}-mobile`].forEach(id=>document.getElementById(id)?.classList.add('active'));renderNotifications()};
 window.toggleNotifMenu=()=>{manageHistory('notif-options-overlay');const o=document.getElementById('notif-options-overlay'),m=document.getElementById('notif-options-modal');o.classList.remove('hidden');m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full')},20)};window.closeNotifOptions=()=>{const o=document.getElementById('notif-options-overlay'),m=document.getElementById('notif-options-modal');o.classList.add('opacity-0');m.classList.add('translate-y-full');setTimeout(()=>o.classList.add('hidden'),200)};
 window.toggleNotifSelection=()=>{window.notifSelectionMode=!window.notifSelectionMode;if(!window.notifSelectionMode)window.selectedNotifs.clear();renderNotifications()};window.toggleNotifSearchMobile=()=>{const c=document.getElementById('mobile-notif-search-container');c.classList.toggle('hidden');if(!c.classList.contains('hidden'))document.getElementById('notif-search').focus()};window.handleNotifSearch=v=>{window.notifSearchTerm=v.toLowerCase();renderNotifications()};window.toggleNotifSelect=id=>{window.selectedNotifs.has(id)?window.selectedNotifs.delete(id):window.selectedNotifs.add(id);renderNotifications()};
@@ -680,8 +487,9 @@ window.renderNotifications=()=>{
       if(n.type==='follow_request')act=`<div class="flex gap-2 mt-2"><button onclick="acceptFollow('${n.id}','${s.id}')" class="btn-xs-blue">Accept</button><button onclick="deleteNotification('${n.id}')" class="btn-xs-gray">Delete</button></div>`;
       if(n.type==='collab_request')act=`<div class="flex gap-2 mt-2"><button onclick="acceptCollab('${n.id}','${n.postId}')" class="btn-xs-blue">Accept</button><button onclick="declineCollab('${n.id}','${n.postId}')" class="btn-xs-gray">Decline</button></div>`;
       const chk=window.notifSelectionMode?`<div class="pt-1 mr-3"><input type="checkbox" ${window.selectedNotifs.has(n.id)?'checked':''} onchange="toggleNotifSelect('${n.id}')" class="w-4 h-4 accent-blue-600 cursor-pointer rounded"></div>`:'';
+      const logo = n.isEduLinkLogo ? 'https://i.imghippo.com/files/fRGt5603uII.png' : s.avatar;
       
-      return `<div class="w-full flex items-start justify-between p-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition-colors"><div class="flex items-start flex-1 gap-3">${chk}<div class="relative cursor-pointer shrink-0" onclick="${window.notifSelectionMode?'':`event.stopPropagation();openProfilePreview('${s.id}')`}"><img src="${s.avatar}" class="w-10 h-10 rounded-full bg-gray-200 object-cover border border-gray-100"><div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${cfg.c} flex items-center justify-center border border-white shadow-sm"><i data-lucide="${cfg.i}" class="w-3.5 h-3.5 text-white ${cfg.fill||''}"></i></div></div><div class="flex-1 min-w-0 pt-0.5"><div class="text-[14px] leading-snug cursor-pointer" onclick="${click}"><span class="font-bold text-gray-900 hover:underline flex items-center gap-1">@${s.username||'user'} ${s.isOfficial?'<i data-lucide="badge-check" class="w-3 h-3 official-badge"></i>':''}</span> <span class="text-gray-600 ml-1">${n.content}</span></div><div class="text-[11px] text-gray-400 mt-1">${formatDate(item.ts)}</div>${act}</div></div>${showImg?`<img src="${showImg}" class="w-10 h-10 rounded-md object-cover ml-3 border border-gray-200 shrink-0 cursor-pointer" onclick="openPostView('${n.postId}')">`:''}${!window.notifSelectionMode&&!showImg?`<button onclick="deleteNotification('${n.id}')" class="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all self-start -mt-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>`:''}</div>`
+      return `<div class="w-full flex items-start justify-between p-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition-colors"><div class="flex items-start flex-1 gap-3">${chk}<div class="relative cursor-pointer shrink-0" onclick="${window.notifSelectionMode?'':`event.stopPropagation();openProfilePreview('${s.id}')`}"><img src="${logo}" class="w-10 h-10 rounded-full bg-gray-200 object-cover border border-gray-100 ${n.isEduLinkLogo?'p-1 bg-white':''}"><div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${cfg.c} flex items-center justify-center border border-white shadow-sm"><i data-lucide="${cfg.i}" class="w-3.5 h-3.5 text-white ${cfg.fill||''}"></i></div></div><div class="flex-1 min-w-0 pt-0.5"><div class="text-[14px] leading-snug cursor-pointer" onclick="${click}"><span class="font-bold text-gray-900 hover:underline flex items-center gap-1">${n.isEduLinkLogo?'EduLink System':`@${s.username||'user'} ${s.isOfficial?'<i data-lucide="badge-check" class="w-3 h-3 official-badge"></i>':''}`}</span> <span class="text-gray-600 ml-1">${n.content}</span></div><div class="text-[11px] text-gray-400 mt-1">${formatDate(item.ts)}</div>${act}</div></div>${showImg?`<img src="${showImg}" class="w-10 h-10 rounded-md object-cover ml-3 border border-gray-200 shrink-0 cursor-pointer" onclick="openPostView('${n.postId}')">`:''}${!window.notifSelectionMode&&!showImg?`<button onclick="deleteNotification('${n.id}')" class="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all self-start -mt-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>`:''}</div>`
     }
   }).join('');
   refreshIcons();
@@ -731,7 +539,9 @@ window.closeProfilePreview=()=>{
 window.deleteNotification=async id=>showAlert("Delete?",async()=>await deleteDoc(doc(db,"notifications",id)));window.clearAllNotifications=async()=>showAlert("Clear all?",async()=>{const b=writeBatch(db),s=await getDocs(query(collection(db,"notifications"),where("receiverId","==",currentUser.id)));s.forEach(d=>b.delete(d.ref));await b.commit();showToast("Cleared")});window.toggleNotifications=()=>switchView('notifications');
 window.acceptCollab=async(nid,pid)=>{const r=doc(db,"posts",pid),s=await getDoc(r);if(s.exists()){const c=s.data().collaborators||[],i=c.findIndex(x=>x.id===currentUser.id);if(i>-1){c[i].status='accepted';await updateDoc(r,{collaborators:c});showToast("Accepted!")}}await deleteDoc(doc(db,"notifications",nid))};window.declineCollab=async(nid,pid)=>{const r=doc(db,"posts",pid),s=await getDoc(r);if(s.exists())await updateDoc(r,{collaborators:(s.data().collaborators||[]).filter(x=>x.id!==currentUser.id)});showToast("Declined");await deleteDoc(doc(db,"notifications",nid))};window.acceptFollow=async(nid,sid)=>{await Promise.all([updateDoc(doc(db,"users",currentUser.id),{followers:arrayUnion(sid)}),updateDoc(doc(db,"users",sid),{following:arrayUnion(currentUser.id)}),deleteDoc(doc(db,"notifications",nid)),sendNotification(sid,'follow','accepted follow')]);showToast("Accepted")};
 window.toggleFollow=async(uid)=>{const m=doc(db,"users",currentUser.id),t=doc(db,"users",uid),u=users.find(x=>x.id===uid),isF=currentUser.following.includes(uid),priv=u?.settings?.privateNetwork;if(isF){currentUser.following=currentUser.following.filter(id=>id!==uid);showToast("Unfollowed");await Promise.all([updateDoc(m,{following:arrayRemove(uid)}),updateDoc(t,{followers:arrayRemove(currentUser.id)})])}else{if(priv){showToast("Request sent");sendNotification(uid,'follow_request','wants to follow you')}else{currentUser.following.push(uid);showToast("Following");await Promise.all([updateDoc(m,{following:arrayUnion(uid)}),updateDoc(t,{followers:arrayUnion(currentUser.id)}),sendNotification(uid,'follow','started following you')])}}const btn=document.getElementById('profile-follow-btn');if(btn)btn.innerText=isF?(priv?'Request':'Follow'):(priv?'Requested':'Following');const ul=document.getElementById(`ul-btn-${uid}`);if(ul){ul.innerText=!isF?'Following':'Follow';ul.className=!isF?"bg-gray-100 text-gray-900 text-xs px-3 py-1 rounded-full font-bold hover:bg-gray-200":"bg-black text-white text-xs px-3 py-1 rounded-full font-bold hover:bg-gray-800"}renderRightSidebar();if(!document.getElementById('view-network').classList.contains('hidden'))renderNetwork();refreshIcons()};
-window.showProfile=(uid,tab='posts')=>{if(!uid)uid=currentUser.id;if(window.currentViewingProfileId!==uid)manageHistory('view-profile');closePostView();closeThread();window.currentViewingProfileId=uid;window.currentProfileTab=tab;const u=users.find(x=>x.id===uid);if(!u)return;const c=document.getElementById('view-profile'),me=uid===currentUser.id,fol=currentUser.following?.includes(uid),hc=u.settings?.hideConnections&&!me;let ab=me?`<div class="flex gap-2"><button onclick="openEditProfile()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-200">Edit Profile</button><button onclick="openQR()" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button></div>`:`<div class="flex gap-2"><button id="profile-follow-btn" onclick="toggleFollow('${uid}')" class="${fol?'bg-gray-100 text-gray-700':'bg-[#0b57d0] text-white'} px-4 py-2 rounded-lg font-bold text-sm transition-colors">${fol?'Following':(u.settings?.privateNetwork?'Request':'Follow')}</button><button onclick="openQR('${uid}')" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button></div>`,stats='';
+window.showProfile=(uid,tab='posts')=>{if(!uid)uid=currentUser.id;if(window.currentViewingProfileId!==uid)manageHistory('view-profile');closePostView();closeThread();window.currentViewingProfileId=uid;window.currentProfileTab=tab;const u=users.find(x=>x.id===uid);if(!u)return;const c=document.getElementById('view-profile'),me=uid===currentUser.id,fol=currentUser.following?.includes(uid),hc=u.settings?.hideConnections&&!me;
+if(!me) { recordProfileView(uid); }
+let ab=me?`<div class="flex gap-2"><button onclick="openEditProfile()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-200">Edit Profile</button><button onclick="openQR()" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button><button onclick="openProfileViews()" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="eye" class="w-5 h-5"></i></button></div>`:`<div class="flex gap-2"><button id="profile-follow-btn" onclick="toggleFollow('${uid}')" class="${fol?'bg-gray-100 text-gray-700':'bg-[#0b57d0] text-white'} px-4 py-2 rounded-lg font-bold text-sm transition-colors">${fol?'Following':(u.settings?.privateNetwork?'Request':'Follow')}</button><button onclick="openQR('${uid}')" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button></div>`,stats='';
 stats=`<div class="flex gap-4 mt-3 text-sm text-gray-500"><span class="cursor-pointer hover:underline" onclick="openUserList('following','${uid}')"><strong class="text-gray-900">${u.following?.length||0}</strong> Following</span><span class="cursor-pointer hover:underline" onclick="openUserList('followers','${uid}')"><strong class="text-gray-900">${u.followers?.length||0}</strong> Followers</span></div>`;
 const tabs=['posts','saved','liked','tagged','links'].map(t=>(!me&&t==='saved')?'':`<button onclick="switchProfileTab('${t}')" class="tab-btn ${tab===t?'active':''}"><i data-lucide="${{posts:'grid',saved:'bookmark',liked:'heart',tagged:'user-check',links:'link'}[t]}" class="w-5 h-5"></i></button>`).join('');c.innerHTML=`<div class="profile-banner-container"><img src="${u.banner||'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'}" class="profile-banner-img" style="object-position:center ${u.bannerPos||50}%"></div><div class="px-4 md:px-6 relative"><div class="flex justify-between items-end -mt-10 mb-4"><img src="${u.avatar}" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover cursor-pointer" onclick="openLightbox('${u.avatar}')">${ab}</div><div class="mb-6"><h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-6 h-6 official-badge ml-1"></i>':''}${u.banned?'<i data-lucide="ban" class="text-red-600 w-6 h-6"></i>':''}</h1><div class="text-sm font-medium text-gray-500">@${u.username||'user'}</div><p class="text-gray-600 mt-2">${u.bio}</p>${stats}</div><div class="tab-group mb-0">${tabs}</div><div id="profile-content-area" class="pt-1 md:pt-4 pb-20 md:pb-0"></div></div>`;switchView('profile');renderProfileContent(uid,tab);refreshIcons()};
 window.switchProfileTab=t=>{if(t==='posts'&&window.currentProfileTab==='posts'){openProfileFilter();return}document.querySelectorAll('#view-profile .tab-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes(t)));window.currentProfileTab=t;renderProfileContent(window.currentViewingProfileId,t)};
