@@ -135,18 +135,10 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 #adjust-image-wrapper:active{cursor:grabbing;}
 .comment-actions-float { float: right; margin-left: 8px; margin-bottom: 2px; }
 .clearfix::after { content: ""; clear: both; display: table; }
-
-/* Swipe Animations */
 .slide-in-right { animation: slideInRight 0.25s cubic-bezier(0.2, 0, 0, 1) forwards; }
 .slide-in-left { animation: slideInLeft 0.25s cubic-bezier(0.2, 0, 0, 1) forwards; }
-@keyframes slideInRight {
-  from { transform: translateX(20px); opacity: 0.8; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideInLeft {
-  from { transform: translateX(-20px); opacity: 0.8; }
-  to { transform: translateX(0); opacity: 1; }
-}
+@keyframes slideInRight { from { transform: translateX(20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
@@ -168,7 +160,7 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 <div id="notif-options-overlay" class="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeNotifOptions()"><div id="notif-options-modal" class="bg-white w-full rounded-t-[24px] shadow-2xl relative transform translate-y-full transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeNotifOptions()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg">Options</span><div class="w-10"></div></div><div class="p-6 flex flex-col gap-2"><button onclick="toggleNotifSelection(); closeNotifOptions()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="check-square" class="w-5 h-5"></i> Select</button><button onclick="deleteSelectedNotifs(); closeNotifOptions()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="trash-2" class="w-5 h-5"></i> Delete Selected</button><button onclick="clearAllNotifications(); closeNotifOptions()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="trash" class="w-5 h-5"></i> Delete All</button></div></div></div>
 <div id="thread-overlay" class="fixed inset-0 z-[65] hidden flex justify-center items-end md:items-center"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="closeThread()"></div><div class="bg-white w-full md:w-[450px] h-[75vh] md:h-[85vh] md:rounded-[24px] rounded-t-[20px] shadow-2xl relative flex flex-col transform transition-transform duration-300 scale-100 opacity-100 overflow-hidden scale-in thread-mobile-container"><div class="discussion-header"><div class="flex items-center gap-3"><button onclick="closeThread()" class="icon-btn hover:bg-gray-100 md:hidden"><i data-lucide="chevron-down" class="w-6 h-6 text-gray-600"></i></button><span class="font-bold text-lg text-[#1f1f1f]">Thread</span></div><button onclick="closeThread()" class="icon-btn hover:bg-gray-100 hidden md:flex"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div><div id="thread-content" class="discussion-scroll bg-white"></div><div class="discussion-footer"><div class="flex items-center gap-2"><img id="thread-input-avatar" src="" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0"><input type="text" id="thread-input" placeholder="Add a reply..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitThreadReply();}"><button onclick="submitThreadReply()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button></div></div></div></div>
 <div id="post-view-overlay" class="fixed inset-0 z-[60] hidden flex justify-center items-center"><div class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onclick="closePostView()"></div><div id="post-view-container" class="post-modal-layout scale-in relative z-10"></div></div>
-<div id="feed-filter-overlay" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeFeedFilter()"><div id="feed-filter-modal" class="bg-white w-full h-auto md:w-[400px] md:max-h-[80vh] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeFeedFilter()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg">Feed Filter</span><div class="w-10"></div></div><div class="p-4 flex flex-col gap-2"><button onclick="switchFeedFilter('all')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="sparkles" class="w-5 h-5 text-yellow-600"></i></div><div class="flex-1"><div class="font-bold text-gray-900">For You</div><div class="text-xs text-gray-500">Personalized recommendations</div></div></button><button onclick="switchFeedFilter('following')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="users" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Following</div><div class="text-xs text-gray-500">Posts from people you follow</div></div></button><button onclick="switchFeedFilter('friends')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="heart-handshake" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Friends</div><div class="text-xs text-gray-500">Mutual follows only</div></div></button></div></div></div>
+<div id="feed-filter-overlay" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeFeedFilter()"><div id="feed-filter-modal" class="bg-white w-full h-auto md:w-[400px] md:max-h-[80vh] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeFeedFilter()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg">Feed Filter</span><div class="w-10"></div></div><div class="p-4 flex flex-col gap-2"><button onclick="switchFeedFilter('all')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="globe" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">All Posts</div><div class="text-xs text-gray-500">Show posts from everyone</div></div></button><button onclick="switchFeedFilter('following')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="users" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Following</div><div class="text-xs text-gray-500">Posts from people you follow</div></div></button><button onclick="switchFeedFilter('friends')" class="group"><div class="icon-circle text-[#606060] bg-gray-100"><i data-lucide="heart-handshake" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Friends</div><div class="text-xs text-gray-500">Mutual follows only</div></div></button></div></div></div>
 <div id="lightbox" class="fixed inset-0 bg-black/95 z-[9999] flex justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeLightbox()"><button class="absolute top-8 right-8 text-white/70 hover:text-white bg-white/10 rounded-full p-3 hover:bg-white/20"><i data-lucide="x" class="w-8 h-8"></i></button><div id="lightbox-wrapper" class="w-full h-full flex justify-center items-center p-6"></div></div>
 <div id="toast" class="toast"><i id="toast-icon" data-lucide="check-circle-2" class="w-5 h-5 text-[#c4eed0]"></i><span id="toast-msg">Action Completed</span></div>
 <div id="likes-overlay" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeLikes()"><div id="likes-modal" class="bg-white w-full h-[70vh] md:h-auto md:w-[400px] md:max-h-[80vh] md:rounded-[24px] rounded-t-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()"><div class="h-16 border-b border-gray-100 flex items-center justify-between px-4 shrink-0"><button onclick="closeLikes()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button><span class="font-bold text-gray-900 text-lg">Likes</span><div class="w-10"></div></div><div id="likes-list-content" class="flex-1 overflow-y-auto p-2"></div></div></div>
@@ -197,7 +189,7 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 <input type="file" id="media-input" class="hidden" accept="image/*,video/*" onchange="handleFileSelect(event)">
 <input type="file" id="grid-upload-input" class="hidden" accept="image/*,video/*" onchange="onGridFileSelect(event)">
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";import{getFirestore,collection,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,arrayRemove,addDoc,onSnapshot,query,orderBy,where,serverTimestamp,getDocs,writeBatch,increment}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";import{getStorage,ref,uploadString,getDownloadURL,uploadBytes}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";import{getFirestore,collection,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,arrayRemove,addDoc,onSnapshot,query,orderBy,where,serverTimestamp,getDocs,writeBatch}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";import{getStorage,ref,uploadString,getDownloadURL,uploadBytes}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 const firebaseConfig={apiKey:"AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno",authDomain:"edulinki.firebaseapp.com",projectId:"edulinki",storageBucket:"edulinki.firebasestorage.app",messagingSenderId:"248886466474",appId:"1:248886466474:web:160043201a6b28bafbbdd3",measurementId:"G-MQBH12VL7N"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);window.auth=auth;window.db=db;
 let currentUser=null,users=[],posts=[],notifications=[],savedPosts=[],activeNotifTab='all',activeNetworkTab='people';
@@ -245,176 +237,20 @@ const canSeePost = (p) => {
     if(p.authorId === currentUser.id) return true; // Can always see own posts
     
     const author = users.find(u => u.id === p.authorId);
-    if(!author) return false; 
+    if(!author) return false; // Should not happen if data integrity is good
 
     const isFollowing = currentUser.following.includes(p.authorId);
-    const isAccountPrivate = author.settings?.privateNetwork; 
-    const isPostPrivate = p.settings?.privacy === 'private'; 
+    const isAccountPrivate = author.settings?.privateNetwork; // Account-level privacy
+    const isPostPrivate = p.settings?.privacy === 'private'; // Post-level privacy
 
+    // If account is private, ONLY followers can see posts, regardless of post setting
     if (isAccountPrivate && !isFollowing) return false;
+
+    // If account is public but post is set to private/followers-only, only followers can see
     if (isPostPrivate && !isFollowing) return false;
 
     return true; 
 };
-
-// Helper to extract tags from content
-function extractTags(text) {
-    if (!text) return [];
-    const matches = text.match(/#(\w+)/g);
-    return matches ? matches.map(t => t.substring(1).toLowerCase()) : [];
-}
-
-// --- PERSONALIZATION ALGORITHM 2.0 (The "For You" Logic) ---
-function calculatePostScore(p) {
-    if (!currentUser) return 0;
-    
-    let score = 0;
-    const now = Date.now();
-    const postTime = p.timestamp?.toDate ? p.timestamp.toDate().getTime() : new Date(p.timestamp).getTime();
-    const ageHours = Math.max(0.1, (now - postTime) / (3600000)); 
-
-    // 1. Time Decay (Gravity):
-    // Standard decay: New stuff is good, but viral stuff stays alive longer.
-    // Decays ~20% every 24 hours.
-    score += 1000 * Math.pow(0.8, ageHours / 24);
-
-    // 2. Engagement (Global Popularity / Velocity)
-    const likes = p.likes ? p.likes.length : 0;
-    const comments = p.comments ? p.comments.length : 0;
-    const shares = p.shares || 0;
-    
-    // Weighted engagement score
-    // Shares are the "Gold Standard" signal in modern algo
-    const engagementScore = (likes * 1) + (comments * 3) + (shares * 8);
-    
-    // Viral Boost: High engagement relative to age gets a massive boost
-    // This allows new "hot" posts to skyrocket past old "heavy" posts
-    if (ageHours < 48) {
-        score += (engagementScore / ageHours) * 10; 
-    } else {
-        score += engagementScore * 0.5; // Long tail value
-    }
-
-    // 3. Personalization (The "For You" Magic)
-    
-    // A. Explicit Interest (Tags)
-    const postTags = extractTags(p.content);
-    const myInterests = currentUser.interestedTags || [];
-    const myDisinterests = currentUser.notInterestedTags || [];
-    
-    // Intersection
-    const matchingTags = postTags.filter(t => myInterests.includes(t));
-    const dislikedTags = postTags.filter(t => myDisinterests.includes(t));
-    
-    if (matchingTags.length > 0) {
-        score += matchingTags.length * 300; // Big boost for explicit interest
-    }
-    if (dislikedTags.length > 0) {
-        score -= dislikedTags.length * 500; // Huge penalty for explicit disinterest
-    }
-
-    // B. Author Affinity (Implicit)
-    // Have I liked this author before? Or followed them?
-    if (currentUser.following.includes(p.authorId)) {
-        score += 200; // Follow boost
-    }
-    // "Interests" array tracks authors I've marked as "Interested"
-    if (currentUser.interests && currentUser.interests.includes(p.authorId)) {
-        score += 350; // "Interested" action boost
-    }
-    
-    // C. Social Graph (Friends of Friends)
-    // If people I follow liked this post, it's highly relevant
-    if (p.likes && p.likes.length) {
-        const mutualLikes = p.likes.filter(uid => currentUser.following.includes(uid));
-        score += mutualLikes.length * 100; // Massive social proof boost
-    }
-
-    // 4. Random Exploration (Noise)
-    // Adds variance so the feed isn't identical every refresh. 
-    // Allows "lucky" new posts to be seen.
-    score += Math.random() * 40; 
-
-    // 5. Explicit Hidden
-    if (currentUser.hiddenContent && currentUser.hiddenContent.includes(p.id)) {
-        return -Infinity;
-    }
-
-    return score;
-}
-
-// Action: Mark Interested
-window.markInterested = async (pid) => {
-    const p = posts.find(x => x.id === pid);
-    if (!p) return;
-    
-    const tags = extractTags(p.content);
-    // Optimistic update
-    currentUser.interestedTags = currentUser.interestedTags || [];
-    tags.forEach(t => {
-        if (!currentUser.interestedTags.includes(t)) currentUser.interestedTags.push(t);
-    });
-    
-    // Also add author to interests if not there
-    currentUser.interests = currentUser.interests || [];
-    if (!currentUser.interests.includes(p.authorId)) currentUser.interests.push(p.authorId);
-
-    showToast("We'll show more like this");
-    hidePostMenu();
-    
-    // Persist
-    await updateDoc(doc(db, "users", currentUser.id), {
-        interestedTags: currentUser.interestedTags,
-        interests: currentUser.interests
-    });
-    
-    // Re-rank next refresh, but for now just acknowledge
-};
-
-// Action: Mark Not Interested
-window.markNotInterested = async (pid) => {
-    const p = posts.find(x => x.id === pid);
-    if (!p) return;
-
-    const tags = extractTags(p.content);
-    
-    // Update local state
-    currentUser.notInterestedTags = currentUser.notInterestedTags || [];
-    tags.forEach(t => {
-        if (!currentUser.notInterestedTags.includes(t)) currentUser.notInterestedTags.push(t);
-    });
-
-    currentUser.hiddenContent = currentUser.hiddenContent || [];
-    if (!currentUser.hiddenContent.includes(pid)) currentUser.hiddenContent.push(pid);
-
-    // Remove from UI immediately with animation
-    const el = document.getElementById(`post-card-feed-${pid}`);
-    if (el) {
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 300);
-    }
-    
-    showToast("We'll show less like this");
-    hidePostMenu();
-
-    // Persist
-    await updateDoc(doc(db, "users", currentUser.id), {
-        notInterestedTags: currentUser.notInterestedTags,
-        hiddenContent: currentUser.hiddenContent
-    });
-};
-
-window.showPostOptions=(e,pid,aid)=>{e.stopPropagation();manageHistory('post-options-overlay');window.currentOptionPostId=pid;const isMe=aid===currentUser.id,o=document.getElementById('post-options-overlay'),m=document.getElementById('post-options-modal'),c=document.getElementById('post-options-content');
-c.innerHTML=`${isMe?`<button onclick="deletePost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle bg-red-50 text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Delete Post</div><div class="text-xs text-gray-500">Permanently remove this post</div></div></button><button onclick="openEditPost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="edit-3" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Edit Post</div><div class="text-xs text-gray-500">Make changes</div></div></button>`:''}
-<button onclick="sharePost('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="share-2" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Share</div><div class="text-xs text-gray-500">Share with friends</div></div></button>
-<button onclick="toggleSave('${pid}'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="bookmark" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">${savedPosts.includes(pid)?'Unsave':'Save'}</div><div class="text-xs text-gray-500">Save for later</div></div></button>
-${!isMe ? `<div class="h-px bg-gray-100 my-1"></div>
-<button onclick="markInterested('${pid}')" class="post-option-item group"><div class="icon-circle text-yellow-600 bg-yellow-50"><i data-lucide="sparkles" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Interested</div><div class="text-xs text-gray-500">Show more like this</div></div></button>
-<button onclick="markNotInterested('${pid}')" class="post-option-item group"><div class="icon-circle text-gray-600 bg-gray-100"><i data-lucide="thumbs-down" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Not Interested</div><div class="text-xs text-gray-500">Show less like this</div></div></button>
-<div class="h-px bg-gray-100 my-1"></div>
-<button onclick="showToast('Reported'); hidePostMenu()" class="post-option-item group"><div class="icon-circle"><i data-lucide="flag" class="w-5 h-5"></i></div><div class="flex-1"><div class="font-bold text-gray-900">Report</div><div class="text-xs text-gray-500">Concern about this post</div></div></button>` : ''}`;
-refreshIcons();toggleModalAnim('post-options-overlay','post-options-modal',!0)};
-window.hidePostMenu=()=>toggleModalAnim('post-options-overlay','post-options-modal',!1);window.deletePost=async pid=>showAlert("Delete post?",async()=>{const r=doc(db,"posts",pid);await deleteDoc(r);showToast("Deleted")});window.openEditPost=pid=>{const p=posts.find(x=>x.id===pid);if(p){window.editingPostId=pid;openCompose(p.content,p.media)}};
 
 onAuthStateChanged(auth,async u=>{
 const l=document.getElementById('app-loader');if(!u)return window.location.href='/login';
@@ -442,14 +278,12 @@ if(s.exists()){
     await setDoc(r, newUser);
     currentUser = { id: u.uid, ...newUser };
 }
-currentUser.following||=[];currentUser.followers||=[];currentUser.friends||=[];currentUser.saved||=[];currentUser.links||=[];currentUser.settings||={privateNetwork:false};
-// Initialize personalization arrays
-currentUser.hiddenContent = currentUser.hiddenContent || [];
-currentUser.interests = currentUser.interests || [];
-currentUser.interestedTags = currentUser.interestedTags || [];
-currentUser.notInterestedTags = currentUser.notInterestedTags || [];
+currentUser.following||=[];currentUser.followers||=[];currentUser.friends||=[];currentUser.saved||=[];currentUser.links||=[];currentUser.settings||={privateNetwork:false};window.currentUser=currentUser;savedPosts=currentUser.saved;
+// Initialize interest profile if missing
+if(!currentUser.interestProfile) currentUser.interestProfile = {};
+if(!currentUser.ignoredPosts) currentUser.ignoredPosts = [];
+window.currentUser=currentUser;
 
-window.currentUser=currentUser;savedPosts=currentUser.saved;
 if(!currentUser.username)document.getElementById('username-modal').classList.remove('hidden');
 updateUserInterface();initRealtimeListeners();refreshIcons();initBannerDrag();window.history.replaceState({root:true},"");
 if(l){l.style.opacity='0';setTimeout(()=>l.remove(),500)}
@@ -462,13 +296,8 @@ window.saveUsername=async()=>{const v=document.getElementById('new-username-inpu
 function initRealtimeListeners(){
 onSnapshot(collection(db,"users"),s=>{users=s.docs.map(d=>({id:d.id,...d.data()}));
 const me = users.find(u => u.id === currentUser.id);
-if(me){
-    if(me.banned) document.getElementById('banned-overlay').classList.remove('hidden');
-    // Keep local prefs in sync
-    currentUser.hiddenContent = me.hiddenContent || [];
-    currentUser.interests = me.interests || [];
-    currentUser.interestedTags = me.interestedTags || [];
-    currentUser.notInterestedTags = me.notInterestedTags || [];
+if(me && me.banned) {
+    document.getElementById('banned-overlay').classList.remove('hidden');
 }
 if(window.pendingProfileUid&&users.some(u=>u.id===window.pendingProfileUid)){showProfile(window.pendingProfileUid);window.pendingProfileUid=null;window.history.replaceState({},document.title,window.location.pathname)}if(!document.getElementById('view-network').classList.contains('hidden'))renderNetwork();if(!document.getElementById('privacy-overlay').classList.contains('hidden')){const u=users.find(x=>x.id===currentUser.id);if(u&&u.settings){const pt=document.getElementById('toggle-privacy-main'),ht=document.getElementById('toggle-hide-connections');if(u.settings.privateNetwork)pt.classList.add('active');else pt.classList.remove('active');if(u.settings.hideConnections)ht.classList.add('active');else ht.classList.remove('active')}}if(window.currentViewingProfileId&&!document.getElementById('view-profile').classList.contains('hidden'))renderProfileContent(window.currentViewingProfileId,window.currentProfileTab);renderRightSidebar();refreshIcons()});
 onSnapshot(doc(db,"global","promo"),s=>{const sec=document.getElementById('promo-section');if(s.exists()&&s.data().imageUrl){sec.classList.remove('hidden');document.getElementById('promo-image').src=s.data().imageUrl;document.getElementById('promo-link').href=s.data().linkUrl||'#'}else if(currentUser?.email!=='edulinkbht@gmail.com')sec.classList.add('hidden')});
@@ -512,69 +341,214 @@ window.switchView=async (v, direction = 'none')=>{
 window.switchNetworkTab=t=>{activeNetworkTab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(`net-tab-${t}`)?.classList.add('active');renderNetwork()};
 window.renderNetwork=()=>{const c=document.getElementById('network-content'),isP=activeNetworkTab==='people';c.innerHTML="";if(isP){const f=users.filter(u=>currentUser.following.includes(u.id));if(!f.length)c.innerHTML='<div class="flex flex-col items-center justify-center py-10 opacity-60"><p>You aren\'t following anyone yet.</p></div>';else{const g=document.createElement('div');g.className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0";f.forEach(u=>{const d=document.createElement('div');d.className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer";d.onclick=()=>showProfile(u.id);d.innerHTML=`<img src="${u.avatar}" class="w-12 h-12 rounded-full border border-gray-100 bg-gray-50 object-cover" onclick="event.stopPropagation();openProfilePreview('${u.id}')"><div><h4 class="font-bold text-gray-900 flex items-center gap-1">${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${u.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>':''}</h4><p class="text-xs text-gray-500 line-clamp-1">${u.bio}</p></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="ml-auto text-xs border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Unfollow</button>`;g.appendChild(d)});c.appendChild(g)}}else{const fp=posts.filter(p=>currentUser.following.includes(p.authorId) && canSeePost(p));if(!fp.length)c.innerHTML='<div class="text-center py-10 text-gray-400">No posts.</div>';else{const pc=document.createElement('div');pc.className="space-y-4 px-4 md:px-0";fp.forEach(p=>pc.appendChild(createPostElement(p,'network')));c.appendChild(pc)}}refreshIcons()};
 
-// --- Updated renderFeed with Personalization ---
-window.renderFeed=t=>{
-    const c=document.getElementById('feed-container');
-    c.innerHTML="";
+// ============================================
+// STATE OF THE ART RECOMMENDATION LOGIC
+// ============================================
 
-    // 1. Inventory & Basic Filtering
-    let feedPosts = posts.filter(p => {
-        // Core privacy check
-        if (!canSeePost(p)) return false;
+// --- 1. Weighted Interest Logic ---
+
+/**
+ * Extracts hashtags from post content
+ */
+function extractTags(content) {
+  if (!content) return [];
+  const matches = content.match(/#(\w+)/g);
+  return matches ? matches.map(t => t.substring(1).toLowerCase()) : [];
+}
+
+/**
+ * Updates the user's interest profile based on interactions
+ * @param {Array} tags - Tags from the post
+ * @param {Number} weight - Score delta (+5 for like, -50 for not interested, etc)
+ */
+async function updateUserInterest(tags, weight) {
+    if (!tags || tags.length === 0) return;
+    
+    // Decay Factor: 0.1 means interests degrade by 10% effectiveness per day approx
+    const DECAY_FACTOR = 0.1; 
+    const now = Date.now();
+    
+    // Ensure profile exists
+    if (!currentUser.interestProfile) currentUser.interestProfile = {};
+    
+    tags.forEach(tag => {
+        // Calculate Time Decay for existing score
+        // New Score = (OldScore + NewWeight) 
+        // Real-time calculation happens during read, here we just accumulate raw score
+        // For simplicity in this implementation, we just add raw score.
+        // A more advanced db structure would store {score: 5, last_updated: timestamp}
         
-        // Filter out "Not Interested" content
-        if (currentUser.hiddenContent && currentUser.hiddenContent.includes(p.id)) return false;
+        const currentScore = currentUser.interestProfile[tag] || 0;
+        currentUser.interestProfile[tag] = currentScore + weight;
+    });
 
-        // Apply search term if exists
+    // Save to Firestore (Debounced in a real app, direct here)
+    await updateDoc(doc(db, "users", currentUser.id), {
+        interestProfile: currentUser.interestProfile
+    });
+}
+
+/**
+ * Calculate Affinity Score for a post based on User Profile
+ */
+function calculateAffinityScore(post) {
+    const tags = extractTags(post.content);
+    if (!tags.length) return 0;
+    
+    let score = 0;
+    const profile = currentUser.interestProfile || {};
+    
+    tags.forEach(tag => {
+        if (profile[tag]) {
+            score += profile[tag];
+        }
+    });
+    
+    // Normalize: If a post has many tags, average them slightly to prevent tag-spamming winning
+    return score > 0 ? score / Math.sqrt(tags.length) : 0;
+}
+
+// --- 2. Neighbor Logic (Simplified Client-Side) ---
+
+/**
+ * Finds posts liked by users who I follow or have common interests with
+ * In a real backend, this would use Jaccard Similarity on the whole DB.
+ * Here, we use "Follow Neighbors" - posts liked by people I follow.
+ */
+function getNeighborBoost(post) {
+    let boost = 0;
+    if (!post.likes) return 0;
+    
+    // Intersection of (People I Follow) AND (People who liked this post)
+    const following = currentUser.following || [];
+    const neighbors = post.likes.filter(uid => following.includes(uid));
+    
+    // Each neighbor like is worth more than a stranger like
+    // Threshold: If > 5 neighbors liked it, it's a "Cluster"
+    boost = neighbors.length * 2; 
+    
+    return boost;
+}
+
+// --- 3. Master Scoring Formula ---
+
+function calculatePostScore(post) {
+    // 1. Freshness (Gravity)
+    // Formula: 1 / (HoursOld + 2)^1.8
+    const now = Date.now();
+    const postTime = post.timestamp?.toDate ? post.timestamp.toDate().getTime() : new Date(post.timestamp).getTime();
+    const hoursOld = (now - postTime) / (1000 * 60 * 60);
+    const freshnessScore = 100 / Math.pow((hoursOld + 2), 1.8);
+
+    // 2. Social Proof (Logarithmic)
+    // Formula: log10(Likes + Comments*2 + 1)
+    const likes = post.likes ? post.likes.length : 0;
+    const comments = post.comments ? post.comments.length : 0;
+    const rawSocial = likes + (comments * 2);
+    const socialProofScore = Math.log10(rawSocial + 1) * 20; // Multiplier to normalize with freshness
+
+    // 3. Affinity (Personalization)
+    const affinityScore = calculateAffinityScore(post);
+
+    // 4. Neighbor Boost
+    const neighborScore = getNeighborBoost(post);
+
+    // 5. Negative Filtering
+    if (currentUser.ignoredPosts && currentUser.ignoredPosts.includes(post.id)) {
+        return -9999;
+    }
+
+    // MASTER FORMULA
+    // Weights: Affinity (0.6), Freshness (0.2), Social (0.2) + Neighbor Bonus
+    // We boost Affinity to make it the primary driver
+    let totalScore = (affinityScore * 2) + (freshnessScore * 5) + (socialProofScore * 3) + (neighborScore * 5);
+    
+    // Random noise for serendipity (prevents feed from becoming static)
+    totalScore += Math.random() * 5;
+
+    return totalScore;
+}
+
+
+// --- 4. Cold Start & Feed Generation ---
+
+window.renderFeed = (t) => {
+    const c = document.getElementById('feed-container');
+    c.innerHTML = "";
+
+    // 1. Filter Pool
+    let candidatePosts = posts.filter(p => {
+        if (!canSeePost(p)) return false; // Basic Privacy
+        
+        // Feed Filter Logic
+        const a = users.find(u => u.id === p.authorId);
+        const fol = currentUser.following.includes(p.authorId);
+        if (window.activeFeedFilter === 'following' && !fol) return false;
+        if (window.activeFeedFilter === 'friends') {
+            const isF = fol && (a.following && a.following.includes(currentUser.id));
+            if (!isF) return false;
+        }
+
+        // Search Filter
         const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase()));
         return ms;
     });
 
-    // 2. Feed Logic based on Filter (Algorithm vs Chronological)
-    if (window.activeFeedFilter === 'all') { // "For You" - The Algorithm
-        
-        // Calculate scores
-        feedPosts = feedPosts.map(p => ({
-            post: p,
-            score: calculatePostScore(p)
-        }));
+    // 2. Score & Rank
+    // If user has 0 interactions (Cold Start), the AffinityScore returns 0,
+    // so sorting relies on Freshness + Social Proof (Trending).
+    candidatePosts.forEach(p => {
+        p._rankScore = calculatePostScore(p);
+    });
 
-        // Sort by score descending
-        feedPosts.sort((a, b) => b.score - a.score);
+    // Sort Descending by Score
+    candidatePosts.sort((a, b) => b._rankScore - a._rankScore);
 
-        // Extract posts back
-        feedPosts = feedPosts.map(item => item.post);
-
-        // Inject Discovery (Explore) items sometimes? 
-        // Logic handled by randomness in calculatePostScore
-
-    } else if (window.activeFeedFilter === 'following') {
-        // Chronological - Following Only
-        feedPosts = feedPosts.filter(p => currentUser.following.includes(p.authorId));
-        // Ensure chronological sort
-        feedPosts.sort((a, b) => b.timestamp - a.timestamp);
-
-    } else if (window.activeFeedFilter === 'friends') {
-        // Friends (Mutuals)
-        feedPosts = feedPosts.filter(p => {
-            const author = users.find(u => u.id === p.authorId);
-            const isF = currentUser.following.includes(p.authorId) && (author.following && author.following.includes(currentUser.id));
-            return isF;
-        });
-        feedPosts.sort((a, b) => b.timestamp - a.timestamp);
-    }
-
-    // Render
-    if (feedPosts.length === 0) {
-        c.innerHTML = '<div class="text-center py-20 text-gray-400">No posts found for your feed. Try following more people or exploring!</div>';
+    // 3. Render
+    if (candidatePosts.length === 0) {
+        c.innerHTML = '<div class="text-center py-20 text-gray-400">No posts found.</div>';
     } else {
-        feedPosts.forEach(p => c.appendChild(createPostElement(p, 'feed')));
+        candidatePosts.forEach(p => c.appendChild(createPostElement(p, 'feed')));
     }
     
     refreshIcons();
 };
 
-window.openFeedFilter=()=>{manageHistory('feed-filter-overlay');toggleModalAnim('feed-filter-overlay','feed-filter-modal',!0)};window.closeFeedFilter=()=>toggleModalAnim('feed-filter-overlay','feed-filter-modal',!1);window.switchFeedFilter=f=>{window.activeFeedFilter=f;closeFeedFilter();renderFeed();const m={all:'For You',following:'Following',friends:'Friends Only'};showToast(`Feed: ${m[f]}`)};
+// UI Action: Interested / Not Interested
+window.markInterested = async (pid, positive) => {
+    const p = posts.find(x => x.id === pid);
+    if (!p) return;
+    
+    const tags = extractTags(p.content);
+    
+    if (positive) {
+        // "More like this"
+        await updateUserInterest(tags, 10); // High weight
+        showToast("We'll show more like this");
+    } else {
+        // "Not Interested"
+        await updateUserInterest(tags, -50); // Massive penalty
+        
+        // Add to ignored list locally and DB
+        if (!currentUser.ignoredPosts) currentUser.ignoredPosts = [];
+        currentUser.ignoredPosts.push(pid);
+        await updateDoc(doc(db, "users", currentUser.id), {
+            ignoredPosts: arrayUnion(pid)
+        });
+        
+        // Remove from DOM immediately
+        const card = document.getElementById(`post-card-feed-${pid}`);
+        if(card) {
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 300);
+        }
+        showToast("Post removed");
+    }
+    
+    // Trigger re-rank in background for next refresh
+};
+
+window.openFeedFilter=()=>{manageHistory('feed-filter-overlay');toggleModalAnim('feed-filter-overlay','feed-filter-modal',!0)};window.closeFeedFilter=()=>toggleModalAnim('feed-filter-overlay','feed-filter-modal',!1);window.switchFeedFilter=f=>{window.activeFeedFilter=f;closeFeedFilter();renderFeed();const m={all:'All Posts',following:'Following',friends:'Friends Only'};showToast(`Filter: ${m[f]}`)};
 let touchStartX=0,touchEndX=0;window.handleTouchStart=e=>touchStartX=e.changedTouches[0].screenX;window.handleTouchEnd=(e,pid,ov)=>{touchEndX=e.changedTouches[0].screenX;const w=e.currentTarget.closest('.post-carousel');if(w&&Math.abs(touchStartX-touchEndX)>50)moveCarousel(w.id,touchStartX>touchEndX?1:-1)};
 function createPostElement(p,ctx='feed'){
 const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:'',isOfficial:false,id:p.authorId},st=p.settings||{privacy:'public',showLikes:true,showComments:true},d=document.createElement('article');d.id=`post-card-${ctx}-${p.id}`;d.className="post-card group overflow-hidden fade-in";d.onclick=()=>openPostView(p.id);let mh="",lh="";if(p.media){const ma=Array.isArray(p.media)?p.media:[p.media];if(ma.length===1){const s=ma[0],iv=s.includes('video')||s.includes('.mp4');mh=`<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv?'bg-black flex items-center justify-center':'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv?'':`openLightbox('${s}','image')`}">${iv?`<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>`:`<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">`}</div>`}else{const cid=`carousel-${ctx}-${p.id}`,iid=`inner-${ctx}-${p.id}`,cntId=`counter-${ctx}-${p.id}`;let sl='',dt='';ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.includes('video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="dot-${ctx}-${p.id}-${i}"></div>`});mh=`<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;(window.carouselStates=window.carouselStates||{})[cid]={index:0,total:ma.length}}}
@@ -593,7 +567,13 @@ window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;
 window.toggleLike=async(pid)=>{const isLiking=!document.querySelector(`.js-like-btn-${pid}`)?.classList.contains('active');document.querySelectorAll(`.js-like-btn-${pid}`).forEach(b=>b.classList.toggle('active',isLiking));document.querySelectorAll(`.js-like-count-${pid}`).forEach(el=>{let c=parseInt(el.innerText)||0,nc=Math.max(0,c+(isLiking?1:-1));el.innerText=nc;});
 const ovBtn=document.getElementById('post-view-like-btn');if(ovBtn){if(isLiking){ovBtn.classList.add('fill-red-500','text-red-500');ovBtn.classList.remove('text-gray-700')}else{ovBtn.classList.remove('fill-red-500','text-red-500');ovBtn.classList.add('text-gray-700')}}
 const movBtn=document.getElementById(`mobile-overlay-like-btn-${pid}`);if(movBtn){if(isLiking){movBtn.classList.add('fill-red-500','text-red-500');movBtn.classList.remove('text-gray-900')}else{movBtn.classList.remove('fill-red-500','text-red-500');movBtn.classList.add('text-gray-900')}}
-const r=doc(db,"posts",pid),p=posts.find(x=>x.id===pid);if(p.likes&&p.likes.includes(currentUser.id))await updateDoc(r,{likes:arrayRemove(currentUser.id)});else{await updateDoc(r,{likes:arrayUnion(currentUser.id)});if(p.authorId!==currentUser.id)sendNotification(p.authorId,'like','liked your post',pid)}};
+// Smart Feed: Update Interest based on like
+const p=posts.find(x=>x.id===pid);
+if (p) {
+    const tags = extractTags(p.content);
+    updateUserInterest(tags, isLiking ? 5 : -5); // +5 for Like, -5 for Unlike
+}
+const r=doc(db,"posts",pid);if(p.likes&&p.likes.includes(currentUser.id))await updateDoc(r,{likes:arrayRemove(currentUser.id)});else{await updateDoc(r,{likes:arrayUnion(currentUser.id)});if(p.authorId!==currentUser.id)sendNotification(p.authorId,'like','liked your post',pid)}};
 const toggleModalAnim=(oid,mid,s)=>{const o=document.getElementById(oid),m=document.getElementById(mid);if(s){o.classList.remove('hidden');m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)}else{o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)}};
 window.openLikes=pid=>{manageHistory('likes-overlay');const p=posts.find(x=>x.id===pid),c=document.getElementById('likes-list-content');
 if(p.settings?.allowLikeView===false && p.authorId !== currentUser.id){c.innerHTML='<div class="text-center text-gray-400 py-8">Creator hid likes.</div>';toggleModalAnim('likes-overlay','likes-modal',!0);return;}
@@ -601,14 +581,15 @@ c.innerHTML=!p.likes?.length?'<div class="text-center text-gray-400 py-8">No lik
 window.toggleSave=async(pid)=>{const isSaving=!document.querySelector(`.js-save-btn-${pid}`)?.classList.contains('active');document.querySelectorAll(`.js-save-btn-${pid}`).forEach(b=>b.classList.toggle('active',isSaving));showToast(isSaving?"Saved":"Removed");
 const ovBtn=document.getElementById('post-view-save-btn');if(ovBtn){if(isSaving){ovBtn.classList.add('fill-yellow-500','text-yellow-500');ovBtn.classList.remove('text-gray-700')}else{ovBtn.classList.remove('fill-yellow-500','text-yellow-500');ovBtn.classList.add('text-gray-700')}}
 const movBtn=document.getElementById(`mobile-overlay-save-btn-${pid}`);if(movBtn){if(isSaving){movBtn.classList.add('fill-yellow-500','text-yellow-500');movBtn.classList.remove('text-gray-900')}else{movBtn.classList.remove('fill-yellow-500','text-yellow-500');movBtn.classList.add('text-gray-900')}}
+// Smart Feed: Update Interest
+const p = posts.find(x=>x.id===pid);
+if (p && isSaving) {
+    const tags = extractTags(p.content);
+    updateUserInterest(tags, 10); // +10 for Save
+}
 if(isSaving)savedPosts.push(pid);else savedPosts=savedPosts.filter(x=>x!==pid);await updateDoc(doc(db,"users",currentUser.id),{saved:isSaving?arrayUnion(pid):arrayRemove(pid)})};
 function createCarouselHTML(ma,prefix,pid){let sl='',dt='';ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.startsWith('data:video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="${prefix}-dot-${pid}-${i}"></div>`});const cid=`${prefix}-carousel-${pid}`,iid=`${prefix}-inner-${pid}`;if(!window.carouselStates)window.carouselStates={};window.carouselStates[cid]={index:0,total:ma.length};return `<div class="carousel-wrapper mt-3"><div class="rounded-lg overflow-hidden post-carousel shadow-sm" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${pid}',true)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`}
-window.sharePost=async pid=>{
-    // Update shares count in DB for Weighted Score algorithm
-    const pRef = doc(db, "posts", pid);
-    await updateDoc(pRef, { shares: increment(1) });
-
-    manageHistory('share-overlay');window.currentSharePid=pid;const url=`${window.location.origin}${window.location.pathname}?postId=${pid}`,p=posts.find(x=>x.id===pid),pc=document.getElementById('share-post-preview');document.getElementById('share-link-input').value=url;document.getElementById('share-link-text').innerText=url;if(p){const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:''};document.getElementById('share-owner-avatar').src=a.avatar;const m=p.media?(Array.isArray(p.media)?p.media[0]:p.media):null,isV=m&&(m.includes('video')||m.endsWith('.mp4')),mh=m?(isV?`<div class="w-16 h-16 bg-black rounded-lg flex items-center justify-center shrink-0"><i data-lucide="play" class="w-6 h-6 text-white"></i></div>`:`<img src="${m}" class="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-200">`):'';pc.innerHTML=`<div class="bg-white border border-gray-200 rounded-xl p-3 mb-6"><div class="flex items-center gap-2 mb-2"><img src="${a.avatar}" class="w-5 h-5 rounded-full object-cover"><span class="text-xs font-bold text-gray-900 truncate">${a.name}</span></div><div class="flex gap-3 items-center"><div class="flex-1 min-w-0"><p class="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">${p.content||(m?'Shared a post':'')}</p><div class="flex items-center gap-3 text-gray-400"><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="heart" class="w-3 h-3"></i> ${p.likes?.length||0}</div><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="message-circle" class="w-3 h-3"></i> ${p.comments?.length||0}</div></div></div>${mh}</div></div>`;pc.classList.remove('hidden');const dl=document.getElementById('share-dl-btn');if(dl)dl.remove();if(m&&!isV){const g=document.getElementById('share-grid-options');if(!document.getElementById(`share-dl-${pid}`)){const d=document.createElement('div');d.id=`share-dl-${pid}`;d.className="share-icon-btn";d.onclick=()=>triggerShare('download');d.innerHTML=`<div class="share-icon-circle bg-gray-100 text-gray-800 border border-gray-200" id="dl-icon-${pid}"><i data-lucide="download" class="w-6 h-6"></i></div><span class="text-xs font-medium text-gray-700" id="dl-text-${pid}">Download</span>`;g.appendChild(d)}}refreshIcons()}else pc.classList.add('hidden');toggleModalAnim('share-overlay','share-modal',!0)};
+window.sharePost=pid=>{manageHistory('share-overlay');window.currentSharePid=pid;const url=`${window.location.origin}${window.location.pathname}?postId=${pid}`,p=posts.find(x=>x.id===pid),pc=document.getElementById('share-post-preview');document.getElementById('share-link-input').value=url;document.getElementById('share-link-text').innerText=url;if(p){const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:''};document.getElementById('share-owner-avatar').src=a.avatar;const m=p.media?(Array.isArray(p.media)?p.media[0]:p.media):null,isV=m&&(m.includes('video')||m.endsWith('.mp4')),mh=m?(isV?`<div class="w-16 h-16 bg-black rounded-lg flex items-center justify-center shrink-0"><i data-lucide="play" class="w-6 h-6 text-white"></i></div>`:`<img src="${m}" class="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-200">`):'';pc.innerHTML=`<div class="bg-white border border-gray-200 rounded-xl p-3 mb-6"><div class="flex items-center gap-2 mb-2"><img src="${a.avatar}" class="w-5 h-5 rounded-full object-cover"><span class="text-xs font-bold text-gray-900 truncate">${a.name}</span></div><div class="flex gap-3 items-center"><div class="flex-1 min-w-0"><p class="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">${p.content||(m?'Shared a post':'')}</p><div class="flex items-center gap-3 text-gray-400"><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="heart" class="w-3 h-3"></i> ${p.likes?.length||0}</div><div class="flex items-center gap-1 text-[10px] font-medium"><i data-lucide="message-circle" class="w-3 h-3"></i> ${p.comments?.length||0}</div></div></div>${mh}</div></div>`;pc.classList.remove('hidden');const dl=document.getElementById('share-dl-btn');if(dl)dl.remove();if(m&&!isV){const g=document.getElementById('share-grid-options');if(!document.getElementById(`share-dl-${pid}`)){const d=document.createElement('div');d.id=`share-dl-${pid}`;d.className="share-icon-btn";d.onclick=()=>triggerShare('download');d.innerHTML=`<div class="share-icon-circle bg-gray-100 text-gray-800 border border-gray-200" id="dl-icon-${pid}"><i data-lucide="download" class="w-6 h-6"></i></div><span class="text-xs font-medium text-gray-700" id="dl-text-${pid}">Download</span>`;g.appendChild(d)}}refreshIcons()}else pc.classList.add('hidden');toggleModalAnim('share-overlay','share-modal',!0)};
 window.closeShareMenu=()=>{const o=document.getElementById('share-overlay'),m=document.getElementById('share-modal');o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>{o.classList.add('hidden');window.currentSharePid=null;document.querySelectorAll('[id^="share-dl-"]').forEach(e=>e.remove())},200)};
 window.openDownloadSelect=i=>{manageHistory('download-select-overlay');window.currentDownloadImages=i;window.selectedDownloadIndices.clear();const m=document.getElementById('download-select-modal'),o=document.getElementById('download-select-overlay'),c=document.getElementById('download-select-content');c.innerHTML=i.map((u,x)=>`<div class="aspect-square rounded-xl overflow-hidden relative border-2 transition-all cursor-pointer border-gray-200 hover:border-gray-300" onclick="toggleDownloadSelect(${x},this)"><img src="${u}" class="w-full h-full object-cover pointer-events-none"><div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 border-white border-2 flex items-center justify-center transition-colors"></div></div>`).join('');updateDownloadBtn();m.style.transform='';m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');o.classList.remove('hidden');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)};window.closeDownloadSelect=()=>{const o=document.getElementById('download-select-overlay'),m=document.getElementById('download-select-modal');o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)};window.toggleDownloadSelect=(i,e)=>{window.selectedDownloadIndices.has(i)?window.selectedDownloadIndices.delete(i):window.selectedDownloadIndices.add(i);const s=window.selectedDownloadIndices.has(i);e.className=`aspect-square rounded-xl overflow-hidden relative border-2 transition-all cursor-pointer ${s?'border-blue-500 ring-2 ring-blue-500/20':'border-gray-200 hover:border-gray-300'}`;const d=e.querySelector('div.absolute');d.className=`absolute top-2 right-2 w-6 h-6 rounded-full ${s?'bg-blue-500 border-blue-500':'bg-black/40 border-white'} border-2 flex items-center justify-center transition-colors`;d.innerHTML=s?'<i data-lucide="check" class="w-3 h-3 text-white"></i>':'';refreshIcons();updateDownloadBtn()};window.updateDownloadBtn=()=>{const c=window.selectedDownloadIndices.size,b=document.getElementById('download-action-btn');b.innerText=`Download ${c>0?`(${c})`:''}`;b.disabled=c===0;b.className=`w-full py-3 rounded-xl font-bold transition-all ${c>0?'bg-[#0b57d0] text-white hover:bg-blue-700':'bg-gray-100 text-gray-400 cursor-not-allowed'}`};window.downloadSelectedImages=async()=>{const idx=Array.from(window.selectedDownloadIndices);if(!idx.length)return;const b=document.getElementById('download-action-btn');b.innerText="Downloading...";for(const i of idx){const u=window.currentDownloadImages[i];try{const r=await fetch(u),bl=await r.blob(),url=window.URL.createObjectURL(bl),a=document.createElement('a');a.style.display='none';a.href=url;a.download=`edulink_img_${Date.now()}_${i}.jpg`;document.body.appendChild(a);a.click();window.URL.revokeObjectURL(url);a.remove();await new Promise(r=>setTimeout(r,500))}catch(e){}}showToast("Saved to device");closeDownloadSelect();closeShareMenu()};
 window.triggerShare=(pf,meta)=>{if(!window.currentSharePid)return;const u=`${window.location.origin}${window.location.pathname}?postId=${window.currentSharePid}`,txt="Check out this post on EduLink!",acts={copy:()=>navigator.clipboard.writeText(u).then(()=>showToast("Link copied!")),twitter:()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}&url=${encodeURIComponent(u)}`,'_blank'),whatsapp:()=>window.open(`https://wa.me/?text=${encodeURIComponent(txt+" "+u)}`,'_blank'),email:()=>window.open(`mailto:?subject=${encodeURIComponent(txt)}&body=${encodeURIComponent(txt+"\n\n"+u)}`),download:async()=>{const pid=window.currentSharePid,p=posts.find(x=>x.id===pid);if(!p||!p.media)return;const ml=Array.isArray(p.media)?p.media:[p.media],imgs=ml.filter(x=>!x.includes('video')&&!x.endsWith('.mp4')&&!x.startsWith('data:video'));if(!imgs.length)return showToast("No images");if(imgs.length===1){const icon=document.getElementById(`dl-icon-${pid}`),txtSpan=document.getElementById(`dl-text-${pid}`);if(icon&&txtSpan){const oi=icon.innerHTML,ot=txtSpan.innerText;icon.innerHTML='<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>';txtSpan.innerText="Saving...";refreshIcons();try{const r=await fetch(imgs[0]),b=await r.blob(),url=window.URL.createObjectURL(b),a=document.createElement('a');a.style.display='none';a.href=url;a.download=`edulink_post_${pid}.jpg`;document.body.appendChild(a);a.click();window.URL.revokeObjectURL(url);a.remove();showToast("Saved to device");closeShareMenu()}catch(e){showToast("Download failed",!0)}finally{icon.innerHTML=oi;txtSpan.innerText=ot;refreshIcons()}}}else openDownloadSelect(imgs)}};acts[pf]?.();if(pf!=='copy'&&pf!=='download')closeShareMenu()};
