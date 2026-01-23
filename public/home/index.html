@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-<title>EduLink - AI Powered Feed</title>
+<title>EduLink - Place where learning meets</title>
 <link rel="icon" type="image/png" href="https://i.imghippo.com/files/vgr8207c.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -33,7 +33,7 @@ i[data-lucide],svg{flex-shrink:0}
 @media (min-width:1024px){.sidebar-user{justify-content:flex-start;padding:8px 12px}}
 .create-btn{display:flex;align-items:center;justify-content:flex-start;gap:12px;background:#1f1f1f;color:#fff;padding:12px 20px;border-radius:12px;font-weight:500;font-size:14px;transition:all .2s ease;width:100%;margin-bottom:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);line-height:1;min-width:0;white-space:nowrap}
 .create-btn:hover{background:#000;transform:translateY(-1px);box-shadow:0 10px 15px -3px rgba(0,0,0,.1)}
-.post-card{background:var(--surface);border-bottom:1px solid var(--outline);border-radius:0;transition:background-color .2s ease;margin-bottom:0;box-shadow:none;overflow:visible; position: relative;}
+.post-card{background:var(--surface);border-bottom:1px solid var(--outline);border-radius:0;transition:background-color .2s ease;margin-bottom:0;box-shadow:none;overflow:visible}
 .post-card:hover{background-color:#fdfdfd;cursor:pointer;transform:none}
 .post-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 .post-avatar{width:40px;height:40px;border-radius:50%;background-color:var(--hover-bg);object-fit:cover;cursor:pointer;}
@@ -126,6 +126,7 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 .toggle-setting-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #f0f0f0}
 .toggle-setting-row:last-child{border-bottom:none}
 .discussion-footer {padding: 12px 16px; border-top: 1px solid var(--outline); background: #fff; z-index: 20;}
+/* SHIMMER LOADING EFFECT - INSTAGRAM STYLE */
 .img-placeholder {
   background: #f6f7f8;
   background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -150,16 +151,6 @@ img { transition: opacity 0.3s ease-out; }
 .slide-in-left { animation: slideInLeft 0.25s cubic-bezier(0.2, 0, 0, 1) forwards; }
 @keyframes slideInRight { from { transform: translateX(20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
-.recommender-badge {
-    font-size: 10px;
-    background: #e8f0fe;
-    color: #1967d2;
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-block;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
@@ -167,7 +158,6 @@ img { transition: opacity 0.3s ease-out; }
 <div id="action-progress-overlay" class="fixed inset-0 z-[200] bg-white/90 backdrop-blur-sm hidden flex flex-col items-center justify-center"><div class="w-64 h-2 bg-gray-200 rounded-full overflow-hidden mb-4"><div id="action-progress-bar" class="h-full bg-[#0b57d0] transition-all duration-300 w-0"></div></div><p id="action-progress-text" class="font-bold text-gray-900 animate-pulse">Saving changes...</p></div>
 <div id="banned-overlay" class="fixed inset-0 z-[99999] flex items-center justify-center bg-white hidden"><div class="text-center p-8"><div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="ban" class="w-10 h-10 text-red-600"></i></div><h2 class="text-2xl font-bold text-gray-900 mb-2">Account Banned</h2><p class="text-gray-600 mb-6">Your access to EduLink has been restricted due to a violation of our terms.</p><button onclick="doLogout()" class="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition-colors">Log Out</button></div></div>
 <div id="custom-alert" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"><div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-[90%] transform scale-95 transition-transform duration-200" id="custom-alert-box"><h3 class="text-lg font-bold text-[#1f1f1f] mb-2" id="alert-title">Confirm</h3><p class="text-gray-600 mb-6 text-sm" id="alert-msg">Are you sure?</p><div class="flex justify-end gap-3"><button class="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-lg transition-colors" onclick="closeAlert(false)">Cancel</button><button class="px-4 py-2 bg-[#0b57d0] text-white font-bold text-sm rounded-lg hover:bg-blue-700 transition-colors" id="alert-confirm-btn">Confirm</button></div></div></div>
-<!-- Modals (Username, Link, Promo, Options, etc) preserved but collapsed for brevity where content is static -->
 <div id="username-modal" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden"><div class="bg-white w-[90%] max-w-[400px] rounded-[24px] shadow-2xl p-8 relative flex flex-col items-center"><h2 class="text-2xl font-bold text-[#1f1f1f] mb-2 google-font">Create Username</h2><p class="text-sm text-gray-500 mb-6 text-center">Choose a unique username.</p><div class="w-full relative mb-4"><span class="absolute left-4 top-3 text-gray-400 font-bold">@</span><input type="text" id="new-username-input" class="w-full bg-gray-100 rounded-xl py-3 pl-8 pr-4 outline-none focus:ring-2 focus:ring-blue-500 font-medium" placeholder="username" maxlength="20"></div><button onclick="saveUsername()" class="w-full bg-[#0b57d0] text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Start Exploring</button></div></div>
 <div id="add-link-modal" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden"><div class="bg-white w-[90%] max-w-[400px] rounded-2xl shadow-2xl p-6 relative"><h3 class="text-lg font-bold text-gray-900 mb-4">Add Link</h3><div class="space-y-4 mb-6"><div><label class="text-xs font-bold text-gray-500 uppercase">Title</label><input type="text" id="new-link-title" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 font-medium text-gray-900"></div><div><label class="text-xs font-bold text-gray-500 uppercase">URL</label><input type="url" id="new-link-url" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 font-medium text-gray-900"></div></div><div class="flex justify-end gap-3"><button onclick="document.getElementById('add-link-modal').classList.add('hidden')" class="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-lg">Cancel</button><button onclick="saveLink()" class="px-4 py-2 bg-[#0b57d0] text-white font-bold text-sm rounded-lg hover:bg-blue-700">Add Link</button></div></div></div>
 <div id="promo-modal" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden"><div class="bg-white w-[90%] max-w-[400px] rounded-2xl shadow-2xl p-6 relative"><h3 class="text-lg font-bold text-gray-900 mb-4">Edit Promo</h3><div class="space-y-4 mb-6"><div><label class="text-xs font-bold text-gray-500 uppercase">Image URL</label><div class="flex gap-2"><input type="text" id="promo-img-url" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 font-medium text-gray-900"><button onclick="document.getElementById('promo-file-input').click()" class="icon-btn bg-gray-100 hover:bg-gray-200"><i data-lucide="upload" class="w-4 h-4"></i></button></div><input type="file" id="promo-file-input" class="hidden" accept="image/*" onchange="handlePromoFile(event)"></div><div><label class="text-xs font-bold text-gray-500 uppercase">Target Link</label><input type="url" id="promo-target-url" class="w-full border-b border-gray-200 py-2 outline-none focus:border-blue-500 font-medium text-gray-900"></div></div><div class="flex justify-end gap-3"><button onclick="document.getElementById('promo-modal').classList.add('hidden')" class="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-lg">Cancel</button><button onclick="savePromo()" class="px-4 py-2 bg-[#0b57d0] text-white font-bold text-sm rounded-lg hover:bg-blue-700">Save</button></div></div></div>
@@ -216,7 +206,6 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 const firebaseConfig={apiKey:"AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno",authDomain:"edulinki.firebaseapp.com",projectId:"edulinki",storageBucket:"edulinki.firebasestorage.app",messagingSenderId:"248886466474",appId:"1:248886466474:web:160043201a6b28bafbbdd3",measurementId:"G-MQBH12VL7N"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);window.auth=auth;window.db=db;
 let currentUser=null,users=[],posts=[],notifications=[],savedPosts=[],activeNotifTab='all',activeNetworkTab='people';
-let userInterests = {}; // { 'keyword': score }
 window.replyingToCommentId=null;window.currentViewingProfileId=null;window.activeExploreTab='explore';window.activeExploreCategory='For You';window.currentProfileTab='posts';
 window.currentMedia=[];window.uploadMode='single';window.currentMediaType=null;window.isWebSearchActive=false;
 let stopGeneration=false,abortController=null;window.isPlusMenuOpen=false;window.currentEventCover=null;window.editingPostId=null;window.threadParentCommentId=null;window.threadPostId=null;
@@ -231,91 +220,24 @@ window.currentDownloadImages=[];window.selectedDownloadIndices=new Set();
 window.adjustingImageIndex=null;window.adjustZoom=1;window.adjustX=0;window.adjustY=0;
 let isDraggingImage=false,dragStartX=0,dragStartY=0,initialX=0,initialY=0;
 const feedView=document.getElementById('view-feed'),exploreView=document.getElementById('view-explore'),ptrSpinner=document.getElementById('ptr-spinner'),refreshIcons=()=>window.lucide?.createIcons();
-
-// --- RECOMMENDATION ENGINE (THE "BRAIN") ---
-const STOP_WORDS = new Set(['a','an','the','and','or','but','is','are','was','were','in','on','at','to','for','of','with','it','this','that']);
-const extractKeywords = (text) => {
-    if (!text) return [];
-    return text.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .split(/\s+/)
-        .filter(w => w.length > 3 && !STOP_WORDS.has(w));
-};
-
-// Tracking "Invisible Signals"
-const observerOptions = { root: null, threshold: 0.6 }; // 60% visibility
-let viewTimers = {}; // { postId: startTime }
-
-const handlePostVisibility = (entries) => {
-    entries.forEach(entry => {
-        const pid = entry.target.dataset.postId;
-        if (!pid) return;
-
-        if (entry.isIntersecting) {
-            viewTimers[pid] = Date.now();
-        } else {
-            if (viewTimers[pid]) {
-                const duration = Date.now() - viewTimers[pid];
-                delete viewTimers[pid];
-                
-                // Signal Logic
-                const keywords = (entry.target.dataset.keywords || '').split(',');
-                if (duration > 1500) { // Hover Time > 1.5s (Positive Passive)
-                    updateUserInterests(keywords, 2);
-                    console.log(`Passive Like (+2) for post ${pid}: ${duration}ms`);
-                } else if (duration < 500) { // Scroll Fast (Negative Signal)
-                    updateUserInterests(keywords, -0.5); 
-                }
-            }
-        }
-    });
-};
-
-const postObserver = new IntersectionObserver(handlePostVisibility, observerOptions);
-
-const updateUserInterests = (keywords, scoreDelta) => {
-    keywords.forEach(k => {
-        if (!k) return;
-        if (!userInterests[k]) userInterests[k] = 0;
-        userInterests[k] += scoreDelta;
-    });
-    // Persist locally for session consistency
-    localStorage.setItem('eduLink_interests', JSON.stringify(userInterests));
-};
-
-const calculatePostScore = (p) => {
-    let score = 0;
-    const postKeywords = extractKeywords(p.content);
-    
-    // 1. Content-Based Filtering
-    postKeywords.forEach(k => {
-        if (userInterests[k]) score += userInterests[k];
-    });
-
-    // 2. Collaborative / Social Filtering (Simple Doppelganger Logic)
-    if (currentUser.following.includes(p.authorId)) score += 20; // High affinity
-    if (p.likes && p.likes.includes(currentUser.id)) score += 10; // Already liked (reinforcement)
-
-    // 3. Global Popularity (Bandwagon effect)
-    score += (p.likes?.length || 0) * 0.5;
-    score += (p.comments?.length || 0) * 1.5;
-
-    // 4. Recency Decay
-    const daysOld = (Date.now() - (p.timestamp?.toDate ? p.timestamp.toDate().getTime() : Date.now())) / (1000 * 60 * 60 * 24);
-    score -= daysOld * 2; // Penalize old posts
-
-    return { post: p, score: score, keywords: postKeywords };
-};
-
-// --- END RECOMMENDATION ENGINE ---
-
 if(feedView){
 feedView.addEventListener('touchstart',e=>{if(!feedView.scrollTop&&!isRefreshing){ptrStartY=e.touches[0].pageY;isPtr=true;ptrSpinner.style.transition='none'}},{passive:true});
 feedView.addEventListener('touchmove',e=>{if(!isPtr||isRefreshing)return;const d=e.touches[0].pageY-ptrStartY;if(d>0&&!feedView.scrollTop){if(e.cancelable)e.preventDefault();ptrDist=d;const y=Math.min(d*.4,80);Object.assign(ptrSpinner.style,{transform:`translateX(-50%) translateY(${y}px) rotate(${y*3}deg)`,opacity:Math.min(y/40,1)})}else{isPtr=false;ptrSpinner.style.opacity='0';ptrSpinner.style.transform='translateX(-50%) translateY(-20px)'}},{passive:false});
 feedView.addEventListener('touchend',async()=>{if(!isPtr||isRefreshing)return;isPtr=false;ptrSpinner.style.transition='all .3s';if(ptrDist>100){isRefreshing=true;Object.assign(ptrSpinner.style,{transform:'translateX(-50%) translateY(50px)',opacity:'1'});ptrSpinner.innerHTML='<i data-lucide="loader-2" class="animate-spin w-5 h-5 text-blue-600"></i>';refreshIcons();await new Promise(r=>setTimeout(r,1000));renderFeed();showToast("Feed updated");isRefreshing=false;ptrSpinner.style.transform='translateX(-50%) translateY(-20px)';ptrSpinner.style.opacity='0';setTimeout(()=>{ptrSpinner.innerHTML='<i data-lucide="arrow-down" class="w-5 h-5 text-blue-600"></i>';refreshIcons()},300)}else{ptrSpinner.style.transform='translateX(-50%) translateY(-20px)';ptrSpinner.style.opacity='0'}ptrDist=0});
 feedView.addEventListener('scroll',()=>{const c=feedView.scrollTop,h=document.getElementById('main-header');h.style.transform=c>lastScrollTop&&c>60?'translateY(-100%)':'translateY(0)';lastScrollTop=Math.max(0,c)},{passive:true});}
 if(exploreView)exploreView.addEventListener('scroll',()=>{const c=exploreView.scrollTop,h=document.getElementById('explore-header-container');h.style.transform=c>lastExploreScrollTop&&c>60?'translateY(-100%)':'translateY(0)';lastExploreScrollTop=Math.max(0,c)},{passive:true});
-const formatDate=t=>{if(!t)return'';const d=t.toDate?t.toDate():new Date(t);if(isNaN(d.getTime()))return '';const now=new Date();const s=(now-d)/1000;if(s<60)return 'Now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';if(s<604800)return Math.floor(s/86400)+'d ago';return d.toLocaleDateString();};
+const formatDate=t=>{
+if(!t)return'';
+const d=t.toDate?t.toDate():new Date(t);
+if(isNaN(d.getTime()))return '';
+const now=new Date();
+const s=(now-d)/1000;
+if(s<60)return 'Now';
+if(s<3600)return Math.floor(s/60)+'m ago';
+if(s<86400)return Math.floor(s/3600)+'h ago';
+if(s<604800)return Math.floor(s/86400)+'d ago';
+return d.toLocaleDateString();
+};
 const formatContent=t=>{if(!t)return'';return t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(/@(\w+)/g,(m,u)=>{const f=users.find(x=>(x.username||'').toLowerCase()===u.toLowerCase());return `<span class="text-blue-600 font-bold ${f?'cursor-pointer hover:underline" onclick="event.stopPropagation(); showProfile(\''+f.id+'\')':''}">@${u}</span>`}).replace(/#(\w+)/g,'<span class="text-blue-600 font-bold cursor-pointer hover:underline" onclick="event.stopPropagation(); searchTag(\'$1\')">#$1</span>').replace(/\n/g,'<br>')};
 window.renderTextWithReadMore=(text,id,limit=180)=>{if(!text)return'';const isExpanded=window.expandedTexts.has(id);if(text.length<=limit)return formatContent(text);const display=isExpanded?formatContent(text):formatContent(text.substring(0,limit))+'...';return `${display}<span class="read-more-btn" onclick="event.stopPropagation(); toggleTextExpansion('${id}')">${isExpanded?'less':'more'}</span>`};
 window.toggleTextExpansion=id=>{if(window.expandedTexts.has(id))window.expandedTexts.delete(id);else window.expandedTexts.add(id);if(id.startsWith('post-')){const pid=id.replace('post-',''),p=posts.find(x=>x.id===pid);if(p)document.querySelectorAll(`.js-post-body-${pid}`).forEach(el=>el.innerHTML=window.renderTextWithReadMore(p.content,id))}else if(id.startsWith('comment-')){const cid=id.replace('comment-','');let foundC=null;for(const p of posts)if(p.comments){foundC=p.comments.find(c=>c.id===cid);if(foundC)break}if(foundC)document.querySelectorAll(`.js-comment-body-${cid}`).forEach(el=>el.innerHTML=window.renderTextWithReadMore(foundC.content,id))}};
@@ -325,13 +247,17 @@ window.manageHistory=m=>window.history.pushState({modal:m},"");
 const canSeePost = (p) => {
     if(!p || !currentUser) return false;
     if(p.authorId === currentUser.id) return true; 
+    
     const author = users.find(u => u.id === p.authorId);
     if(!author) return false;
+
     const isFollowing = currentUser.following.includes(p.authorId);
     const isAccountPrivate = author.settings?.privateNetwork; 
     const isPostPrivate = p.settings?.privacy === 'private';
+
     if (isAccountPrivate && !isFollowing) return false;
     if (isPostPrivate && !isFollowing) return false;
+
     return true; 
 };
 
@@ -362,10 +288,6 @@ if(s.exists()){
     currentUser = { id: u.uid, ...newUser };
 }
 currentUser.following||=[];currentUser.followers||=[];currentUser.friends||=[];currentUser.saved||=[];currentUser.links||=[];currentUser.settings||={privateNetwork:false};window.currentUser=currentUser;savedPosts=currentUser.saved;
-// Initialize Interests
-const savedInterests = localStorage.getItem('eduLink_interests');
-if(savedInterests) userInterests = JSON.parse(savedInterests);
-
 if(!currentUser.username)document.getElementById('username-modal').classList.remove('hidden');
 updateUserInterface();initRealtimeListeners();refreshIcons();initBannerDrag();window.history.replaceState({root:true},"");
 if(l){l.style.opacity='0';setTimeout(()=>l.remove(),500)}
@@ -422,150 +344,30 @@ window.switchView=async (v, direction = 'none')=>{
   document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(e=>e.classList.remove('active'));const nav=document.getElementById(`nav-${v}`),mnav=document.querySelectorAll('.mobile-nav-item');if(nav)nav.classList.add('active');if(v==='feed'){mnav[0]?.classList.add('active');if(document.getElementById('feed-container').children.length===0)renderFeed()}else if(v==='explore'){mnav[1]?.classList.add('active');switchExploreMainTab('explore')}else if(v==='network'){if(nav)nav.classList.add('active');if(document.getElementById('network-content').children.length===0)renderNetwork()}else if(v==='notifications'){if(nav)nav.classList.add('active');mnav[3]?.classList.add('active');renderNotifications();const un=notifications.filter(n=>!n.read);if(un.length>0){const b=writeBatch(db);un.forEach(n=>b.update(doc(db,"notifications",n.id),{read:!0}));await b.commit()}}else if(v==='saved'){if(nav)nav.classList.add('active');if(document.getElementById('saved-container').children.length===0)renderSaved()}else if(v==='profile'){mnav[4]?.classList.add('active');}setTimeout(()=>refreshIcons(),10)};
 window.switchNetworkTab=t=>{activeNetworkTab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(`net-tab-${t}`)?.classList.add('active');renderNetwork()};
 window.renderNetwork=()=>{const c=document.getElementById('network-content'),isP=activeNetworkTab==='people';c.innerHTML="";if(isP){const f=users.filter(u=>currentUser.following.includes(u.id));if(!f.length)c.innerHTML='<div class="flex flex-col items-center justify-center py-10 opacity-60"><p>You aren\'t following anyone yet.</p></div>';else{const g=document.createElement('div');g.className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0";f.forEach(u=>{const d=document.createElement('div');d.className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer";d.onclick=()=>showProfile(u.id);d.innerHTML=`<div class="img-placeholder w-12 h-12 rounded-full border border-gray-100 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${u.id}')"></div><div><h4 class="font-bold text-gray-900 flex items-center gap-1">${u.name} ${u.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${u.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>':''}</h4><p class="text-xs text-gray-500 line-clamp-1">${u.bio}</p></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="ml-auto text-xs border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Unfollow</button>`;g.appendChild(d)});c.appendChild(g)}}else{const fp=posts.filter(p=>currentUser.following.includes(p.authorId) && canSeePost(p));if(!fp.length)c.innerHTML='<div class="text-center py-10 text-gray-400">No posts.</div>';else{const pc=document.createElement('div');pc.className="space-y-4 px-4 md:px-0";fp.forEach(p=>pc.appendChild(createPostElement(p,'network')));c.appendChild(pc)}}refreshIcons()};
-
-// --- UPDATED RENDER FEED WITH AI LOGIC ---
-window.renderFeed = (t) => {
-    const c = document.getElementById('feed-container');
-    c.innerHTML = "";
-
-    // 1. Candidate Generation (The Broad Net)
-    let candidates = posts.filter(p => canSeePost(p));
-
-    // 2. Filter by UI settings (Following/Friends)
-    if (window.activeFeedFilter === 'following') {
-        candidates = candidates.filter(p => currentUser.following.includes(p.authorId) || p.authorId === currentUser.id);
-    } else if (window.activeFeedFilter === 'friends') {
-        candidates = candidates.filter(p => {
-            const author = users.find(u => u.id === p.authorId);
-            return (currentUser.following.includes(p.authorId) && author.following.includes(currentUser.id)) || p.authorId === currentUser.id;
-        });
-    }
-
-    // 3. Scoring (The Prediction)
-    let scoredPosts = candidates.map(calculatePostScore);
-
-    // 4. Re-Ranking (Sort by Score)
-    scoredPosts.sort((a, b) => b.score - a.score);
-
-    // 5. Exploration vs Exploitation & Diversity
-    let finalFeed = [];
-    let seenAuthors = new Set();
-    let explorationCount = 0;
-
-    // We pick items from the sorted list, but inject "Exploration" items occasionally
-    for (let i = 0; i < scoredPosts.length; i++) {
-        // "Exploration": Every 5th post, pick something random from the lower half of the candidates
-        if (i > 0 && i % 5 === 0 && explorationCount < 2) {
-            const randomIndex = Math.floor(Math.random() * (scoredPosts.length - i)) + i;
-            const explorePost = scoredPosts[randomIndex];
-            if (explorePost) {
-                explorePost.isExploration = true;
-                finalFeed.push(explorePost);
-                // Remove it from current list so we don't duplicate
-                scoredPosts.splice(randomIndex, 1);
-                explorationCount++;
-                continue;
-            }
+window.renderFeed=t=>{
+    const c=document.getElementById('feed-container');
+    c.innerHTML="";
+    posts.filter(p=>{
+        if (!canSeePost(p)) return false;
+        const a=users.find(u=>u.id===p.authorId);
+        const fol=currentUser.following.includes(p.authorId);
+        let pf=true;
+        if(window.activeFeedFilter==='following') pf=fol;
+        else if(window.activeFeedFilter==='friends'){
+            const isF=fol&&(a.following&&a.following.includes(currentUser.id));
+            pf=isF;
         }
-        
-        // "Diversity": Avoid same author twice in a row (simple implementation)
-        const currentItem = scoredPosts[i];
-        if (finalFeed.length > 0 && finalFeed[finalFeed.length - 1].post.authorId === currentItem.post.authorId) {
-             // Skip logic or swap could go here, for now just append
-        }
-        finalFeed.push(currentItem);
-    }
-
-    // Search override
-    if(t) {
-        finalFeed = finalFeed.filter(item => item.post.content.toLowerCase().includes(t.toLowerCase()));
-    }
-
-    finalFeed.forEach(item => c.appendChild(createPostElement(item.post, 'feed', item)));
-    
-    // Start tracking visible elements
-    document.querySelectorAll('.post-card').forEach(el => postObserver.observe(el));
+        const ms=(!t||p.content.toLowerCase().includes(t.toLowerCase()));
+        return pf && ms;
+    }).forEach(p=>c.appendChild(createPostElement(p,'feed')));
     refreshIcons();
 };
-
 window.openFeedFilter=()=>{manageHistory('feed-filter-overlay');toggleModalAnim('feed-filter-overlay','feed-filter-modal',!0)};window.closeFeedFilter=()=>toggleModalAnim('feed-filter-overlay','feed-filter-modal',!1);window.switchFeedFilter=f=>{window.activeFeedFilter=f;closeFeedFilter();renderFeed();const m={all:'All Posts',following:'Following',friends:'Friends Only'};showToast(`Filter: ${m[f]}`)};
 let touchStartX=0,touchEndX=0;window.handleTouchStart=e=>touchStartX=e.changedTouches[0].screenX;window.handleTouchEnd=(e,pid,ov)=>{touchEndX=e.changedTouches[0].screenX;const w=e.currentTarget.closest('.post-carousel');if(w&&Math.abs(touchStartX-touchEndX)>50)moveCarousel(w.id,touchStartX>touchEndX?1:-1)};
-
-// --- UPDATED CREATE POST ELEMENT TO SUPPORT TRACKING ---
-function createPostElement(p, ctx='feed', aiData = null) {
-    const a = users.find(u => u.id === p.authorId) || {name: 'Unknown', avatar: '', isOfficial: false, id: p.authorId};
-    const st = p.settings || {privacy: 'public', showLikes: true, showComments: true};
-    const d = document.createElement('article');
-    d.id = `post-card-${ctx}-${p.id}`;
-    d.className = "post-card group overflow-hidden fade-in";
-    d.onclick = () => openPostView(p.id);
-    
-    // Attach Tracking Data
-    d.dataset.postId = p.id;
-    d.dataset.keywords = (aiData ? aiData.keywords : extractKeywords(p.content)).join(',');
-
-    let mh = "", lh = "";
-    // Media Logic (Carousel vs Single) ... [Same as original logic]
-    if (p.media) {
-        const ma = Array.isArray(p.media) ? p.media : [p.media];
-        if (ma.length === 1) {
-            const s = ma[0], iv = s.includes('video') || s.includes('.mp4');
-            mh = `<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv ? 'bg-black flex items-center justify-center' : 'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv ? '' : `openLightbox('${s}','image')`}">${iv ? `<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>` : `<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`;
-        } else {
-            const cid = `carousel-${ctx}-${p.id}`, iid = `inner-${ctx}-${p.id}`;
-            let sl = '', dt = '';
-            ma.forEach((s, i) => {
-                sl += `<div class="post-carousel-item img-placeholder">${(s.includes('video') || s.includes('.mp4')) ? `<video src="${s}" controls></video>` : `<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`;
-                dt += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" id="dot-${ctx}-${p.id}-${i}"></div>`
-            });
-            mh = `<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;
-            (window.carouselStates = window.carouselStates || {})[cid] = {index: 0, total: ma.length}
-        }
-    }
-    
-    // Liked By logic
-    if (p.likes?.length && currentUser.following) {
-        const f = p.likes.filter(id => currentUser.following.includes(id) && id !== currentUser.id), ff = f.length && users.find(u => u.id === f[0]);
-        if (ff) lh = `<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length > 1 ? ` and ${f.length - 1} others` : ''}</span></div>`
-    }
-    
-    // AI Explainer Badge
-    let explainer = '';
-    if (aiData) {
-        if (aiData.isExploration) explainer = `<div class="px-4 md:px-5 pt-3"><span class="recommender-badge bg-purple-100 text-purple-700">✨ Discover something new</span></div>`;
-        else if (aiData.score > 15) explainer = `<div class="px-4 md:px-5 pt-3"><span class="recommender-badge">Suggested for you</span></div>`;
-    }
-
-    const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id);
-    d.innerHTML = `${explainer}<div class="p-4 md:p-5 pt-2"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container img-placeholder w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${a.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>' : ''}${st.privacy === 'private' ? '<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>' : ''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><div class="flex items-center gap-1"><button class="action-btn like js-like-btn-${p.id} ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart" class="w-6 h-6"></i></button>${st.showLikes ?`<span class="js-like-count-${p.id} text-xs font-medium px-1 hover:underline cursor-pointer" onclick="event.stopPropagation();openLikes('${p.id}')">${(p.likes?.length > 0) ? p.likes.length : '0'}</span>`: ''}<button class="action-btn comment ml-2" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments === false ? 'message-circle-off' : 'message-circle'}" class="w-6 h-6"></i> ${st.showComments ? `<span class="js-comment-count-${p.id} text-xs font-medium">${(p.comments?.length > 0) ? p.comments.length : ''}</span>` : ''}</button><button class="action-btn share-btn ml-2" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2" class="w-6 h-6"></i></button></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved ? 'active' : ''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark" class="w-6 h-6"></i></button></div></div>`;
-    return d
-}
-
-// Logic for existing methods to update scores
-const originalToggleLike = window.toggleLike;
-window.toggleLike = async (pid) => {
-    // Boost interest if liked
-    const p = posts.find(x => x.id === pid);
-    if(p) updateUserInterests(extractKeywords(p.content), 5); // +5 Score for Like
-    if(originalToggleLike) await originalToggleLike(pid);
-};
-
-const originalToggleSave = window.toggleSave;
-window.toggleSave = async (pid) => {
-    const p = posts.find(x => x.id === pid);
-    if(p) updateUserInterests(extractKeywords(p.content), 8); // +8 Score for Save
-    if(originalToggleSave) await originalToggleSave(pid);
-};
-
-const originalPostComment = window.submitCommentDesktop; // and Mobile
-window.submitCommentDesktop = async () => {
-   if(window.currentViewingPostId) {
-       const p = posts.find(x => x.id === window.currentViewingPostId);
-       if(p) updateUserInterests(extractKeywords(p.content), 10); // +10 Score for Comment
-   }
-   if(originalPostComment) await originalPostComment();
-};
-
+function createPostElement(p,ctx='feed'){
+const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:'',isOfficial:false,id:p.authorId},st=p.settings||{privacy:'public',showLikes:true,showComments:true},d=document.createElement('article');d.id=`post-card-${ctx}-${p.id}`;d.className="post-card group overflow-hidden fade-in";d.onclick=()=>openPostView(p.id);let mh="",lh="";if(p.media){const ma=Array.isArray(p.media)?p.media:[p.media];if(ma.length===1){const s=ma[0],iv=s.includes('video')||s.includes('.mp4');mh=`<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv?'bg-black flex items-center justify-center':'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv?'':`openLightbox('${s}','image')`}">${iv?`<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>`:`<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`}else{const cid=`carousel-${ctx}-${p.id}`,iid=`inner-${ctx}-${p.id}`,cntId=`counter-${ctx}-${p.id}`;let sl='',dt='';ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.includes('video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="dot-${ctx}-${p.id}-${i}"></div>`});mh=`<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;(window.carouselStates=window.carouselStates||{})[cid]={index:0,total:ma.length}}}
+if(p.likes?.length&&currentUser.following){const f=p.likes.filter(id=>currentUser.following.includes(id)&&id!==currentUser.id),ff=f.length&&users.find(u=>u.id===f[0]);if(ff)lh=`<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length>1?` and ${f.length-1} others`:''}</span></div>`}
+const isLiked=p.likes?.includes(currentUser.id),isSaved=savedPosts.includes(p.id);d.innerHTML=`<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container img-placeholder w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${a.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>':''}${st.privacy==='private'?'<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>':''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content,`post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><div class="flex items-center gap-1"><button class="action-btn like js-like-btn-${p.id} ${isLiked?'active':''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart" class="w-6 h-6"></i></button>${st.showLikes?`<span class="js-like-count-${p.id} text-xs font-medium px-1 hover:underline cursor-pointer" onclick="event.stopPropagation();openLikes('${p.id}')">${(p.likes?.length>0)?p.likes.length:'0'}</span>`:''}<button class="action-btn comment ml-2" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments===false?'message-circle-off':'message-circle'}" class="w-6 h-6"></i> ${st.showComments?`<span class="js-comment-count-${p.id} text-xs font-medium">${(p.comments?.length>0)?p.comments.length:''}</span>`:''}</button><button class="action-btn share-btn ml-2" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2" class="w-6 h-6"></i></button></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved?'active':''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark" class="w-6 h-6"></i></button></div></div>`;return d}
 window.moveCarousel=(cid,dir)=>{const s=window.carouselStates[cid];if(!s)return;let n=s.index+dir;if(n<0)n=0;if(n>=s.total)n=s.total-1;s.index=n;const outer=document.getElementById(cid),inner=outer?outer.querySelector('.post-carousel-inner'):null;if(inner)inner.style.transform=`translateX(-${n*100}%)`;const dc=document.getElementById(cid).nextElementSibling;if(dc)dc.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===n));const ctid=cid.replace('carousel-','counter-'),cnt=document.getElementById(ctid);if(cnt)cnt.innerText=n+1};
 window.switchExploreMainTab=t=>{window.activeExploreTab=t;const m=t==='explore'?'main':t;['main','video','people','tags'].forEach(x=>{const el=document.getElementById(`tab-explore-${x}`),ed=document.getElementById(`tab-explore-${x}-d`);if(el)el.classList.remove('active');if(ed)ed.classList.remove('active')});document.getElementById(`tab-explore-${m}`)?.classList.add('active');document.getElementById(`tab-explore-${m}-d`)?.classList.add('active');window.activeExploreCategory=t==='video'?'All':'For You';handleSearch(document.getElementById('mobile-explore-search').value)};
 window.toggleExploreSearch=()=>{const b=document.getElementById('explore-search-bar');if(b){b.classList.toggle('hidden');if(!b.classList.contains('hidden'))document.getElementById('mobile-explore-search').focus()}};
@@ -721,6 +523,9 @@ window.showProfile=(uid,tab='posts')=>{
   const c=document.getElementById('view-profile'),me=uid===currentUser.id,fol=currentUser.following?.includes(uid);
   
   let ab=me?`<div class="flex gap-2"><button onclick="openEditProfile()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-200">Edit Profile</button><button onclick="openQR()" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button></div>`:`<div class="flex gap-2"><button id="profile-follow-btn" onclick="toggleFollow('${uid}')" class="${fol?'bg-gray-100 text-gray-700':'bg-[#0b57d0] text-white'} px-4 py-2 rounded-lg font-bold text-sm transition-colors">${fol?'Following':(u.settings?.privateNetwork?'Request':'Follow')}</button><button onclick="openQR('${uid}')" class="bg-gray-100 text-gray-700 px-2 py-2 rounded-lg hover:bg-gray-200"><i data-lucide="qr-code" class="w-5 h-5"></i></button></div>`;
+  
+  // Privacy logic: Only the user can open if connection is hidden or private, UNLESS it is the user themselves.
+  // Actually per request "only the user can open it only if their connection is hideen or private"
   const canViewConnections = me || (!u.settings?.hideConnections && !u.settings?.privateNetwork);
   const clickFollowing = canViewConnections ? `onclick="openUserList('following','${uid}')"` : `onclick="showToast('Connections are private')"`;
   const clickFollowers = canViewConnections ? `onclick="openUserList('followers','${uid}')"` : `onclick="showToast('Connections are private')"`;
@@ -740,7 +545,7 @@ window.showProfile=(uid,tab='posts')=>{
 };
 window.switchProfileTab=t=>{if(t==='posts'&&window.currentProfileTab==='posts'){openProfileFilter();return}document.querySelectorAll('#view-profile .tab-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes(t)));window.currentProfileTab=t;renderProfileContent(window.currentViewingProfileId,t)};
 window.renderProfileContent=(uid,t)=>{const c=document.getElementById('profile-content-area'),u=users.find(x=>x.id===uid);c.innerHTML="";if(t==='links'){const is=uid===currentUser.id,l=u.links||[];c.innerHTML=`<div class="max-w-4xl mx-auto py-6 space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 px-2">${is?`<button onclick="document.getElementById('add-link-modal').classList.remove('hidden')" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold hover:bg-gray-50 flex items-center justify-center gap-2 h-full"><i data-lucide="plus" class="w-5 h-5"></i> Add New Link</button>`:''}${!l.length&&!is?'<div class="col-span-2 text-center text-gray-400 py-10">No links added yet.</div>':l.map((k,i)=>`<a href="${k.url}" target="_blank" class="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-200 group relative"><div class="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200 mr-4 shrink-0"><i data-lucide="link" class="w-5 h-5 text-blue-600"></i></div><div class="flex-1 min-w-0"><div class="font-bold text-gray-900 truncate">${k.title}</div><div class="text-xs text-gray-500 truncate">${k.url}</div></div><i data-lucide="external-link" class="w-4 h-4 text-gray-400 ml-2"></i>${is?`<button onclick="event.preventDefault(); deleteLink(${i})" class="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50"><i data-lucide="trash-2" class="w-3 h-3"></i></button>`:''}</a>`).join('')}</div>`;refreshIcons();return}if(t==='liked'&&uid!==currentUser.id)return c.innerHTML='<div class="flex flex-col items-center justify-center py-20 text-gray-400 opacity-60"><i data-lucide="lock" class="w-16 h-16 mb-2"></i><p>This user\'s likes are private.</p></div>',refreshIcons();let tp=posts.filter(p=>t==='posts'?p.authorId===uid:t==='saved'?savedPosts.includes(p.id):t==='liked'?p.likes?.includes(uid):(p.collaborators?.some(x=>x.id===uid&&x.status==='accepted')||p.mentions?.includes(uid)));if(uid!==currentUser.id&&t==='posts'){const isF=currentUser.following.includes(uid);if(u.settings?.privateNetwork&&!isF){c.innerHTML='<div class="flex flex-col items-center justify-center py-20 text-gray-400 opacity-60"><i data-lucide="lock" class="w-16 h-16 mb-2"></i><p>This account is private.</p></div>';refreshIcons();return}tp=tp.filter(p=>(p.settings?.privacy==='public'||currentUser.following.includes(uid)))}if(window.profileSort==='latest')tp.sort((a,b)=>b.timestamp-a.timestamp);else if(window.profileSort==='oldest')tp.sort((a,b)=>a.timestamp-b.timestamp);else if(window.profileSort==='popular')tp.sort((a,b)=>(b.likes?.length||0)-(a.likes?.length||0));if(tp.length===0)c.innerHTML='<div class="text-center py-20 text-gray-400">No posts yet</div>';else c.innerHTML=`<div class="grid-post-container">${tp.map(p=>{const m=Array.isArray(p.media)?p.media[0]:p.media,isV=m&&(m.includes('video')||m.endsWith('.mp4')||m.startsWith('data:video'));return `<div class="grid-post-item group img-placeholder" onclick="openPostView('${p.id}')">${m?(isV?`<video src="${m}" class="w-full h-full object-cover pointer-events-none"></video><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play" class="w-8 h-8 text-white drop-shadow-md"></i></div>`:`<img src="${m}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`+(Array.isArray(p.media)&&p.media.length>1?`<div class="absolute top-2 right-2"><i data-lucide="layers" class="w-4 h-4 text-white drop-shadow-md"></i></div>`: '')):`<div class="grid-post-text-preview">${p.content.substring(0,60)}${p.content.length>60?'...':''}</div>`}<div class="grid-post-overlay"><div class="flex items-center gap-1"><i data-lucide="heart" class="w-5 h-5 fill-white"></i> ${p.likes?.length>0?p.likes.length:'0'}</div><div class="flex items-center gap-1"><i data-lucide="message-circle" class="w-5 h-5 fill-white"></i> ${p.comments?.length>0?p.comments.length:''}</div></div></div>`}).join('')}</div>`;refreshIcons()};
-window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;manageHistory('user-list-overlay');const m=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText=type==='following'?'Following':'Followers';const me=uid===currentUser.id,fol=currentUser.following.includes(uid),priv=u.settings?.privateNetwork,hide=u.settings?.hideConnections;if(!me&&(hide||(priv&&!fol))){c.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide?'eye-off':'lock'}" class="w-16 h-16 mb-2"></i><p>${hide?'Connections hidden':'Account is private'}</p></div>`}else{const ids=type==='following'?(u.following||[]):(u.followers||[]);if(!ids.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No users found.</div>';else{c.innerHTML='';ids.forEach(id=>{const user=users.find(x=>x.id===id);if(user){const d=document.createElement('div');d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";d.onclick=()=>{closeUserList();showProfile(user.id)};d.innerHTML=`<div class="flex items-center gap-3"><img src="${user.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username||'user'}</div></div></div>`;c.appendChild(d)}})}}toggleModalAnim('user-list-overlay','user-list-modal',!0);refreshIcons()};window.closeUserList=()=>toggleModalAnim('user-list-overlay','user-list-modal',!1);
+window.openUserList=(type,uid)=>{const u=users.find(x=>x.id===uid);if(!u)return;manageHistory('user-list-overlay');const m=document.getElementById('user-list-overlay'),c=document.getElementById('user-list-content');document.getElementById('user-list-title').innerText=type==='following'?'Following':'Followers';const me=uid===currentUser.id,fol=currentUser.following.includes(uid),priv=u.settings?.privateNetwork,hide=u.settings?.hideConnections;if(!me&&(hide||(priv&&!fol))){c.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide?'eye-off':'lock'}" class="w-16 h-16 mb-2"></i><p>${hide?'Connections hidden':'Account is private'}</p></div>`}else{const ids=type==='following'?(u.following||[]):(u.followers||[]);if(!ids.length)c.innerHTML='<div class="text-center text-gray-400 py-8">No users found.</div>';else{c.innerHTML='';ids.forEach(id=>{const user=users.find(x=>x.id===id);if(user){const d=document.createElement('div');d.className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer";d.onclick=()=>{closeUserList();showProfile(user.id)};d.innerHTML=`<div class="flex items-center gap-3"><div class="img-placeholder rounded-full w-10 h-10 shrink-0"><img src="${user.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username||'user'}</div></div></div>`;c.appendChild(d)}})}}toggleModalAnim('user-list-overlay','user-list-modal',!0);refreshIcons()};window.closeUserList=()=>toggleModalAnim('user-list-overlay','user-list-modal',!1);
 const animModal=(oid,mid,s)=>{const o=document.getElementById(oid),m=document.getElementById(mid);if(s){o.classList.remove('hidden');m.style.transition='none';o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');void m.offsetWidth;m.style.transition='';setTimeout(()=>{o.classList.remove('opacity-0');m.classList.remove('translate-y-full','md:scale-95');m.classList.add('translate-y-0','md:scale-100')},20)}else{o.classList.add('opacity-0');m.classList.add('translate-y-full','md:scale-95');m.classList.remove('translate-y-0','md:scale-100');setTimeout(()=>o.classList.add('hidden'),200)}};
 
 window.openEditProfile=()=>{
