@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +99,7 @@ i[data-lucide],svg{flex-shrink:0}
 body.reel-mode #mobile-bottom-nav{display:none!important}
 @media (min-width:768px){.post-modal-layout{flex-direction:row;width:90vw;max-width:1200px;height:85vh;gap:0;background:#fff;border-radius:24px;overflow:hidden}.desktop-split-view{display:flex;width:100%;height:100%}.desktop-post-container{flex:1.2;display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--outline);position:relative}.desktop-comments-container{flex:1;display:flex;flex-direction:column;height:100%;background:#fff}.stage-content{width:100%;height:auto;object-fit:contain;border-radius:8px}}
 @media (max-width:767px){.post-modal-layout{width:100vw;height:100%;background:#fff}.mobile-overlay-layout{display:flex;flex-direction:column;height:100%}.mobile-fixed-header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--outline);background:#fff;flex-shrink:0;z-index:20}.mobile-scroll-content{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:0}.mobile-fixed-footer{height:auto;padding:12px 16px;border-top:1px solid var(--outline);background:#fff;flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}.discussion-panel{display:none}}
-.discussion-header{padding:12px 16px;border-bottom:1px solid var(--outline);display:flex;align-items:center;justify-content:space-between;background:#fff;z-index:10}
+.discussion-header{padding:12px 16px;border-bottom:1px solid var(--outline);display:flex;align-items:center;justify-content:space-between;background:#fff;z-index:10;border-top:1px solid var(--outline);}
 .discussion-scroll{flex:1;overflow-y:auto;padding:0;background:#fff}
 .replies-line-container{margin-left:24px;padding-left:16px;border-left:2px solid #f0f2f5;margin-top:0px;display:flex;flex-direction:column;gap:0}
 .chat-input-wrapper{display:flex;align-items:center;background:0 0;padding:8px 0;gap:12px;border-top:1px solid transparent}
@@ -126,7 +127,6 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 .toggle-setting-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #f0f0f0}
 .toggle-setting-row:last-child{border-bottom:none}
 .discussion-footer {padding: 12px 16px; border-top: 1px solid var(--outline); background: #fff; z-index: 20;}
-/* SHIMMER LOADING EFFECT - INSTAGRAM STYLE */
 .img-placeholder {
   background: #f6f7f8;
   background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -297,7 +297,7 @@ if(l){l.style.opacity='0';setTimeout(()=>l.remove(),500)}
 const p=new URLSearchParams(window.location.search).get('postId');if(p)setTimeout(()=>{openPostView(p);window.history.pushState({},document.title,window.location.pathname)},1000)});
 window.onpopstate=e=>{
 const modals=[{id:'post-view-overlay',close:window.closePostView},{id:'thread-overlay',close:window.closeThread},{id:'edit-profile-overlay',close:window.closeEditProfile},{id:'likes-overlay',close:window.closeLikes},{id:'user-list-overlay',close:window.closeUserList},{id:'feed-filter-overlay',close:window.closeFeedFilter},{id:'compose-overlay',close:window.attemptCloseCompose},{id:'share-overlay',close:window.closeShareMenu},{id:'post-options-overlay',close:window.hidePostMenu},{id:'settings-overlay',close:window.closeSettings},{id:'notif-options-overlay',close:window.closeNotifOptions},{id:'qr-overlay',close:window.closeQR},{id:'privacy-overlay',close:window.closePrivacySettings},{id:'profile-filter-overlay',close:window.closeProfileFilter},{id:'download-select-overlay',close:window.closeDownloadSelect},{id:'adjust-image-overlay',close:window.closeImageAdjust},{id:'comment-options-overlay',close:window.closeCommentOptions},{id:'create-menu-overlay',close:window.closeCreateMenu},{id:'announcement-overlay',close:window.closeAnnouncement},{id:'profile-preview-overlay',close:window.closeProfilePreview},{id:'comment-filter-overlay',close:window.closeCommentFilter},{id:'view-profile',close:()=>window.switchView('feed')}];
-let closedAny=false;if(e.state&&e.state.modal){}else{for(let m of modals){const el=document.getElementById(m.id);if(el&&!el.classList.contains('hidden')&&!el.classList.contains('opacity-0')){if(m.id==='view-profile'){if(window.currentViewingProfileId){window.switchView('feed');window.currentViewingProfileId=null;closedAny=true}}else if(m.id==='compose-overlay'){window.closeCompose();closedAny=true}else if(m.id==='create-menu-overlay'){window.closeCreateMenu();closedAny=true}else{m.close();closedAny=true}if(closedAny)break}}}if(!closedAny){if(exitAttempt){}else{window.history.pushState({root:true},"");exitAttempt=true;showToast("Press back again to exit");setTimeout(()=>{exitAttempt=false},2000)}}};
+let closedAny=false;if(e.state.modal){}else{for(let m of modals){const el=document.getElementById(m.id);if(el&&!el.classList.contains('hidden')&&!el.classList.contains('opacity-0')){if(m.id==='view-profile'){if(window.currentViewingProfileId){window.switchView('feed');window.currentViewingProfileId=null;closedAny=true}}else if(m.id==='compose-overlay'){window.closeCompose();closedAny=true}else if(m.id==='create-menu-overlay'){window.closeCreateMenu();closedAny=true}else{m.close();closedAny=true}if(closedAny)break}}}if(!closedAny){if(exitAttempt){}else{window.history.pushState({root:true},"");exitAttempt=true;showToast("Press back again to exit");setTimeout(()=>{exitAttempt=false},2000)}}};
 window.checkUsername=e=>{const v=e.value.trim().toLowerCase(),l=v.length;document.getElementById('username-counter').innerText=`${l}/20`;if(l<3){document.getElementById('username-error').classList.add('hidden');return}const t=users.some(u=>u.username===v&&u.id!==currentUser.id);const err=document.getElementById('username-error');if(t){err.innerText="Username taken";err.classList.remove('hidden')}else err.classList.add('hidden')};
 window.saveUsername=async()=>{const v=document.getElementById('new-username-input').value.trim().toLowerCase();if(v.length<3||v.length>20||/\s/.test(v)||!/^[a-z0-9_.]+$/.test(v))return showToast("Invalid username",true);if(!(await getDocs(query(collection(db,"users"),where("username","==",v)))).empty)return showToast("Taken",true);await updateDoc(doc(db,"users",currentUser.id),{username:v});currentUser.username=v;document.getElementById('username-modal').classList.add('hidden');showToast("Username set!")};
 function initRealtimeListeners(){
@@ -391,47 +391,20 @@ window.openLikes = pid => {
   manageHistory('likes-overlay');
   const p = posts.find(x => x.id === pid), c = document.getElementById('likes-list-content');
   const searchInput = document.getElementById('likes-search-input');
-  
-  // Clear search on open
   if (searchInput) searchInput.value = '';
-
-  if (p.settings?.allowLikeView === false && p.authorId !== currentUser.id) {
-    c.innerHTML = '<div class="text-center text-gray-400 py-8">Creator hid likes.</div>';
-    toggleModalAnim('likes-overlay', 'likes-modal', true);
-    return;
-  }
-
-  // Initial render
   renderLikesList(p.likes || []);
-
-  // Set input handler
   searchInput.oninput = (e) => {
     const term = e.target.value.toLowerCase();
     const allLikes = p.likes || [];
-    if (!term) {
-        renderLikesList(allLikes);
-    } else {
-        const filtered = allLikes.filter(uid => {
-            const u = users.find(x => x.id === uid);
-            return u && (u.name.toLowerCase().includes(term) || (u.username && u.username.toLowerCase().includes(term)));
-        });
-        renderLikesList(filtered);
-    }
+    if (!term) { renderLikesList(allLikes); } else { const filtered = allLikes.filter(uid => { const u = users.find(x => x.id === uid); return u && (u.name.toLowerCase().includes(term) || (u.username && u.username.toLowerCase().includes(term))); }); renderLikesList(filtered); }
   };
-
   toggleModalAnim('likes-overlay', 'likes-modal', true);
 };
 
 window.renderLikesList = (idList) => {
     const c = document.getElementById('likes-list-content');
-    if (!idList || !idList.length) {
-        c.innerHTML = '<div class="text-center text-gray-400 py-8">No matching users.</div>';
-        return;
-    }
-    c.innerHTML = idList.map(uid => {
-        const u = users.find(x => x.id === uid);
-        return u ? `<div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer" onclick="closeLikes();showProfile('${u.id}')"><div class="img-placeholder rounded-full w-10 h-10 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500 truncate w-32">${u.bio}</div></div></div>` : '';
-    }).join('');
+    if (!idList || !idList.length) { c.innerHTML = '<div class="text-center text-gray-400 py-8">No matching users.</div>'; return; }
+    c.innerHTML = idList.map(uid => { const u = users.find(x => x.id === uid); return u ? `<div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer" onclick="closeLikes();showProfile('${u.id}')"><div class="img-placeholder rounded-full w-10 h-10 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500 truncate w-32">${u.bio}</div></div></div>` : ''; }).join('');
 };
 
 window.closeLikes=()=>toggleModalAnim('likes-overlay','likes-modal',!1);
@@ -600,32 +573,25 @@ window.openEditProfile=()=>{
   document.getElementById('edit-banner-preview').style.objectPosition=`center ${currentBannerPos=initialBannerPos=currentUser.bannerPos||50}%`;
   document.getElementById('banner-pos-hint').innerText=`${currentBannerPos}%`;
   document.getElementById('edit-email').value=currentUser.email||"";
-  
-  // Name limit logic
   const ONE_WEEK = 604800000;
   const now = Date.now();
-  
   const lastNameChange = currentUser.lastNameChange?.toDate?.()?.getTime() || 0;
   const daysLeftName = Math.ceil((lastNameChange + ONE_WEEK - now) / (1000 * 60 * 60 * 24));
   const canEditName = now - lastNameChange > ONE_WEEK;
-  
   const lastUserChange = currentUser.lastUsernameChange?.toDate?.()?.getTime() || 0;
   const daysLeftUser = Math.ceil((lastUserChange + ONE_WEEK - now) / (1000 * 60 * 60 * 24));
   const canEditUser = now - lastUserChange > ONE_WEEK;
-  
   const ni = document.getElementById('edit-name');
   ni.value = currentUser.name;
   ni.disabled = !canEditName;
   document.getElementById('name-change-hint').innerText = canEditName ? "You can change your name once a week." : `Wait ${daysLeftName} days to change name.`;
   document.getElementById('name-change-hint').className = canEditName ? "text-[10px] text-gray-400 mt-1" : "text-[10px] text-red-500 mt-1 font-medium";
-
   const ui = document.getElementById('edit-username');
   ui.value = currentUser.username||"";
   ui.disabled = !canEditUser;
   document.getElementById('username-change-hint').innerText = canEditUser ? "You can change this once a week." : `Wait ${daysLeftUser} days to change username.`;
   document.getElementById('username-change-hint').className = canEditUser ? "text-[10px] text-gray-400" : "text-[10px] text-red-500 font-medium";
   document.getElementById('username-counter').innerText=`${(currentUser.username||"").length}/20`;
-  
   document.body.classList.add('modal-open');
   toggleModalAnim('edit-profile-overlay','edit-profile-modal',!0);
 };
@@ -637,88 +603,52 @@ window.saveProfileChanges=async()=>{
   const n=document.getElementById('edit-name').value.trim();
   const bio=document.getElementById('edit-bio').value;
   const un=document.getElementById('edit-username').value.trim().toLowerCase();
-  
   if(!n) return showToast("Name required",true);
-  
-  // Validation again just in case
   const ONE_WEEK = 604800000;
   const now = Date.now();
   const nameChanged = n !== currentUser.name;
   const userChanged = un !== currentUser.username;
-  
   if (nameChanged) {
       const lastNameChange = currentUser.lastNameChange?.toDate?.()?.getTime() || 0;
       if (now - lastNameChange < ONE_WEEK) return showToast("Name change limit reached", true);
   }
-  
   if (userChanged) {
       const lastUserChange = currentUser.lastUsernameChange?.toDate?.()?.getTime() || 0;
       if (now - lastUserChange < ONE_WEEK) return showToast("Username limit reached", true);
       if(un.length<3||un.length>20||!/^[a-z0-9_.]+$/.test(un)) return showToast("Invalid username",true);
-      
       const q = query(collection(db, "users"), where("username", "==", un));
       const snap = await getDocs(q);
       if(!snap.empty && snap.docs[0].id !== currentUser.id) return showToast("Username taken", true);
   }
-  
-  // Progress UI
   const progOverlay = document.getElementById('action-progress-overlay');
   const progBar = document.getElementById('action-progress-bar');
   progOverlay.classList.remove('hidden');
   progOverlay.classList.add('flex');
-  
   let pr = 0;
   const int = setInterval(()=>{
       if(pr<90) { pr += Math.random()*5; progBar.style.width=`${Math.min(pr,90)}%`; }
   }, 100);
-
   try {
       let av=currentUser.avatar,bu=currentUser.banner;
       if(currentAvatarBlob) av=await uploadToImgHippo(currentAvatarBlob);
       if(currentBannerBlob) bu=await uploadToImgHippo(currentBannerBlob);
-      
-      const updateData = {
-          name: n,
-          bio: bio,
-          avatar: av,
-          banner: bu,
-          bannerPos: currentBannerPos,
-          username: un
-      };
-      
+      const updateData = { name: n, bio: bio, avatar: av, banner: bu, bannerPos: currentBannerPos, username: un };
       if(nameChanged) updateData.lastNameChange = serverTimestamp();
       if(userChanged) updateData.lastUsernameChange = serverTimestamp();
-      
       await updateDoc(doc(db,"users",currentUser.id), updateData);
-      
-      // Update local state
-      Object.assign(currentUser, {
-          name: n, bio: bio, avatar: av, banner: bu, bannerPos: currentBannerPos, username: un,
-          lastNameChange: nameChanged ? {toDate: ()=>new Date()} : currentUser.lastNameChange,
-          lastUsernameChange: userChanged ? {toDate: ()=>new Date()} : currentUser.lastUsernameChange
-      });
-      
+      Object.assign(currentUser, { name: n, bio: bio, avatar: av, banner: bu, bannerPos: currentBannerPos, username: un, lastNameChange: nameChanged ? {toDate: ()=>new Date()} : currentUser.lastNameChange, lastUsernameChange: userChanged ? {toDate: ()=>new Date()} : currentUser.lastUsernameChange });
       currentAvatarBlob=currentBannerBlob=null;
       updateUserInterface();
-      
       clearInterval(int);
       progBar.style.width='100%';
       await new Promise(r=>setTimeout(r,500));
-      
       progOverlay.classList.add('hidden');
       progOverlay.classList.remove('flex');
       progBar.style.width='0%';
-      
       closeEditProfile();
       showProfile(currentUser.id,window.currentProfileTab);
       showToast("Profile Updated");
-  } catch(e) {
-      console.error(e);
-      clearInterval(int);
-      progOverlay.classList.add('hidden');
-      progOverlay.classList.remove('flex');
-      showToast("Update failed", true);
-  }
+  } catch(e) { console.error(e); clearInterval(int); progOverlay.classList.add('hidden'); progOverlay.classList.remove('flex'); showToast("Update failed", true); }
 };
 
 window.saveLink=async()=>{const t=document.getElementById('new-link-title').value.trim(),u=document.getElementById('new-link-url').value.trim();if(!t||!u)return showToast("Fill all fields",true);const l={title:t,url:u,type:'web'};await updateDoc(doc(db,"users",currentUser.id),{links:arrayUnion(l)});(currentUser.links=currentUser.links||[]).push(l);document.getElementById('add-link-modal').classList.add('hidden');document.getElementById('new-link-title').value=document.getElementById('new-link-url').value="";renderProfileContent(currentUser.id,'links');showToast("Link added!")};window.deleteLink=async i=>showAlert("Remove link?",async()=>{await updateDoc(doc(db,"users",currentUser.id),{links:arrayRemove(currentUser.links[i])});currentUser.links.splice(i,1);renderProfileContent(currentUser.id,'links');showToast("Removed")});
