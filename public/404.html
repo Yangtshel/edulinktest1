@@ -22,7 +22,7 @@
             overscroll-behavior: none;
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER (Kept as requested) --- */
         header {
             position: absolute;
             top: 0;
@@ -44,8 +44,7 @@
             object-fit: contain;
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
             pointer-events: auto;
-            transition: transform 0.2s ease-out;
-            will-change: transform; /* Optimized hover */
+            transition: transform 0.3s ease;
         }
 
         .header-logo:hover {
@@ -64,14 +63,14 @@
             letter-spacing: 2px;
             padding: 10px 20px;
             border-radius: 30px;
-            transition: background 0.2s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         .header-nav a:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
         /* --- SCENE --- */
@@ -91,13 +90,20 @@
             inset: 0;
             z-index: 100;
             pointer-events: none;
-            /* Simple vignette is cheap */
             background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.3) 120%);
         }
-
-        /* --- OPTIMIZED CLOUDS (CSS BLUR) --- */
-        /* Instead of complex SVG filters, we use box-shadows and blur */
         
+        .grain {
+            position: absolute;
+            inset: 0;
+            z-index: 101;
+            opacity: 0.04;
+            pointer-events: none;
+            /* Simple noise texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- ORIGINAL CLOUDS (Restored) --- */
         .layer {
             position: absolute;
             width: 100%;
@@ -105,75 +111,57 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            will-change: transform; /* Hint to browser to use GPU */
+            /* CRITICAL PERFORMANCE FIX: */
+            will-change: transform; 
+            transform: translateZ(0); /* Force GPU */
         }
 
-        .cloud-base {
+        .smoke-puff {
             position: absolute;
-            background: white;
+            background: radial-gradient(closest-side, rgba(255,255,255,0.8), transparent);
             border-radius: 50%;
-            /* This is the key to performance: CSS Blur is fast */
-            filter: blur(35px); 
+            /* The original texture filter you liked */
+            filter: url(#cloud-filter);
         }
 
-        /* Cloud Shapes - Built using pseudo-elements to create "lumps" */
-        .cloud-shape {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: inherit;
-        }
-        
-        .cloud-shape::after, .cloud-shape::before {
-            content: '';
-            position: absolute;
-            background: inherit;
-            border-radius: 50%;
-        }
+        /* Cloud Positioning */
+        .layer-back .smoke-puff { opacity: 0.3; animation: drift 80s infinite ease-in-out alternate; }
+        .b1 { width: 800px; height: 600px; top: -20%; left: -10%; }
+        .b2 { width: 900px; height: 700px; bottom: -20%; right: -20%; }
 
-        /* --- CLOUD POSITIONS & STYLES --- */
-        
-        /* Back Layer - Faint, Slow */
-        .layer-back .cloud-base { opacity: 0.3; }
-        .b1 { width: 500px; height: 300px; top: 10%; left: 10%; animation: float 60s infinite ease-in-out; }
-        .b1 .cloud-shape::after { width: 300px; height: 300px; top: -50px; left: 200px; }
-        
-        .b2 { width: 600px; height: 400px; bottom: 10%; right: 10%; animation: float 70s infinite ease-in-out reverse; }
-        .b2 .cloud-shape::after { width: 400px; height: 400px; top: -100px; left: -100px; }
+        .layer-mid .smoke-puff { mix-blend-mode: soft-light; }
+        .m1 { width: 600px; height: 400px; top: 20%; left: 5%; opacity: 0.5; animation: float 20s infinite ease-in-out; }
+        .m2 { width: 500px; height: 400px; bottom: 15%; right: 10%; opacity: 0.5; animation: float 25s infinite ease-in-out reverse; }
 
-        /* Mid Layer - Slightly brighter */
-        .layer-mid .cloud-base { opacity: 0.5; mix-blend-mode: overlay; }
-        
-        /* Central Clouds (Around Text) */
+        /* The Central Clouds (Restored) */
         .c1-center { 
-            width: 400px; height: 300px; 
-            top: 45%; left: 50%; 
+            width: 800px; height: 600px; 
+            top: 50%; left: 50%; 
             transform: translate(-50%, -50%);
-            opacity: 0.4;
+            opacity: 0.45; 
+            animation: float-center 30s infinite ease-in-out;
         }
-        .c1-center .cloud-shape::after { width: 300px; height: 300px; top: 50px; left: 150px; }
-        .c1-center .cloud-shape::before { width: 300px; height: 300px; top: 50px; left: -100px; }
-
         .c2-center { 
-            width: 300px; height: 200px; 
-            top: 60%; left: 40%; 
+            width: 500px; height: 350px; 
+            top: 65%; left: 45%; 
             transform: translate(-50%, -50%);
-            opacity: 0.3;
+            opacity: 0.4; 
+            animation: drift 45s infinite alternate-reverse ease-in-out;
         }
 
-        /* Front Layer - Fast, Blurry */
-        .layer-front .cloud-base { opacity: 0.2; filter: blur(50px); }
-        .f1 { width: 800px; height: 300px; bottom: -10%; left: -10%; }
-        .f1 .cloud-shape::after { width: 500px; height: 400px; top: -100px; right: -100px; }
+        /* Front Layer */
+        .layer-front { z-index: 50; pointer-events: none; }
+        /* Optimization: Removed extra 'blur(30px)' here which caused lag. The filter handles texture. */
+        .layer-front .smoke-puff { opacity: 0.3; } 
+        .f1 { width: 1100px; height: 400px; bottom: -15%; left: -20%; animation: drift 40s infinite alternate; }
 
         /* --- STARS --- */
         .star {
             position: absolute;
-            background: white;
+            background: var(--star-white);
             border-radius: 50%;
             opacity: 0;
-            /* Removed heavy box-shadow from stars for performance */
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
             animation: twinkle var(--duration) ease-in-out infinite;
             animation-delay: var(--delay);
             will-change: opacity;
@@ -181,30 +169,40 @@
 
         @keyframes twinkle {
             0% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); } /* Removed box-shadow here too */
+            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 6px rgba(255, 255, 255, 1); }
             100% { opacity: 0.2; transform: scale(0.8); }
         }
 
-        /* Shooting Star */
         .shooting-star {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 30px; /* Tail length */
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,1), transparent);
-            transform-origin: left;
-            animation: shoot 2s linear infinite;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.1), 0 0 20px rgba(255,255,255,1);
+            animation: shoot 3s linear infinite;
             opacity: 0;
             z-index: 5;
             pointer-events: none;
-            will-change: transform, opacity;
+        }
+
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,1), transparent);
+            right: 0;
         }
 
         @keyframes shoot {
             0% { transform: rotate(-45deg) translateX(0); opacity: 1; }
-            20% { transform: rotate(-45deg) translateX(-500px); opacity: 0; }
-            100% { transform: rotate(-45deg) translateX(-500px); opacity: 0; }
+            15% { transform: rotate(-45deg) translateX(-1000px); opacity: 0; }
+            100% { transform: rotate(-45deg) translateX(-1000px); opacity: 0; }
         }
 
         /* --- CONTENT --- */
@@ -224,8 +222,8 @@
             margin: 0;
             mix-blend-mode: overlay;
             opacity: 0.9;
-            /* Text shadow is expensive, keeping it minimal */
-            text-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: pulse-text 8s infinite ease-in-out;
         }
 
         .error-text {
@@ -235,23 +233,23 @@
             margin-top: 20px;
             font-weight: 400;
             opacity: 0.95;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         button {
             margin-top: 45px;
             padding: 14px 45px;
-            /* Removed backdrop-filter for performance in main button state */
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            /* Removed backdrop-filter here to reduce lag */
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             color: white;
             font-size: 0.9rem;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s;
+            transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             position: relative;
             z-index: 11;
         }
@@ -259,25 +257,44 @@
         button:hover {
             background: white;
             color: var(--deep-atmosphere);
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 0 30px rgba(255,255,255,0.7);
+            transform: translateY(-2px);
         }
 
         /* --- ANIMATIONS --- */
-        @keyframes float { 
-            0%, 100% { transform: translateY(0); } 
-            50% { transform: translateY(-20px); } 
+        @keyframes drift { from { transform: translateX(-100px); } to { transform: translateX(100px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-40px) scale(1.05); } }
+        @keyframes float-center { 
+            0%, 100% { transform: translate(-50%, -50%) scale(1); } 
+            50% { transform: translate(-50%, -80px) scale(1.05); } 
         }
+        @keyframes pulse-text { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.7; } }
 
         @media (max-width: 768px) {
             header { padding: 20px; }
             .header-logo { height: 35px; }
-            .c1-center { width: 300px; height: 200px; }
-            .c1-center .cloud-shape::after { display: none; } /* Simplify on mobile */
+            .c1-center { width: 600px; height: 450px; opacity: 0.35; }
+            .c2-center { width: 400px; height: 300px; opacity: 0.3; }
+        }
+
+        @media (max-width: 480px) {
+            .smoke-puff { transform: scale(0.6); opacity: 0.3 !important; }
+            .c1-center, .c2-center { opacity: 0.25 !important; }
+            .f1 { bottom: -20%; }
+            button { padding: 12px 30px; font-size: 0.8rem; margin-top: 30px; }
+            .header-nav { display: none; }
         }
     </style>
 </head>
 <body>
+
+    <svg style="display: none;">
+        <filter id="cloud-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="turbulence"/>
+            <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="80" xChannelSelector="R" yChannelSelector="G"/>
+            <feGaussianBlur stdDeviation="3" />
+        </filter>
+    </svg>
 
     <header>
         <img src="https://i.imghippo.com/files/vgr8207c.png" alt="Logo" class="header-logo">
@@ -289,19 +306,22 @@
     <div class="scene" id="scene">
         
         <div class="overlay-texture"></div>
+        <div class="grain"></div>
 
         <div class="layer" id="star-layer" data-speed="0.02">
             <div id="shooting-star-container"></div>
         </div>
 
         <div class="layer layer-back" data-speed="-0.03">
-            <div class="cloud-base b1"><div class="cloud-shape"></div></div>
-            <div class="cloud-base b2"><div class="cloud-shape"></div></div>
+            <div class="smoke-puff b1"></div>
+            <div class="smoke-puff b2"></div>
         </div>
 
         <div class="layer layer-mid" data-speed="0.06">
-            <div class="cloud-base c1-center"><div class="cloud-shape"></div></div>
-            <div class="cloud-base c2-center"><div class="cloud-shape"></div></div>
+            <div class="smoke-puff m1"></div>
+            <div class="smoke-puff m2"></div>
+            <div class="smoke-puff c1-center"></div>
+            <div class="smoke-puff c2-center"></div>
         </div>
 
         <div class="content">
@@ -310,8 +330,8 @@
             <button onclick="window.history.back()">Return</button>
         </div>
 
-        <div class="layer layer-front" data-speed="0.12">
-            <div class="cloud-base f1"><div class="cloud-shape"></div></div>
+        <div class="layer layer-front" data-speed="0.1">
+            <div class="smoke-puff f1"></div>
         </div>
     </div>
 
@@ -321,11 +341,9 @@
         const shootingStarContainer = document.getElementById('shooting-star-container');
         const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-        // --- 1. LIGHTWEIGHT STARS ---
+        // --- 1. STARS ---
         function createStars() {
-            const starCount = isMobile ? 50 : 120; // Reduced count slightly
-            const fragment = document.createDocumentFragment(); // Performance optimization
-
+            const starCount = isMobile ? 60 : 150; 
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
@@ -334,16 +352,14 @@
                 const size = Math.random() * 2 + 1; 
                 const duration = Math.random() * 3 + 2 + 's';
                 const delay = Math.random() * 5 + 's';
-                
                 star.style.left = `${x}%`;
                 star.style.top = `${y}%`;
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
                 star.style.setProperty('--duration', duration);
                 star.style.setProperty('--delay', delay);
-                fragment.appendChild(star);
+                starLayer.appendChild(star);
             }
-            starLayer.appendChild(fragment);
         }
 
         // --- 2. SHOOTING STAR ---
@@ -354,51 +370,48 @@
             const startX = Math.random() * 40 + 60;
             star.style.top = startY + '%';
             star.style.left = startX + '%';
+            star.style.animationDelay = (Math.random() * 2) + 's';
             shootingStarContainer.appendChild(star);
-            
-            // Cleanup
-            setTimeout(() => { star.remove(); }, 2500);
-            
-            // Loop
-            setTimeout(createShootingStar, Math.random() * 4000 + 3000); 
+            setTimeout(() => { star.remove(); setTimeout(createShootingStar, Math.random() * 5000 + 2000); }, 4000);
         }
 
         createStars();
         setTimeout(createShootingStar, 1000);
 
-        // --- 3. HIGH PERFORMANCE LERP LOOP ---
+        // --- 3. SMOOTH PARALLAX (LERP) ---
+        // This is the physics-based movement that makes it feel smooth
         if (!isMobile) {
-            let targetX = 0, targetY = 0;
+            let mouseX = 0, mouseY = 0;
             let currentX = 0, currentY = 0;
-            const ease = 0.08; // Slightly faster ease for responsiveness
+            const ease = 0.05; 
 
             document.addEventListener('mousemove', (e) => {
-                // Calculation on event is cheap
-                targetX = (window.innerWidth / 2 - e.clientX) / 50; // Reduced range divisor
-                targetY = (window.innerHeight / 2 - e.clientY) / 50;
+                mouseX = (window.innerWidth / 2 - e.clientX) / (window.innerWidth / 2);
+                mouseY = (window.innerHeight / 2 - e.clientY) / (window.innerHeight / 2);
             });
 
             function animate() {
-                // Interpolate
-                currentX += (targetX - currentX) * ease;
-                currentY += (targetY - currentY) * ease;
+                currentX += (mouseX - currentX) * ease;
+                currentY += (mouseY - currentY) * ease;
 
-                // Stop animation if values are extremely close (Save CPU)
-                if (Math.abs(targetX - currentX) > 0.01 || Math.abs(targetY - currentY) > 0.01) {
-                    layers.forEach(layer => {
-                        const speed = parseFloat(layer.getAttribute('data-speed'));
-                        const x = currentX * speed * 50; 
-                        const y = currentY * speed * 50;
-                        
-                        // force 3d transform for gpu
-                        layer.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                    });
-                }
+                layers.forEach(layer => {
+                    const speed = parseFloat(layer.getAttribute('data-speed'));
+                    const xPos = currentX * speed * 80;
+                    const yPos = currentY * speed * 80;
+                    const rotate = currentX * speed * 2;
 
+                    // GPU Translate
+                    if(layer.id === 'star-layer') {
+                         layer.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+                    } else {
+                         layer.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) rotate(${rotate}deg)`;
+                    }
+                });
                 requestAnimationFrame(animate);
             }
             animate();
         }
     </script>
+
 </body>
 </html>
