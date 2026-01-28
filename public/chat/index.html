@@ -62,6 +62,11 @@ body.chat-active .chat-window { transform: translateX(0); }
 .heart-fixed { transition: transform 0.1s; }
 .heart-fixed:active { transform: scale(0.9); }
 
+/* Message Reaction */
+.msg-reaction { position: absolute; bottom: -6px; right: 0; background: white; border-radius: 999px; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; z-index: 5; }
+.msg-self .msg-reaction { right: 0; bottom: -8px; }
+.msg-other .msg-reaction { left: 0; bottom: -8px; right: auto; }
+
 /* Input */
 .chat-input-area { padding: 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
 .chat-input { background: #efefef; border-radius: 22px; padding: 11px 16px; flex: 1; outline: none; border: 1px solid transparent; font-size: 15px; max-height: 100px; resize: none; transition: border 0.2s; }
@@ -105,6 +110,8 @@ body.chat-active .chat-window { transform: translateX(0); }
     margin-bottom: 12px;
     position: relative;
     z-index: 20;
+    width: 96px; /* w-24 */
+    height: 96px; /* h-24 */
 }
 
 .details-footer {
@@ -121,6 +128,15 @@ body.chat-active .chat-window { transform: translateX(0); }
     gap: 12px;
     z-index: 30;
     padding-bottom: env(safe-area-inset-bottom);
+}
+
+.like-animation {
+    animation: popLike 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popLike {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 </style>
@@ -177,7 +193,9 @@ body.chat-active .chat-window { transform: translateX(0); }
                         <img id="chat-header-avatar" src="" class="w-8 h-8 rounded-full border border-gray-200 object-cover bg-gray-100">
                         <div>
                             <div class="font-bold text-gray-900 text-[15px] leading-tight" id="chat-header-name">User</div>
-                            <div class="text-xs text-gray-500 leading-tight" id="chat-header-status">Active now</div>
+                            <div class="text-xs text-gray-500 leading-tight flex items-center gap-1.5" id="chat-header-status">
+                                Active now <span class="w-2 h-2 rounded-full bg-green-500 block"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +208,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
             <div class="chat-input-area">
                 <button class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="document.getElementById('img-upload').click()">
-                    <i data-lucide="image" class="w-6 h-6 text-gray-800"></i>
+                    <i data-lucide="image" class="w-7 h-7 text-gray-800"></i>
                 </button>
                 <input type="file" id="img-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
                 
@@ -199,10 +217,10 @@ body.chat-active .chat-window { transform: translateX(0); }
                 </div>
                 
                 <button id="send-btn" class="shrink-0 p-2 text-[#0095f6] font-bold hidden hover:text-blue-700 transition-colors" onclick="sendMessage()">
-                    <i data-lucide="send" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="send" class="w-7 h-7 fill-current"></i>
                 </button>
                 <button id="like-btn" class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="sendHeart()">
-                    <i data-lucide="heart" class="w-6 h-6 text-gray-800"></i>
+                    <i data-lucide="heart" class="w-7 h-7 text-gray-800"></i>
                 </button>
             </div>
         </div>
@@ -221,26 +239,23 @@ body.chat-active .chat-window { transform: translateX(0); }
              <!-- Content with overlapping curve and avatar -->
              <div class="profile-content-curve">
                  <div class="profile-avatar-wrapper">
-                    <img id="cd-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover shadow-sm">
+                    <img id="cd-avatar" src="" class="w-full h-full rounded-full border-4 border-white bg-white object-cover shadow-sm">
                  </div>
                  
-                 <div class="px-6 mt-2">
+                 <div class="px-6 mt-1">
                      <h2 id="cd-name" class="text-2xl font-bold text-gray-900 flex items-center gap-1">User</h2>
                      <div id="cd-username" class="text-sm text-gray-500 font-medium">@username</div>
                      
-                     <div class="flex gap-6 mt-6 mb-6 text-sm border-b border-gray-100 pb-6">
-                        <div class="flex flex-col items-center">
-                            <strong class="text-gray-900 text-lg" id="cd-following">0</strong>
-                            <span class="text-gray-500 text-xs">Following</span>
+                     <p id="cd-bio" class="text-gray-700 text-[15px] leading-relaxed mt-3"></p>
+
+                     <div class="flex gap-4 mt-4 mb-6 text-sm text-gray-500 border-b border-gray-100 pb-6">
+                        <div class="cursor-pointer hover:underline flex items-center gap-1">
+                            <strong class="text-gray-900 text-base" id="cd-following">0</strong> Following
                         </div>
-                        <div class="flex flex-col items-center">
-                            <strong class="text-gray-900 text-lg" id="cd-followers">0</strong>
-                            <span class="text-gray-500 text-xs">Followers</span>
+                        <div class="cursor-pointer hover:underline flex items-center gap-1">
+                            <strong class="text-gray-900 text-base" id="cd-followers">0</strong> Followers
                         </div>
                      </div>
-
-                     <div class="text-xs font-bold text-gray-500 uppercase mb-2">About</div>
-                     <p id="cd-bio" class="text-gray-700 text-[15px] leading-relaxed mb-6"></p>
                  </div>
              </div>
         </div>
@@ -298,7 +313,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = { apiKey: "AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno", authDomain: "edulinki.firebaseapp.com", projectId: "edulinki", storageBucket: "edulinki.firebasestorage.app", messagingSenderId: "248886466474", appId: "1:248886466474:web:160043201a6b28bafbbdd3", measurementId: "G-MQBH12VL7N" };
@@ -318,7 +333,7 @@ let currentMsgContext = null;
 let pressTimer = null;
 let pressStartX = 0;
 let pressStartY = 0;
-let conversationRenderId = 0; // Sequence ID to prevent duplicated renders
+let conversationRenderId = 0; 
 
 onAuthStateChanged(auth, async (u) => {
     if (!u) {
@@ -337,7 +352,6 @@ onAuthStateChanged(auth, async (u) => {
 function loadConversations() {
     if (unsubscribeConversations) unsubscribeConversations();
     
-    // Initial loading state
     const container = document.getElementById('chat-list-container');
     container.innerHTML = '<div class="flex flex-col items-center justify-center h-40 opacity-50"><i data-lucide="loader-2" class="w-6 h-6 animate-spin text-gray-400"></i></div>';
     
@@ -347,7 +361,6 @@ function loadConversations() {
     );
 
     unsubscribeConversations = onSnapshot(q, async (snapshot) => {
-        // Increment render ID to invalidate previous async renders
         const currentRenderId = ++conversationRenderId;
 
         if (snapshot.empty) {
@@ -358,21 +371,18 @@ function loadConversations() {
         const chatsData = [];
         snapshot.forEach(doc => chatsData.push({ id: doc.id, ...doc.data() }));
 
-        // Sort by timestamp
         chatsData.sort((a, b) => {
             const tA = a.lastMessageTimestamp?.toMillis() || 0;
             const tB = b.lastMessageTimestamp?.toMillis() || 0;
             return tB - tA; 
         });
 
-        // Fetch all required data first (concurrently)
         const renderedItems = await Promise.all(chatsData.map(async (chat) => {
             const otherUserId = chat.participants.find(uid => uid !== currentUser.id);
             if (!otherUserId) return '';
 
             let otherUser = { name: 'User', avatar: 'https://via.placeholder.com/150' };
             try {
-                // Fetch other user's data
                 const uSnap = await getDoc(doc(db, "users", otherUserId));
                 if (uSnap.exists()) otherUser = uSnap.data();
             } catch (e) {}
@@ -382,7 +392,6 @@ function loadConversations() {
             const timeStr = formatTime(chat.lastMessageTimestamp);
             const lastMsg = chat.lastMessage || 'Start chatting';
             
-            // Build the HTML for this item
             const userJson = JSON.stringify(otherUser).replace(/"/g, '&quot;');
             
             return `
@@ -401,10 +410,7 @@ function loadConversations() {
             </div>`;
         }));
 
-        // Check if this render sequence is still the latest one
         if (currentRenderId !== conversationRenderId) return;
-
-        // Render everything at once to prevent duplicates
         container.innerHTML = renderedItems.join('');
     });
 }
@@ -483,6 +489,9 @@ function loadMessages(chatId) {
             const div = document.createElement('div');
             div.className = `msg-group fade-in`;
             
+            const isLiked = msg.reactions && msg.reactions.includes(currentUser.id);
+            const reactionHtml = isLiked ? `<div class="msg-reaction like-animation"><i data-lucide="heart" class="w-3 h-3 fill-red-500 text-red-500"></i></div>` : '';
+
             let contentHtml = '';
             let bubbleStyle = '';
             let rawContent = msg.content;
@@ -505,6 +514,7 @@ function loadMessages(chatId) {
             }
 
             const eventHandlers = `
+                ondblclick="toggleMessageLike('${msgDoc.id}')"
                 onmousedown="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}')"
                 ontouchstart="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}')"
                 onmouseup="handlePressEnd(event)"
@@ -518,6 +528,7 @@ function loadMessages(chatId) {
                 <div class="msg-container ${isSelf ? 'self' : 'other'}">
                     <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'} noselect" style="${bubbleStyle}" ${eventHandlers}>
                         ${contentHtml}
+                        ${reactionHtml}
                     </div>
                 </div>
             `;
@@ -573,6 +584,23 @@ function formatTime(timestamp) {
     if (diff < 604800000) return date.toLocaleDateString([], { weekday: 'short' });
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
+
+window.toggleMessageLike = async (msgId) => {
+    if (!currentChatId || !currentUser) return;
+    const msgRef = doc(db, `chats/${currentChatId}/messages`, msgId);
+    try {
+        const msgSnap = await getDoc(msgRef);
+        if (msgSnap.exists()) {
+            const data = msgSnap.data();
+            const reactions = data.reactions || [];
+            if (reactions.includes(currentUser.id)) {
+                await updateDoc(msgRef, { reactions: arrayRemove(currentUser.id) });
+            } else {
+                await updateDoc(msgRef, { reactions: arrayUnion(currentUser.id) });
+            }
+        }
+    } catch(e) {}
+};
 
 window.handleTyping = (e) => {
     const val = e.target.value.trim();
@@ -713,6 +741,7 @@ window.closeChatDetails = () => {
 window.viewProfileFromDetails = () => {
     closeChatDetails();
     if (currentChatUser) {
+        // Explicitly set href to /home?profileId=... as requested
         window.location.href = `/home?profileId=${currentChatUser.id}`;
     }
 };
