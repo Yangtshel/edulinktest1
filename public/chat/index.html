@@ -31,26 +31,38 @@ body.chat-active .sidebar { display: none; }
 @media (min-width: 768px) { body.chat-active .sidebar { display: flex; } }
 body.chat-active .chat-window { transform: translateX(0); }
 
-.msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 22px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; margin-bottom: 2px; }
+/* Message Groups */
+.msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
+.msg-group:hover .msg-actions { opacity: 1; }
+
+.msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 22px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; }
 .msg-self { align-self: flex-end; background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { align-self: flex-start; background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
-/* Grouping bubbles */
+/* Grouping bubbles corners */
 .msg-self + .msg-self { border-top-right-radius: 4px; }
 .msg-other + .msg-other { border-top-left-radius: 4px; }
 .msg-self:last-child { border-bottom-right-radius: 22px; }
 .msg-other:last-child { border-bottom-left-radius: 22px; }
 
+/* Message Actions (Delete) */
+.msg-actions { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; padding: 0 10px; }
+.msg-self .msg-actions { right: 100%; display: flex; align-items: center; }
+.msg-other .msg-actions { left: 100%; display: flex; align-items: center; }
+.action-btn { width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; }
+.action-btn:hover { background: #e0e0e0; color: #ff3b30; }
+
 /* Post Card inside Chat (Instagram Style) */
 .chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 260px; margin-top: 4px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; }
-.msg-self .chat-post-card { background: #4db5f9; /* Lighter blue for better contrast inside blue bubble */ }
-.msg-self .cpc-footer { color: white; opacity: 0.9; }
+.msg-self .chat-post-card { background: #4db5f9; }
+.msg-self .cpc-footer { color: white; opacity: 0.95; }
 .msg-self .cpc-header span { color: white; }
 .chat-post-card:hover { opacity: 0.95; }
 
 .cpc-header { padding: 10px; display: flex; align-items: center; gap: 8px; }
-.cpc-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #e0e0e0; }
-.cpc-footer { padding: 10px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cpc-img-container { width: 100%; aspect-ratio: 1/1; background: #e0e0e0; overflow: hidden; }
+.cpc-img { width: 100%; height: 100%; object-fit: cover; }
+.cpc-footer { padding: 12px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
 
 .chat-input-area { padding: 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
 .chat-input { background: #efefef; border-radius: 22px; padding: 11px 16px; flex: 1; outline: none; border: 1px solid transparent; font-size: 15px; max-height: 100px; resize: none; transition: border 0.2s; }
@@ -194,13 +206,14 @@ body.chat-active .chat-window { transform: translateX(0); }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = { apiKey: "AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno", authDomain: "edulinki.firebaseapp.com", projectId: "edulinki", storageBucket: "edulinki.firebasestorage.app", messagingSenderId: "248886466474", appId: "1:248886466474:web:160043201a6b28bafbbdd3", measurementId: "G-MQBH12VL7N" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 let currentUser = null;
 let currentChatId = null;
@@ -225,8 +238,6 @@ onAuthStateChanged(auth, async (u) => {
 
 // UI Logic: Load Conversations List (Client-side sorting)
 function loadConversations() {
-    // IMPORTANT: Remove 'orderBy' from Firestore query to prevent missing index errors.
-    // Sort in JS instead.
     const q = query(
         collection(db, "chats"), 
         where("participants", "array-contains", currentUser.id)
@@ -245,22 +256,18 @@ function loadConversations() {
             chats.push({ id: doc.id, ...doc.data() });
         });
 
-        // Client-side Sort: Newest first
         chats.sort((a, b) => {
             const tA = a.lastMessageTimestamp?.toMillis() || 0;
             const tB = b.lastMessageTimestamp?.toMillis() || 0;
-            return tB - tA; // Descending
+            return tB - tA; 
         });
 
-        // Clear and rebuild
         container.innerHTML = '';
         
         for (const chat of chats) {
             const otherUserId = chat.participants.find(uid => uid !== currentUser.id);
             if (!otherUserId) continue;
 
-            // Simple caching logic could go here, for now we fetch user details
-            // In a production app, you'd cache users in a map to avoid N+1 reads
             let otherUser = { name: 'User', avatar: 'https://via.placeholder.com/150' };
             try {
                 const uSnap = await getDoc(doc(db, "users", otherUserId));
@@ -271,8 +278,6 @@ function loadConversations() {
             const isSelected = currentChatId === chat.id;
             const timeStr = formatTime(chat.lastMessageTimestamp);
             const lastMsg = chat.lastMessage || 'Start chatting';
-            
-            // Stylistic choice: Bold if unread
             const msgClass = isUnread ? "font-bold text-gray-900" : "text-gray-500";
             
             const div = document.createElement('div');
@@ -296,7 +301,6 @@ function loadConversations() {
     });
 }
 
-// Check for shared post in URL
 async function checkForSharedPost() {
     const urlParams = new URLSearchParams(window.location.search);
     const sharedPostId = urlParams.get('sharePostId');
@@ -306,54 +310,40 @@ async function checkForSharedPost() {
             const postSnap = await getDoc(doc(db, "posts", sharedPostId));
             if (postSnap.exists()) {
                 pendingSharePost = { id: postSnap.id, ...postSnap.data() };
-                
-                // Open Modal
                 openNewChatModal();
                 document.getElementById('modal-title').innerText = "Share Post";
                 document.getElementById('start-chat-btn').innerText = "Send";
-                
-                // Show Preview
                 const previewDiv = document.getElementById('share-preview-container');
                 previewDiv.classList.remove('hidden');
                 document.getElementById('share-preview-text').innerText = pendingSharePost.content || "Image Post";
-                
                 let img = 'https://via.placeholder.com/150';
                 if (pendingSharePost.image) img = pendingSharePost.image;
                 if (pendingSharePost.media && Array.isArray(pendingSharePost.media) && pendingSharePost.media.length > 0) img = pendingSharePost.media[0];
                 document.getElementById('share-preview-img').src = img;
-                
-                // Clean URL
                 window.history.replaceState({}, document.title, "chat.html");
             }
-        } catch (e) {
-            console.error("Error fetching shared post", e);
-        }
+        } catch (e) { console.error("Error fetching shared post", e); }
     }
 }
 
-// UI Logic: Open Chat
 window.openChat = async (chatId, user, userId) => {
     currentChatId = chatId;
     currentChatUser = { ...user, id: userId };
     
-    // UI Updates
     document.body.classList.add('chat-active');
     document.getElementById('chat-window-panel').classList.remove('hidden');
     document.getElementById('empty-state').classList.add('hidden');
     document.getElementById('active-chat-interface').classList.remove('hidden');
     document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
     
-    // Header
     document.getElementById('chat-header-name').innerText = user.name;
     document.getElementById('chat-header-avatar').src = user.avatar;
     document.getElementById('chat-header-avatar').onclick = () => window.location.href = `index.html?profileId=${userId}`;
 
-    // Mark as Read
     updateDoc(doc(db, "chats", chatId), {
-        readBy: [currentUser.id, userId] // Assuming if we open, we read it
-    }).catch(e => console.log("Read receipt error (ignorable):", e));
+        readBy: [currentUser.id, userId]
+    }).catch(e => console.log("Read receipt error:", e));
 
-    // Listen to Messages
     loadMessages(chatId);
 };
 
@@ -373,40 +363,48 @@ function loadMessages(chatId) {
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
         container.innerHTML = ''; 
         
-        let lastSenderId = null;
-
         snapshot.forEach((msgDoc) => {
             const msg = msgDoc.data();
             const isSelf = msg.senderId === currentUser.id;
-            lastSenderId = msg.senderId;
 
             const div = document.createElement('div');
-            // Remove 'msg-last' etc complexity for now, just basics
-            div.className = `msg-bubble ${isSelf ? 'msg-self' : 'msg-other'} fade-in`;
+            div.className = `msg-group fade-in ${isSelf ? 'msg-self' : 'msg-other'}`;
             
-            // Content Rendering
+            let contentHtml = '';
+            let bubbleStyle = '';
+
             if (msg.type === 'image') {
-                div.innerHTML = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer" onclick="window.open('${msg.content}', '_blank')">`;
-                div.style.padding = '4px';
-                div.style.backgroundColor = 'transparent';
+                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer" onclick="window.open('${msg.content}', '_blank')">`;
+                bubbleStyle = 'padding: 4px; background: transparent;';
             } else if (msg.type === 'post') {
                 let postData = typeof msg.postData === 'string' ? JSON.parse(msg.postData) : msg.postData;
-                div.innerHTML = renderPostCard(postData, isSelf);
-                div.style.padding = '0';
-                div.style.background = 'transparent';
-                div.style.overflow = 'hidden';
+                contentHtml = renderPostCard(postData, isSelf);
+                bubbleStyle = 'padding: 0; background: transparent; overflow: hidden;';
             } else if (msg.type === 'heart') {
-                 div.innerHTML = `<i data-lucide="heart" class="w-10 h-10 text-red-500 fill-red-500 animate-pulse"></i>`;
-                 div.style.background = 'transparent';
-                 div.style.padding = '0';
+                 contentHtml = `<i data-lucide="heart" class="w-10 h-10 text-red-500 fill-red-500"></i>`;
+                 bubbleStyle = 'background: transparent; padding: 0;';
             } else {
-                div.innerHTML = linkify(msg.content);
+                contentHtml = linkify(msg.content);
             }
+
+            // Trash button for own messages
+            const deleteBtn = isSelf ? 
+                `<div class="msg-actions">
+                    <div class="action-btn" onclick="deleteMessage('${msgDoc.id}')" title="Unsend">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </div>
+                 </div>` : '';
+
+            div.innerHTML = `
+                <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'}" style="${bubbleStyle}">
+                    ${contentHtml}
+                </div>
+                ${deleteBtn}
+            `;
 
             container.appendChild(div);
         });
 
-        // Scroll to bottom
         setTimeout(() => {
             container.scrollTop = container.scrollHeight;
         }, 50);
@@ -415,9 +413,14 @@ function loadMessages(chatId) {
 }
 
 function renderPostCard(post, isSelf) {
-    let img = 'https://via.placeholder.com/300';
+    let img = null;
     if(post.image) img = post.image;
     if(post.media && Array.isArray(post.media) && post.media.length > 0) img = post.media[0];
+
+    // If no image, show placeholder or styled text area
+    const imgHtml = img ? 
+        `<div class="cpc-img-container"><img src="${img}" class="cpc-img"></div>` : 
+        `<div class="cpc-img-container flex items-center justify-center bg-gray-200"><i data-lucide="file-text" class="w-10 h-10 text-gray-400"></i></div>`;
 
     return `
         <div class="chat-post-card" onclick="window.location.href='index.html?postId=${post.id}'">
@@ -425,7 +428,7 @@ function renderPostCard(post, isSelf) {
                 <img src="${post.authorAvatar || 'https://via.placeholder.com/50'}" class="w-6 h-6 rounded-full border border-white/20 object-cover">
                 <span class="font-bold text-xs truncate">${post.authorName || 'User'}</span>
             </div>
-            <img src="${img}" class="cpc-img">
+            ${imgHtml}
             <div class="cpc-footer">
                 <p class="truncate font-medium">${post.content || 'View Post'}</p>
             </div>
@@ -456,7 +459,6 @@ function formatTime(timestamp) {
     }
 }
 
-// Sending Logic
 window.handleTyping = (e) => {
     const input = e.target;
     const sendBtn = document.getElementById('send-btn');
@@ -500,7 +502,6 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
     try {
         await addDoc(collection(db, `chats/${currentChatId}/messages`), messageData);
         
-        // Determine preview text for sidebar
         let preview = msgContent;
         if (type === 'image') preview = 'Sent a photo';
         if (type === 'post') preview = `Sent a post by ${extraData.postData.authorName || 'someone'}`;
@@ -518,16 +519,36 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
 
 window.sendHeart = () => sendMessage('heart', '❤️');
 
-// Image Upload
+// Improved Image Upload with Firebase Storage
 window.handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-        const base64 = evt.target.result;
-        sendMessage('image', base64);
-    };
-    reader.readAsDataURL(file);
+
+    // Show loading state/toast ideally, for now just console
+    console.log("Uploading...");
+    
+    try {
+        const storageRef = ref(storage, `chat_images/${currentChatId}/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        sendMessage('image', downloadURL);
+    } catch (error) {
+        console.error("Upload failed", error);
+        alert("Failed to send image. Please try again.");
+    }
+};
+
+// Delete Message Logic
+window.deleteMessage = async (msgId) => {
+    if(confirm("Unsend this message?")) {
+        try {
+            await deleteDoc(doc(db, `chats/${currentChatId}/messages`, msgId));
+            // Optional: Update last message in chat doc if it was the last one (skipped for simplicity in MVP)
+        } catch (error) {
+            console.error("Error deleting message", error);
+            alert("Could not delete message");
+        }
+    }
 };
 
 // New Chat Flow
@@ -546,7 +567,6 @@ window.closeNewChatModal = () => {
     document.getElementById('new-chat-modal').classList.remove('open');
     setTimeout(() => {
         document.getElementById('new-chat-overlay').classList.add('hidden');
-        // Reset Modal State
         pendingSharePost = null;
         document.getElementById('modal-title').innerText = "New Message";
         document.getElementById('start-chat-btn').innerText = "Chat";
@@ -639,13 +659,11 @@ window.startChat = async () => {
     const targetUserId = selectedUserForNewChat.id;
     const targetUser = selectedUserForNewChat;
     
-    // Close modal first
     const modal = document.getElementById('new-chat-modal');
     document.getElementById('new-chat-overlay').classList.add('opacity-0');
     modal.classList.remove('open');
     setTimeout(() => document.getElementById('new-chat-overlay').classList.add('hidden'), 300);
 
-    // Check existing chat
     const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.id));
     const snap = await getDocs(q);
     let chatId = null;
@@ -667,16 +685,11 @@ window.startChat = async () => {
         chatId = newChatRef.id;
     }
 
-    // Initialize chat window
     await openChat(chatId, targetUser, targetUserId);
 
-    // If we have a pending shared post, send it now
     if (pendingSharePost) {
-        // Send the post as a message
         await sendMessage('post', '', { postData: pendingSharePost });
-        // Clear pending state
         pendingSharePost = null;
-        // Clean up UI for next time
         document.getElementById('modal-title').innerText = "New Message";
         document.getElementById('start-chat-btn').innerText = "Chat";
         document.getElementById('share-preview-container').classList.add('hidden');
@@ -689,7 +702,6 @@ window.viewProfile = () => {
     }
 };
 
-// Initial icon render
 lucide.createIcons();
 </script>
 </body>
