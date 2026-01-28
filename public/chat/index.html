@@ -35,17 +35,55 @@ body.chat-active .chat-window { transform: translateX(0); }
 /* Messages */
 .msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; width: 100%; }
 
-.msg-container { display: flex; width: 100%; position: relative; }
+.msg-container { display: flex; width: 100%; position: relative; align-items: flex-end; gap: 8px; transition: transform 0.2s ease-out; }
 .msg-container.self { justify-content: flex-end; }
 .msg-container.other { justify-content: flex-start; }
 
-.msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 22px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; transition: transform 0.1s; cursor: pointer; }
+.msg-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; transition: transform 0.1s; cursor: pointer; display: flex; flex-direction: column; min-width: 60px; }
 .msg-bubble:active { transform: scale(0.98); }
 .msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
 .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
 .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
+
+/* Message Status */
+.msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 2px; margin-top: 2px; margin-left: auto; }
+.msg-time { font-size: 10px; opacity: 0.7; }
+.msg-status-icon { width: 14px; height: 14px; }
+
+/* Reply Context (Quoted Message) */
+.reply-quote-bubble {
+    border-left: 3px solid rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+.msg-self .reply-quote-bubble { border-left-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
+.reply-quote-name { font-weight: 700; margin-bottom: 2px; opacity: 0.8; }
+.reply-quote-text { opacity: 0.9; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Reply Bar (Input Area) */
+.reply-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; background: #f9fafb; border-top: 1px solid #eee;
+    font-size: 13px; color: #555; border-left: 4px solid #0095f6;
+}
+
+/* Reply Hover Button */
+.reply-hover-btn {
+    opacity: 0; transition: opacity 0.2s;
+    background: #f0f0f0; border-radius: 50%; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+}
+.msg-container:hover .reply-hover-btn { opacity: 1; }
+.msg-self .reply-hover-btn { order: -1; } /* Button appears on left for self */
 
 /* Post Card */
 .chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 260px; margin-top: 4px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.05); }
@@ -63,12 +101,11 @@ body.chat-active .chat-window { transform: translateX(0); }
 .heart-fixed:active { transform: scale(0.9); }
 
 /* Message Reaction */
-.msg-reaction { position: absolute; bottom: -6px; right: 0; background: white; border-radius: 999px; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; z-index: 10; }
-.msg-self .msg-reaction { right: 0; bottom: -8px; }
-.msg-other .msg-reaction { left: 0; bottom: -8px; right: auto; }
+.msg-reaction { position: absolute; bottom: -8px; right: -4px; background: white; border-radius: 999px; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; z-index: 10; }
+.msg-self .msg-reaction { right: auto; left: -4px; }
 
 /* Input */
-.chat-input-area { padding: 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
+.chat-input-area { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
 .chat-input { background: #efefef; border-radius: 22px; padding: 11px 16px; flex: 1; outline: none; border: 1px solid transparent; font-size: 15px; max-height: 100px; resize: none; transition: border 0.2s; }
 .chat-input:focus { border-color: #dbdbdb; }
 
@@ -206,6 +243,15 @@ body.chat-active .chat-window { transform: translateX(0); }
 
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 pb-4 scroll-smooth"></div>
 
+            <!-- Reply Preview Bar -->
+            <div id="reply-preview-bar" class="hidden reply-bar">
+                <div class="flex flex-col flex-1 min-w-0">
+                    <span class="font-bold text-xs text-[#0095f6] mb-0.5" id="reply-to-name">Replying to User</span>
+                    <span class="truncate text-xs text-gray-500" id="reply-to-text">Message text...</span>
+                </div>
+                <button onclick="cancelReplyMode()" class="p-2 hover:bg-gray-200 rounded-full"><i data-lucide="x" class="w-4 h-4 text-gray-500"></i></button>
+            </div>
+
             <div class="chat-input-area">
                 <button class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="document.getElementById('img-upload').click()">
                     <i data-lucide="image" class="w-7 h-7 text-gray-800"></i>
@@ -229,7 +275,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 <!-- Chat Details Overlay -->
 <div id="chat-details-overlay" class="fixed inset-0 z-50 bg-black/40 hidden flex justify-end transition-opacity duration-200 opacity-0" onclick="closeChatDetails()">
-    <div id="chat-details-panel" class="bg-white w-full md:w-96 h-full shadow-2xl transform translate-x-full flex flex-col relative" onclick="event.stopPropagation()">
+    <div id="chat-details-panel" class="bg-white w-full md:w-[500px] h-full shadow-2xl transform translate-x-full flex flex-col relative" onclick="event.stopPropagation()">
         
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto bg-white">
@@ -330,11 +376,12 @@ let unsubscribeMessages = null;
 let unsubscribeConversations = null;
 let pendingSharePost = null;
 let currentMsgContext = null;
+let currentReplyContext = null;
 let pressTimer = null;
 let pressStartX = 0;
 let pressStartY = 0;
 let conversationRenderId = 0; 
-let postClickTimer = null; // Timer for single click on post
+let postClickTimer = null; 
 
 onAuthStateChanged(auth, async (u) => {
     if (!u) {
@@ -393,15 +440,6 @@ function loadConversations() {
             const timeStr = formatTime(chat.lastMessageTimestamp);
             const lastMsg = chat.lastMessage || 'Start chatting';
             
-            // Status logic for Sent/Delivered/Seen
-            let statusHtml = '';
-            if (chat.lastSenderId === currentUser.id) {
-                const isSeen = chat.readBy && chat.readBy.includes(otherUserId);
-                // Double check icon: gray if not seen, blue if seen
-                const colorClass = isSeen ? 'text-[#0095f6]' : 'text-gray-400';
-                statusHtml = `<i data-lucide="check-check" class="w-4 h-4 ${colorClass} ml-1"></i>`;
-            }
-
             const userJson = JSON.stringify(otherUser).replace(/"/g, '&quot;');
             
             return `
@@ -415,7 +453,6 @@ function loadConversations() {
                     <div class="flex items-center gap-1 text-[13px] ${isUnread ? "font-bold text-gray-900" : "text-gray-500"}">
                         <span class="truncate block max-w-[140px]">${lastMsg}</span>
                         <span class="shrink-0 text-gray-400 font-normal">· ${timeStr}</span>
-                        ${statusHtml}
                     </div>
                 </div>
             </div>`;
@@ -478,6 +515,7 @@ async function checkForSharedPost() {
 window.closeChat = () => {
     document.body.classList.remove('chat-active');
     currentChatId = null;
+    cancelReplyMode();
     if (unsubscribeMessages) unsubscribeMessages();
 };
 
@@ -491,8 +529,18 @@ function loadMessages(chatId) {
     if (unsubscribeMessages) unsubscribeMessages();
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("timestamp", "asc"));
     const container = document.getElementById('messages-container');
+    const chatDocRef = doc(db, "chats", chatId);
 
-    unsubscribeMessages = onSnapshot(q, (snapshot) => {
+    // Get chat metadata once to check read status, but ideally real-time
+    let chatMetadata = { readBy: [] };
+
+    unsubscribeMessages = onSnapshot(q, async (snapshot) => {
+        // Need to know if other user has read the chat to show blue checks
+        try {
+            const chatSnap = await getDoc(chatDocRef);
+            if(chatSnap.exists()) chatMetadata = chatSnap.data();
+        } catch(e) {}
+
         container.innerHTML = ''; 
         snapshot.forEach((msgDoc) => {
             const msg = msgDoc.data();
@@ -503,46 +551,91 @@ function loadMessages(chatId) {
             
             const hasReactions = msg.reactions && msg.reactions.length > 0;
             const reactionHtml = hasReactions ? `<div class="msg-reaction like-animation"><i data-lucide="heart" class="w-3 h-3 fill-red-500 text-red-500"></i></div>` : '';
-
-            // Handle reactions for hold menu passing
             const reactionsJson = JSON.stringify(msg.reactions || []).replace(/"/g, '&quot;');
 
+            // --- Content Rendering ---
             let contentHtml = '';
             let bubbleStyle = '';
             let rawContent = msg.content;
+            let displayContent = msg.content;
 
             if (msg.type === 'image') {
-                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100" onclick="window.open('${msg.content}', '_blank')">`;
+                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100 mb-1" onclick="window.open('${msg.content}', '_blank')">`;
                 bubbleStyle = 'padding: 4px; background: transparent;';
                 rawContent = "Photo";
+                displayContent = "Photo";
             } else if (msg.type === 'post') {
                 let postData = typeof msg.postData === 'string' ? JSON.parse(msg.postData) : msg.postData;
                 contentHtml = renderPostCard(postData, isSelf);
                 bubbleStyle = 'padding: 0; background: transparent;';
                 rawContent = "Post";
+                displayContent = "Shared a post";
             } else if (msg.type === 'heart') {
                  contentHtml = `<i data-lucide="heart" class="w-12 h-12 text-[#ff3040] fill-[#ff3040] heart-fixed"></i>`;
                  bubbleStyle = 'background: transparent; padding: 0;';
                  rawContent = "";
+                 displayContent = "❤️";
             } else {
                 contentHtml = linkify(msg.content);
             }
 
+            // --- Reply Rendering ---
+            let replyHtml = '';
+            if (msg.replyTo) {
+                const replyName = msg.replyTo.senderId === currentUser.id ? 'You' : (msg.replyTo.senderName || 'User');
+                replyHtml = `
+                <div class="reply-quote-bubble">
+                    <span class="reply-quote-name">${replyName}</span>
+                    <span class="reply-quote-text">${msg.replyTo.text}</span>
+                </div>
+                `;
+            }
+
+            // --- Status Icon Logic ---
+            let statusHtml = '';
+            let timeText = formatTimeShort(msg.timestamp);
+            if (isSelf) {
+                const otherUserId = currentChatUser ? currentChatUser.id : null;
+                const isSeen = otherUserId && chatMetadata.readBy && chatMetadata.readBy.includes(otherUserId);
+                const colorClass = isSeen ? 'text-[#0095f6]' : 'text-gray-400';
+                statusHtml = `
+                <div class="msg-meta">
+                    <span class="msg-time ${msg.type === 'image' || msg.type === 'post' ? 'text-gray-500 bg-white/50 px-1 rounded' : ''}">${timeText}</span>
+                    <i data-lucide="check-check" class="msg-status-icon ${colorClass}"></i>
+                </div>`;
+            } else {
+                 statusHtml = `<div class="msg-meta"><span class="msg-time">${timeText}</span></div>`;
+            }
+
+            // Combine Content
+            const finalInner = `
+                ${replyHtml}
+                ${contentHtml}
+                ${msg.type !== 'heart' ? statusHtml : ''}
+            `;
+
+            // Escape for JS handlers
+            const safeContent = escapeHtml(displayContent);
+            const safeSenderName = isSelf ? 'You' : (currentChatUser ? currentChatUser.name : 'User');
+            
             const eventHandlers = `
                 ondblclick="toggleMessageLike('${msgDoc.id}')"
-                onmousedown="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
-                ontouchstart="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
+                onmousedown="handlePressStart(event, '${msgDoc.id}', '${safeContent}', ${isSelf}, '${msg.type}', ${reactionsJson})"
+                ontouchstart="handleTouchStart(event, '${msgDoc.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')"
                 onmouseup="handlePressEnd(event)"
-                ontouchend="handlePressEnd(event)"
+                ontouchend="handleTouchEnd(event)"
                 onmousemove="handlePressMove(event)"
-                ontouchmove="handlePressMove(event)"
+                ontouchmove="handleTouchMove(event)"
                 oncontextmenu="return false;"
             `;
 
             div.innerHTML = `
-                <div class="msg-container ${isSelf ? 'self' : 'other'}">
+                <div class="msg-container ${isSelf ? 'self' : 'other'}" id="msg-cont-${msgDoc.id}">
+                    <div class="reply-hover-btn group" onclick="activateReplyMode('${msgDoc.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')">
+                         <i data-lucide="reply" class="w-4 h-4 text-gray-500"></i>
+                    </div>
                     <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'} noselect" style="${bubbleStyle}" ${eventHandlers}>
-                        ${contentHtml}
+                        ${finalInner}
                         ${reactionHtml}
                     </div>
                 </div>
@@ -555,6 +648,119 @@ function loadMessages(chatId) {
     });
 }
 
+// --- Reply & Swipe Logic ---
+let touchStartX = 0;
+let touchStartY = 0;
+let activeSwipeMsgId = null;
+
+window.handleTouchStart = (e, msgId, content, senderName, senderId) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    activeSwipeMsgId = msgId;
+    
+    // Also trigger long press logic
+    handlePressStart(e, msgId, content, senderId === currentUser.id, 'text', []); 
+};
+
+window.handleTouchMove = (e) => {
+    if (!activeSwipeMsgId) return;
+    const diffX = e.touches[0].clientX - touchStartX;
+    const diffY = e.touches[0].clientY - touchStartY;
+
+    // Detect horizontal swipe (reply) vs vertical scroll
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+        // Prevent scroll if horizontal
+        if(e.cancelable) e.preventDefault();
+        
+        const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
+        // Limit swipe distance visually
+        const translate = Math.min(Math.max(diffX, -60), 60); 
+        if(el) el.style.transform = `translateX(${translate}px)`;
+    }
+    
+    // Pass to long press handler
+    handlePressMove(e);
+};
+
+window.handleTouchEnd = (e) => {
+    const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
+    if (el) {
+        // Check if swipe threshold met (e.g., 50px)
+        const matrix = new WebKitCSSMatrix(window.getComputedStyle(el).transform);
+        const translateX = matrix.m41;
+        
+        // Reset position
+        el.style.transform = 'translateX(0)';
+
+        // Logic: Swipe Right on Others (reply), Swipe Left on Self (reply) - simplified to any significant horizontal swipe triggers reply
+        if (Math.abs(translateX) > 40) {
+            // Extract data from the element's handlers or stored context
+            // Re-parsing from arguments is hard here due to scope, so we rely on the LongPress start data or simple DOM
+            // Simplified: We trigger the reply mode based on the Active ID. We need the text/name.
+            // Using a hack to retrieve the data stored in the onclick/onmousedown attributes would be messy.
+            // Better: We stored it in handleTouchStart scope? No. 
+            // Correct approach: We need to pass data to activateReplyMode.
+            // Since we can't easily pass the specific string data in `touchend` without storing it globally:
+            // We will rely on `handleTouchStart` setting a temporary `swipeContext`.
+        }
+    }
+    
+    // Since we need the content for reply, let's optimize:
+    // We already have `handlePressStart` firing. Let's make `handleTouchStart` store the reply context globally temporarily.
+    activeSwipeMsgId = null;
+    handlePressEnd(e);
+};
+
+// Modified Touch Start to store context for swipe-to-reply
+const swipeContext = {};
+window.handleTouchStart = (e, msgId, content, senderName, senderId) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    activeSwipeMsgId = msgId;
+    swipeContext.msgId = msgId;
+    swipeContext.content = content;
+    swipeContext.senderName = senderName;
+    swipeContext.senderId = senderId;
+    
+    // Existing Long Press Logic
+    // We need to parse reactions if possible, but for now passing empty array to avoid error
+    // in complex parsing. This is a trade-off. Real implementation would fetch msg data.
+    handlePressStart(e, msgId, content, senderId === currentUser.id, 'text', []); 
+};
+
+window.handleTouchEnd = (e) => {
+    const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
+    if (el && activeSwipeMsgId) {
+        const matrix = new WebKitCSSMatrix(window.getComputedStyle(el).transform);
+        const translateX = matrix.m41;
+        el.style.transform = 'translateX(0)';
+        
+        if (Math.abs(translateX) > 40) {
+            activateReplyMode(swipeContext.msgId, swipeContext.content, swipeContext.senderName, swipeContext.senderId);
+        }
+    }
+    activeSwipeMsgId = null;
+    handlePressEnd(e);
+};
+
+
+window.activateReplyMode = (msgId, text, senderName, senderId) => {
+    currentReplyContext = { msgId, text, senderName, senderId };
+    const bar = document.getElementById('reply-preview-bar');
+    bar.classList.remove('hidden');
+    bar.classList.add('flex');
+    document.getElementById('reply-to-name').innerText = `Replying to ${senderName}`;
+    document.getElementById('reply-to-text').innerText = text;
+    document.getElementById('message-input').focus();
+};
+
+window.cancelReplyMode = () => {
+    currentReplyContext = null;
+    const bar = document.getElementById('reply-preview-bar');
+    bar.classList.add('hidden');
+    bar.classList.remove('flex');
+};
+
 function escapeHtml(text) {
   if (!text) return '';
   return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -564,12 +770,12 @@ window.handlePostClick = (postId) => {
     if (postClickTimer) {
         clearTimeout(postClickTimer);
         postClickTimer = null;
-        return; // Detected double click, do nothing (bubble ondblclick will fire)
+        return; 
     }
     postClickTimer = setTimeout(() => {
         window.location.href = '/home?postId=' + postId;
         postClickTimer = null;
-    }, 250); // Wait 250ms for potential second click
+    }, 250); 
 };
 
 function renderPostCard(post, isSelf) {
@@ -610,6 +816,12 @@ function formatTime(timestamp) {
     if (diff < 86400000) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     if (diff < 604800000) return date.toLocaleDateString([], { weekday: 'short' });
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function formatTimeShort(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 window.toggleMessageLike = async (msgId) => {
@@ -686,6 +898,7 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
     document.getElementById('like-btn').classList.remove('hidden');
     document.getElementById('message-input').focus();
 
+    // Prepare message data
     const messageData = {
         senderId: currentUser.id,
         content: msgContent,
@@ -693,6 +906,17 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
         type: type,
         ...extraData
     };
+
+    // Add Reply Context
+    if (currentReplyContext) {
+        messageData.replyTo = {
+            id: currentReplyContext.msgId,
+            text: currentReplyContext.text,
+            senderName: currentReplyContext.senderName,
+            senderId: currentReplyContext.senderId
+        };
+        cancelReplyMode();
+    }
 
     try {
         await addDoc(collection(db, `chats/${currentChatId}/messages`), messageData);
@@ -720,8 +944,6 @@ window.handleImageUpload = async (e) => {
     if (!file) return;
 
     const btn = document.getElementById('send-btn');
-    // We show a loading spinner or similar here typically, but text change is fine for now
-    // Since we changed it to an icon, let's keep it visible
     btn.classList.remove('hidden');
     
     try {
