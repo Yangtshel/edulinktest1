@@ -35,74 +35,97 @@ body.chat-active .chat-window { transform: translateX(0); }
 /* Messages */
 .msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; width: 100%; }
 
-.msg-container { display: flex; width: 100%; position: relative; align-items: flex-end; gap: 8px; transition: transform 0.2s ease-out; }
+.msg-container { display: flex; width: 100%; position: relative; align-items: center; gap: 8px; transition: transform 0.2s ease-out; min-height: 40px; }
 .msg-container.self { justify-content: flex-end; }
 .msg-container.other { justify-content: flex-start; }
 
-.msg-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; transition: transform 0.1s; cursor: pointer; display: flex; flex-direction: column; min-width: 60px; }
+.msg-bubble { 
+    max-width: 70%; 
+    padding: 10px 14px; 
+    border-radius: 22px; 
+    position: relative; 
+    word-wrap: break-word; 
+    font-size: 15px; 
+    line-height: 1.4; 
+    transition: transform 0.1s; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column;
+}
 .msg-bubble:active { transform: scale(0.98); }
+
 .msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
+/* Grouping radius logic */
 .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
 .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
 
 /* Message Status */
-.msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 2px; margin-top: 2px; margin-left: auto; }
-.msg-time { font-size: 10px; opacity: 0.7; }
+.msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 2px; margin-left: auto; min-height: 14px; }
+.msg-time { font-size: 10px; opacity: 0.7; font-weight: 400; }
 .msg-status-icon { width: 14px; height: 14px; }
+.msg-self .msg-time { color: rgba(255,255,255,0.8); }
 
-/* Reply Context (Quoted Message) */
+/* Reply Context */
 .reply-quote-bubble {
-    border-left: 3px solid rgba(0,0,0,0.2);
+    border-left: 3px solid;
     background: rgba(0,0,0,0.05);
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
     margin-bottom: 6px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
     cursor: pointer;
 }
-.msg-self .reply-quote-bubble { border-left-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
-.reply-quote-name { font-weight: 700; margin-bottom: 2px; opacity: 0.8; }
-.reply-quote-text { opacity: 0.9; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.msg-other .reply-quote-bubble { border-left-color: #0095f6; }
+.msg-self .reply-quote-bubble { border-left-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.15); }
 
-/* Reply Bar (Input Area) */
+.reply-quote-name { font-weight: 700; margin-bottom: 2px; opacity: 0.9; }
+.reply-quote-text { opacity: 0.8; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Reply Bar */
 .reply-bar {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 16px; background: #f9fafb; border-top: 1px solid #eee;
-    font-size: 13px; color: #555; border-left: 4px solid #0095f6;
+    padding: 10px 16px; background: #fff; border-top: 1px solid #dbdbdb;
+    font-size: 13px; color: #262626; border-left: 4px solid #0095f6;
+    animation: slideUp 0.2s ease-out;
 }
+@keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* Reply Hover Button */
 .reply-hover-btn {
-    opacity: 0; transition: opacity 0.2s;
-    background: #f0f0f0; border-radius: 50%; width: 28px; height: 28px;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    background: transparent; 
+    width: 30px; height: 30px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; flex-shrink: 0;
 }
 .msg-container:hover .reply-hover-btn { opacity: 1; }
-.msg-self .reply-hover-btn { order: -1; } /* Button appears on left for self */
+/* Positioning Logic for Reply Button */
+.msg-self .reply-hover-btn { order: -1; margin-right: 4px; } /* Left of bubble */
+.msg-other .reply-hover-btn { margin-left: 4px; } /* Right of bubble */
 
 /* Post Card */
-.chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 260px; margin-top: 4px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.05); }
+.chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 240px; margin-top: 2px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; }
 .msg-self .chat-post-card { background: #4db5f9; border: none; }
-.msg-self .cpc-footer { color: white; opacity: 0.95; }
+.msg-self .cpc-footer { color: white; opacity: 1; }
 .msg-self .cpc-header span { color: white; }
 .chat-post-card:hover { opacity: 0.95; }
 
-.cpc-header { padding: 10px; display: flex; align-items: center; gap: 8px; width: 100%; }
+.cpc-header { padding: 8px 10px; display: flex; align-items: center; gap: 8px; width: 100%; }
 .cpc-img-container { width: 100%; aspect-ratio: 1/1; background: #e0e0e0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .cpc-img { width: 100%; height: 100%; object-fit: cover; }
-.cpc-footer { padding: 12px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
+.cpc-footer { padding: 10px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
 
 .heart-fixed { transition: transform 0.1s; }
 .heart-fixed:active { transform: scale(0.9); }
 
 /* Message Reaction */
-.msg-reaction { position: absolute; bottom: -8px; right: -4px; background: white; border-radius: 999px; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; z-index: 10; }
-.msg-self .msg-reaction { right: auto; left: -4px; }
+.msg-reaction { position: absolute; bottom: -6px; right: 0; background: white; border-radius: 999px; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; z-index: 10; transform: scale(0.9); }
+.msg-self .msg-reaction { right: auto; left: 0; }
+.msg-other .msg-reaction { left: auto; right: 0; }
 
 /* Input */
 .chat-input-area { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
@@ -110,7 +133,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 .chat-input:focus { border-color: #dbdbdb; }
 
 /* User List */
-.user-item { padding: 10px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; }
+.user-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; }
 .user-item:hover { background-color: #fafafa; }
 .user-item.active { background-color: #efefef; }
 
@@ -121,60 +144,14 @@ body.chat-active .chat-window { transform: translateX(0); }
 #chat-details-panel { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #chat-details-overlay.open #chat-details-panel { transform: translateX(0); }
 
-/* Profile Design in Chat Details */
-.profile-banner {
-    height: 160px;
-    width: 100%;
-    background-color: #e5e7eb;
-    background-size: cover;
-    background-position: center;
-}
+/* Profile Design */
+.profile-banner { height: 140px; width: 100%; background-color: #e5e7eb; background-size: cover; background-position: center; }
+.profile-content-curve { border-radius: 24px 24px 0 0; margin-top: -20px; background: white; position: relative; z-index: 10; padding-top: 10px; min-height: 300px; padding-bottom: 80px; }
+.profile-avatar-wrapper { margin-top: -50px; margin-left: 20px; margin-bottom: 12px; position: relative; z-index: 20; width: 84px; height: 84px; }
+.details-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 20px; gap: 12px; z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
 
-.profile-content-curve {
-    border-radius: 30px 30px 0 0;
-    margin-top: -24px;
-    background: white;
-    position: relative;
-    z-index: 10;
-    padding-top: 10px;
-    min-height: 300px;
-    padding-bottom: 80px;
-}
-
-.profile-avatar-wrapper {
-    margin-top: -60px; /* Pull up to overlap banner */
-    margin-left: 20px;
-    margin-bottom: 12px;
-    position: relative;
-    z-index: 20;
-    width: 96px; /* w-24 */
-    height: 96px; /* h-24 */
-}
-
-.details-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 80px;
-    background: white;
-    border-top: 1px solid #f0f0f0;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 12px;
-    z-index: 30;
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
-.like-animation {
-    animation: popLike 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-@keyframes popLike {
-    0% { transform: scale(0); opacity: 0; }
-    50% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-}
+.like-animation { animation: popLike 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popLike { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
 </style>
 </head>
@@ -183,7 +160,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 <div class="chat-layout">
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar" id="sidebar-panel">
-        <div class="h-16 flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
+        <div class="h-[60px] flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
             <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='/home'">
                 <i data-lucide="chevron-left" class="w-6 h-6 md:hidden"></i>
                 <h1 class="text-xl font-bold text-gray-900 google-font flex items-center gap-1">
@@ -221,7 +198,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
         <!-- Chat Interface -->
         <div id="active-chat-interface" class="w-full h-full flex flex-col hidden bg-white relative">
-            <header class="h-16 px-4 flex items-center justify-between border-b border-gray-100 shrink-0 bg-white/95 backdrop-blur z-20">
+            <header class="h-[60px] px-4 flex items-center justify-between border-b border-gray-100 shrink-0 bg-white/95 backdrop-blur z-20">
                 <div class="flex items-center gap-3">
                     <button onclick="closeChat()" class="md:hidden w-8 h-8 -ml-2 flex items-center justify-center hover:bg-gray-50 rounded-full">
                         <i data-lucide="arrow-left" class="w-6 h-6 text-gray-800"></i>
@@ -254,7 +231,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
             <div class="chat-input-area">
                 <button class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="document.getElementById('img-upload').click()">
-                    <i data-lucide="image" class="w-7 h-7 text-gray-800"></i>
+                    <i data-lucide="image" class="w-6 h-6 text-gray-800"></i>
                 </button>
                 <input type="file" id="img-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
                 
@@ -263,10 +240,10 @@ body.chat-active .chat-window { transform: translateX(0); }
                 </div>
                 
                 <button id="send-btn" class="shrink-0 p-2 text-[#0095f6] font-bold hidden hover:text-blue-700 transition-colors" onclick="sendMessage()">
-                    <i data-lucide="send" class="w-7 h-7 fill-current"></i>
+                    <span class="text-sm font-semibold">Send</span>
                 </button>
                 <button id="like-btn" class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="sendHeart()">
-                    <i data-lucide="heart" class="w-7 h-7 text-gray-800"></i>
+                    <i data-lucide="heart" class="w-6 h-6 text-gray-800"></i>
                 </button>
             </div>
         </div>
@@ -275,7 +252,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 <!-- Chat Details Overlay -->
 <div id="chat-details-overlay" class="fixed inset-0 z-50 bg-black/40 hidden flex justify-end transition-opacity duration-200 opacity-0" onclick="closeChatDetails()">
-    <div id="chat-details-panel" class="bg-white w-full md:w-[500px] h-full shadow-2xl transform translate-x-full flex flex-col relative" onclick="event.stopPropagation()">
+    <div id="chat-details-panel" class="bg-white w-full md:w-[400px] h-full shadow-2xl transform translate-x-full flex flex-col relative" onclick="event.stopPropagation()">
         
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto bg-white">
@@ -531,19 +508,29 @@ function loadMessages(chatId) {
     const container = document.getElementById('messages-container');
     const chatDocRef = doc(db, "chats", chatId);
 
-    // Get chat metadata once to check read status, but ideally real-time
     let chatMetadata = { readBy: [] };
 
     unsubscribeMessages = onSnapshot(q, async (snapshot) => {
-        // Need to know if other user has read the chat to show blue checks
         try {
             const chatSnap = await getDoc(chatDocRef);
             if(chatSnap.exists()) chatMetadata = chatSnap.data();
         } catch(e) {}
 
+        const messages = [];
+        snapshot.forEach(doc => messages.push({id: doc.id, ...doc.data()}));
+
+        // Find the index of the *last* message sent by current user
+        let lastUserMsgIndex = -1;
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].senderId === currentUser.id) {
+                lastUserMsgIndex = i;
+                break;
+            }
+        }
+
         container.innerHTML = ''; 
-        snapshot.forEach((msgDoc) => {
-            const msg = msgDoc.data();
+
+        messages.forEach((msg, index) => {
             if (msg.hiddenBy && msg.hiddenBy.includes(currentUser.id)) return;
             const isSelf = msg.senderId === currentUser.id;
             const div = document.createElement('div');
@@ -591,19 +578,23 @@ function loadMessages(chatId) {
                 `;
             }
 
-            // --- Status Icon Logic ---
+            // --- Status Icon Logic (Only for Last User Message) ---
             let statusHtml = '';
             let timeText = formatTimeShort(msg.timestamp);
-            if (isSelf) {
+            
+            if (isSelf && index === lastUserMsgIndex) {
                 const otherUserId = currentChatUser ? currentChatUser.id : null;
                 const isSeen = otherUserId && chatMetadata.readBy && chatMetadata.readBy.includes(otherUserId);
                 const colorClass = isSeen ? 'text-[#0095f6]' : 'text-gray-400';
+                
+                // If it's the last message, show time + check
                 statusHtml = `
                 <div class="msg-meta">
                     <span class="msg-time ${msg.type === 'image' || msg.type === 'post' ? 'text-gray-500 bg-white/50 px-1 rounded' : ''}">${timeText}</span>
                     <i data-lucide="check-check" class="msg-status-icon ${colorClass}"></i>
                 </div>`;
             } else {
+                 // Otherwise just time (or hidden if we want minimal UI, keeping time for now)
                  statusHtml = `<div class="msg-meta"><span class="msg-time">${timeText}</span></div>`;
             }
 
@@ -619,9 +610,9 @@ function loadMessages(chatId) {
             const safeSenderName = isSelf ? 'You' : (currentChatUser ? currentChatUser.name : 'User');
             
             const eventHandlers = `
-                ondblclick="toggleMessageLike('${msgDoc.id}')"
-                onmousedown="handlePressStart(event, '${msgDoc.id}', '${safeContent}', ${isSelf}, '${msg.type}', ${reactionsJson})"
-                ontouchstart="handleTouchStart(event, '${msgDoc.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')"
+                ondblclick="toggleMessageLike('${msg.id}')"
+                onmousedown="handlePressStart(event, '${msg.id}', '${safeContent}', ${isSelf}, '${msg.type}', ${reactionsJson})"
+                ontouchstart="handleTouchStart(event, '${msg.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')"
                 onmouseup="handlePressEnd(event)"
                 ontouchend="handleTouchEnd(event)"
                 onmousemove="handlePressMove(event)"
@@ -630,9 +621,9 @@ function loadMessages(chatId) {
             `;
 
             div.innerHTML = `
-                <div class="msg-container ${isSelf ? 'self' : 'other'}" id="msg-cont-${msgDoc.id}">
-                    <div class="reply-hover-btn group" onclick="activateReplyMode('${msgDoc.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')">
-                         <i data-lucide="reply" class="w-4 h-4 text-gray-500"></i>
+                <div class="msg-container ${isSelf ? 'self' : 'other'}" id="msg-cont-${msg.id}">
+                    <div class="reply-hover-btn group" onclick="activateReplyMode('${msg.id}', '${safeContent}', '${safeSenderName}', '${msg.senderId}')">
+                         <i data-lucide="reply" class="w-5 h-5 text-gray-400 hover:text-gray-600"></i>
                     </div>
                     <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'} noselect" style="${bubbleStyle}" ${eventHandlers}>
                         ${finalInner}
@@ -653,64 +644,6 @@ let touchStartX = 0;
 let touchStartY = 0;
 let activeSwipeMsgId = null;
 
-window.handleTouchStart = (e, msgId, content, senderName, senderId) => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    activeSwipeMsgId = msgId;
-    
-    // Also trigger long press logic
-    handlePressStart(e, msgId, content, senderId === currentUser.id, 'text', []); 
-};
-
-window.handleTouchMove = (e) => {
-    if (!activeSwipeMsgId) return;
-    const diffX = e.touches[0].clientX - touchStartX;
-    const diffY = e.touches[0].clientY - touchStartY;
-
-    // Detect horizontal swipe (reply) vs vertical scroll
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
-        // Prevent scroll if horizontal
-        if(e.cancelable) e.preventDefault();
-        
-        const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
-        // Limit swipe distance visually
-        const translate = Math.min(Math.max(diffX, -60), 60); 
-        if(el) el.style.transform = `translateX(${translate}px)`;
-    }
-    
-    // Pass to long press handler
-    handlePressMove(e);
-};
-
-window.handleTouchEnd = (e) => {
-    const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
-    if (el) {
-        // Check if swipe threshold met (e.g., 50px)
-        const matrix = new WebKitCSSMatrix(window.getComputedStyle(el).transform);
-        const translateX = matrix.m41;
-        
-        // Reset position
-        el.style.transform = 'translateX(0)';
-
-        // Logic: Swipe Right on Others (reply), Swipe Left on Self (reply) - simplified to any significant horizontal swipe triggers reply
-        if (Math.abs(translateX) > 40) {
-            // Extract data from the element's handlers or stored context
-            // Re-parsing from arguments is hard here due to scope, so we rely on the LongPress start data or simple DOM
-            // Simplified: We trigger the reply mode based on the Active ID. We need the text/name.
-            // Using a hack to retrieve the data stored in the onclick/onmousedown attributes would be messy.
-            // Better: We stored it in handleTouchStart scope? No. 
-            // Correct approach: We need to pass data to activateReplyMode.
-            // Since we can't easily pass the specific string data in `touchend` without storing it globally:
-            // We will rely on `handleTouchStart` setting a temporary `swipeContext`.
-        }
-    }
-    
-    // Since we need the content for reply, let's optimize:
-    // We already have `handlePressStart` firing. Let's make `handleTouchStart` store the reply context globally temporarily.
-    activeSwipeMsgId = null;
-    handlePressEnd(e);
-};
-
 // Modified Touch Start to store context for swipe-to-reply
 const swipeContext = {};
 window.handleTouchStart = (e, msgId, content, senderName, senderId) => {
@@ -723,12 +656,48 @@ window.handleTouchStart = (e, msgId, content, senderName, senderId) => {
     swipeContext.senderId = senderId;
     
     // Existing Long Press Logic
-    // We need to parse reactions if possible, but for now passing empty array to avoid error
-    // in complex parsing. This is a trade-off. Real implementation would fetch msg data.
-    handlePressStart(e, msgId, content, senderId === currentUser.id, 'text', []); 
+    // We need to fetch the actual reactions for this specific message ideally, 
+    // but here we are using the handler attached.
+    // The handler in HTML includes reactionsJson. But handleTouchStart here overrides it? 
+    // No, onTouchStart in HTML calls THIS function. 
+    // The HTML call is: handleTouchStart(event, 'id', 'content', 'name', 'senderId')
+    // It DOES NOT pass reactions. 
+    // FIX: We need to trigger the press start logic manually or rely on a separate listener.
+    // We will call handlePressStart from within here with empty reactions initially 
+    // or we update the HTML to pass it. 
+    // Let's rely on onmousedown for desktop and use a separate timer here for touch.
+    
+    pressStartX = touchStartX;
+    pressStartY = touchStartY;
+    pressTimer = setTimeout(() => {
+        // We need to find the message element to get reactions or pass them.
+        // Simplified: Fetch msg or just open options without reactions list if not passed.
+        // Ideally we update the signature.
+        openMsgOptions(msgId, content, senderId === currentUser.id, 'text', []); 
+    }, 500);
+};
+
+window.handleTouchMove = (e) => {
+    if (!activeSwipeMsgId) return;
+    const diffX = e.touches[0].clientX - touchStartX;
+    const diffY = e.touches[0].clientY - touchStartY;
+
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+        if(e.cancelable) e.preventDefault();
+        const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
+        const translate = Math.min(Math.max(diffX, -60), 60); 
+        if(el) el.style.transform = `translateX(${translate}px)`;
+    }
+    
+    if(Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
 };
 
 window.handleTouchEnd = (e) => {
+    if(pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    
     const el = document.getElementById(`msg-cont-${activeSwipeMsgId}`);
     if (el && activeSwipeMsgId) {
         const matrix = new WebKitCSSMatrix(window.getComputedStyle(el).transform);
@@ -740,7 +709,6 @@ window.handleTouchEnd = (e) => {
         }
     }
     activeSwipeMsgId = null;
-    handlePressEnd(e);
 };
 
 
@@ -997,6 +965,7 @@ window.viewProfileFromDetails = () => {
 };
 
 // --- Long Press Message Options Logic ---
+// We use mousedown for desktop to pass reactions correctly from HTML attributes
 window.handlePressStart = (e, msgId, content, isSelf, type, reactions) => {
     pressStartX = e.touches ? e.touches[0].clientX : e.clientX;
     pressStartY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -1036,6 +1005,7 @@ window.openMsgOptions = (msgId, content, isSelf, type, reactions) => {
             let u = null;
             if(uid === currentUser.id) u = currentUser;
             else if(uid === currentChatUser.id) u = currentChatUser;
+            // In a real app we might need to fetch user data if not current/chat user
             
             if(u) {
                 reactorHtml += `
@@ -1044,13 +1014,21 @@ window.openMsgOptions = (msgId, content, isSelf, type, reactions) => {
                     <span class="text-xs font-bold text-gray-900">${u.name}</span>
                     <i data-lucide="heart" class="w-3 h-3 text-red-500 fill-red-500 ml-auto"></i>
                 </div>`;
+            } else {
+                 // Fallback for unknown users
+                 reactorHtml += `
+                <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                    <div class="w-6 h-6 rounded-full bg-gray-200"></div>
+                    <span class="text-xs font-bold text-gray-900">User</span>
+                    <i data-lucide="heart" class="w-3 h-3 text-red-500 fill-red-500 ml-auto"></i>
+                </div>`;
             }
         });
         
         if (reactorHtml) {
             html += `
             <div class="px-2 pt-2 pb-1 text-xs font-bold text-gray-500 uppercase tracking-wide">Reactions</div>
-            <div class="mb-2 bg-white rounded-xl border border-gray-100 p-1">
+            <div class="mb-2 bg-white rounded-xl border border-gray-100 p-1 max-h-32 overflow-y-auto">
                 ${reactorHtml}
             </div>
             `;
