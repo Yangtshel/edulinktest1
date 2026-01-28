@@ -169,8 +169,50 @@ body.chat-active .chat-window { transform: translateX(0); }
 }
 .msg-bubble:active { transform: scale(0.98); transition: transform 0.1s; }
 
-.msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
-.msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
+/* Bubble colors and base border radius logic */
+.msg-self { 
+    background-color: var(--bg-chat-bubble-self); 
+    color: white; 
+    border-bottom-right-radius: 4px; /* Default for stack */
+}
+.msg-other { 
+    background-color: var(--bg-chat-bubble-other); 
+    color: #000; 
+    border-bottom-left-radius: 4px; /* Default for stack */
+}
+
+/* TAIL LOGIC: Applied when 'has-tail' class is present (last message in a group) */
+
+/* Self Tail */
+.msg-self.has-tail {
+    border-bottom-right-radius: 0;
+}
+.msg-self.has-tail::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -6px;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at top left, transparent 65%, var(--bg-chat-bubble-self) 65%);
+    z-index: 1;
+}
+
+/* Other Tail */
+.msg-other.has-tail {
+    border-bottom-left-radius: 0;
+}
+.msg-other.has-tail::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -6px;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at top right, transparent 65%, var(--bg-chat-bubble-other) 65%);
+    z-index: 1;
+}
+
 
 /* Connected Bubble Styling when Reply exists */
 .bubble-connected-self { border-top-right-radius: 4px; border-top-left-radius: 18px; margin-top: -4px; }
@@ -184,12 +226,14 @@ body.chat-active .chat-window { transform: translateX(0); }
     padding: 0 !important; 
     border: none !important;
 }
+/* Ensure no tail on transparent bubbles */
+.bubble-transparent::after { display: none !important; }
 
 /* Emoji Sizes */
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
 .emoji-large { font-size: 32px; line-height: 1.1; }
 
-/* Grouping Logic */
+/* Grouping Logic overrides */
 .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
 .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
 
@@ -659,12 +703,21 @@ function loadMessages(chatId) {
             
             if (isSelf) lastMessageFromSelf = { id: msg.id, ...msg };
             
-            // Avatar logic
+            // Avatar and Tail Logic
             let showAvatar = false;
+            let showTail = false;
+
             if (!isSelf) {
                 const nextMsg = messages[index + 1];
                 if (!nextMsg || nextMsg.senderId !== msg.senderId) {
                     showAvatar = true;
+                    showTail = true;
+                }
+            } else {
+                // Self Tail Logic: Show tail if it's the LAST message in a sequence of self-messages
+                const nextMsg = messages[index + 1];
+                if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                    showTail = true;
                 }
             }
 
@@ -689,6 +742,11 @@ function loadMessages(chatId) {
             const isEmojiOnly = msg.type === 'text' && 
                                 /^[ \p{Emoji_Presentation}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{200D}]+$/u.test(msg.content) && 
                                 msg.content.length < 15;
+            
+            // Only apply tail class if NOT transparent bubble
+            if (showTail && !isEmojiOnly && msg.type !== 'image' && msg.type !== 'post' && msg.type !== 'heart') {
+                bubbleClass += ' has-tail';
+            }
 
             // Reply Block Logic
             if (msg.replyTo) {
