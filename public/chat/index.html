@@ -181,35 +181,61 @@ body.chat-active .chat-window { transform: translateX(0); }
     border-bottom-left-radius: 4px; /* Default for stack */
 }
 
-/* TAIL LOGIC: Applied when 'has-tail' class is present (last message in a group) */
+/* 
+   TAIL LOGIC - WHITE OVERLAY MASK TECHNIQUE
+   This creates a perfect convex "Messenger/Instagram" style tail by masking a square 
+   block with a white rounded corner overlay.
+*/
 
 /* Self Tail */
 .msg-self.has-tail {
-    border-bottom-right-radius: 0;
+    border-bottom-right-radius: 2px;
+}
+.msg-self.has-tail::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--bg-chat-bubble-self);
+    z-index: 0; 
 }
 .msg-self.has-tail::after {
     content: "";
     position: absolute;
     bottom: 0;
-    right: -6px;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle at top left, transparent 65%, var(--bg-chat-bubble-self) 65%);
+    right: -10px;
+    width: 10px;
+    height: 20px;
+    background-color: #fff; /* Match background */
+    border-bottom-left-radius: 10px;
     z-index: 1;
 }
 
 /* Other Tail */
 .msg-other.has-tail {
-    border-bottom-left-radius: 0;
+    border-bottom-left-radius: 2px;
+}
+.msg-other.has-tail::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--bg-chat-bubble-other);
+    z-index: 0;
 }
 .msg-other.has-tail::after {
     content: "";
     position: absolute;
     bottom: 0;
-    left: -6px;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle at top right, transparent 65%, var(--bg-chat-bubble-other) 65%);
+    left: -10px;
+    width: 10px;
+    height: 20px;
+    background-color: #fff;
+    border-bottom-right-radius: 10px;
     z-index: 1;
 }
 
@@ -227,7 +253,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     border: none !important;
 }
 /* Ensure no tail on transparent bubbles */
-.bubble-transparent::after { display: none !important; }
+.bubble-transparent::before, .bubble-transparent::after { display: none !important; }
 
 /* Emoji Sizes */
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
