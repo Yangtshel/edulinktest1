@@ -81,37 +81,36 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Reply Block - Integrated Style */
 .reply-upper-block {
-    border-radius: 18px 18px 18px 18px;
     padding: 10px 14px;
-    margin-bottom: -10px; /* Overlap slightly */
     font-size: 13px;
     cursor: pointer;
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    opacity: 0.95;
-    transition: opacity 0.2s;
     position: relative;
     z-index: 1;
-    transform: scale(0.92);
-    transform-origin: bottom center;
-    border: 1px solid rgba(0,0,0,0.02);
+    margin-bottom: 2px; 
+    transition: opacity 0.2s;
 }
 
+/* Rounded corners logic to attach to bubble */
 .reply-block-self {
-    background-color: #eff6ff; /* Very Light Blue */
-    color: #1e40af; /* Dark Blue Text */
+    background-color: #2b7de9; /* Darker blue shade */
+    color: rgba(255,255,255,0.9);
     align-self: flex-end;
     margin-right: 0;
-    border-left: 3px solid #60a5fa;
+    border-radius: 18px 18px 4px 18px;
+    /* Optional: translucent look */
+    /* background-color: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); */
 }
 
 .reply-block-other {
-    background-color: #f3f4f6; /* Gray-100 */
-    color: #4b5563; /* Gray-600 */
+    background-color: #e3e3e3; /* Slightly darker gray */
+    color: #000;
     align-self: flex-start;
     margin-left: 0;
-    border-left: 3px solid #d1d5db;
+    border-left: 3px solid #0095f6; /* Blue quote line like Instagram */
+    border-radius: 18px 18px 18px 4px;
 }
 
 .reply-upper-block:active { opacity: 0.8; }
@@ -134,11 +133,17 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
-/* Transparent Bubble for Hearts/Emojis */
-.bubble-transparent { 
-    background: transparent !important; 
+/* Connected Bubble Styling when Reply exists */
+.bubble-connected-self { border-top-right-radius: 4px; }
+.bubble-connected-other { border-top-left-radius: 4px; }
+
+/* Transparent Bubble for Hearts/Emojis - High Specificity */
+.bubble-transparent, .msg-container .bubble-transparent { 
+    background-color: transparent !important; 
+    background: transparent !important;
     box-shadow: none !important; 
     padding: 0 !important; 
+    border: none !important;
 }
 
 /* Emoji Sizes */
@@ -624,11 +629,15 @@ function loadMessages(chatId) {
             let rawContent = msg.content;
             let bubbleClass = isSelf ? 'msg-self' : 'msg-other';
             let isTransparent = false;
+            let replyHtml = '';
+            
+            // Emoji Detection
+            const isEmojiOnly = msg.type === 'text' && 
+                                /^[ \p{Emoji_Presentation}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{200D}]+$/u.test(msg.content) && 
+                                msg.content.length < 15;
 
             // Reply Block Logic
-            let replyHtml = '';
             if (msg.replyTo) {
-                // Determine reply block style based on bubble context
                 const replyClass = isSelf ? 'reply-block-self' : 'reply-block-other';
                 replyHtml = `
                     <div class="reply-upper-block ${replyClass}" onclick="window.scrollToMessage('${msg.replyTo.id}')">
@@ -636,12 +645,12 @@ function loadMessages(chatId) {
                         <span class="truncate block opacity-90">${msg.replyTo.body || 'Message'}</span>
                     </div>
                 `;
+                
+                // If text bubble, adjust border radius to look connected
+                if (!isTransparent) {
+                   bubbleClass += isSelf ? ' bubble-connected-self' : ' bubble-connected-other';
+                }
             }
-
-            // Emoji Detection (Simple logic: check if only emojis/spaces and length < 10)
-            const isEmojiOnly = msg.type === 'text' && 
-                                /^[ \p{Emoji_Presentation}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{200D}]+$/u.test(msg.content) && 
-                                msg.content.length < 15;
 
             if (msg.type === 'image') {
                 contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100" onclick="window.open('${msg.content}', '_blank'); event.stopPropagation();">`;
@@ -679,7 +688,6 @@ function loadMessages(chatId) {
             `;
 
             // Interaction Handlers (Click + Hold)
-            // Added explicit click handler for single tap options, stopping propagation if necessary
             const interactHandlers = `
                 ondblclick="toggleMessageLike('${msgDoc.id}')"
                 onclick="handleMessageClick(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
@@ -732,15 +740,8 @@ function loadMessages(chatId) {
 }
 
 window.handleMessageClick = (e, msgId, content, isSelf, type, reactions) => {
-    // If it's an image or post, the specific handler usually stops prop or handles it.
-    // But for text/hearts, we want single tap to open options.
-    // We also want to allow text selection if user drags, but 'onclick' fires on mouseup.
-    // We'll rely on our existing openMsgOptions logic.
-    
-    // Tiny delay to distinguish from dblclick if needed, but instant is snappier as requested.
-    // Double click handler is on the element too, so simple click fires first.
-    
-    // Prevent firing if we just finished a long press (pressTimer would have fired)
+    // Immediate click handler for single tap options
+    // Only fire if we are NOT in the middle of a hold/swipe
     if(pressTimer === null && activeSwipeEl === null) {
         openMsgOptions(msgId, content, isSelf, type, reactions);
     }
