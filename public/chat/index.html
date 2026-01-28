@@ -34,11 +34,15 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Messages */
 .msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; width: 100%; transition: margin 0.2s; }
-.msg-group.has-reaction { margin-bottom: 26px; } /* Fix overlap for reactions */
+.msg-group.has-reaction { margin-bottom: 26px; } 
 
 .msg-container { display: flex; width: 100%; position: relative; align-items: flex-end; }
 .msg-container.self { justify-content: flex-end; }
 .msg-container.other { justify-content: flex-start; }
+
+/* Highlight Animation for Scroll */
+@keyframes highlightMsg { 0% { background-color: rgba(0, 149, 246, 0.1); } 100% { background-color: transparent; } }
+.highlight-message .msg-bubble { animation: highlightMsg 2s ease-out; }
 
 /* Swipe Wrapper */
 .msg-swipe-wrapper {
@@ -47,7 +51,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     transition: transform 0.1s cubic-bezier(0,0,0.2,1);
     touch-action: pan-y; 
     display: flex;
-    align-items: flex-end; /* Align bottom to keep bubbles aligned */
+    align-items: flex-end; 
 }
 .msg-container.self .msg-swipe-wrapper { flex-direction: row-reverse; }
 
@@ -75,26 +79,41 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-container.self .msg-content-stack { align-items: flex-end; }
 .msg-container.other .msg-content-stack { align-items: flex-start; }
 
-/* Reply Block (Above Bubble) */
+/* Reply Block - Integrated Style */
 .reply-upper-block {
     background-color: rgba(0,0,0,0.05);
     color: #666;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 4px;
+    border-radius: 18px 18px 18px 18px;
+    padding: 10px 14px;
+    margin-bottom: -10px; /* Overlap slightly */
     font-size: 13px;
     cursor: pointer;
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    border-left: 3px solid #ccc;
     opacity: 0.9;
     transition: opacity 0.2s;
+    position: relative;
+    z-index: 1;
+    transform: scale(0.95);
+    transform-origin: bottom center;
+    border: 1px solid rgba(0,0,0,0.05);
 }
-.msg-container.self .reply-upper-block { background-color: #f0f0f0; border-left-color: #bbb; border-bottom-right-radius: 4px; }
-.msg-container.other .reply-upper-block { background-color: #f0f0f0; border-left-color: #bbb; border-bottom-left-radius: 4px; }
+.msg-container.self .reply-upper-block { 
+    background-color: #f0f0f0; 
+    align-self: flex-end;
+    margin-right: 0;
+}
+.msg-container.other .reply-upper-block { 
+    background-color: #f0f0f0; 
+    align-self: flex-start;
+    margin-left: 0;
+}
 
 .reply-upper-block:active { opacity: 0.7; }
+.reply-bar-indicator {
+    width: 2px; height: 100%; background: #ccc; position: absolute; left: 0; top: 0; display: none;
+}
 
 /* Main Bubble */
 .msg-bubble { 
@@ -107,13 +126,14 @@ body.chat-active .chat-window { transform: translateX(0); }
     line-height: 1.4; 
     cursor: pointer;
     z-index: 2;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .msg-bubble:active { transform: scale(0.98); transition: transform 0.1s; }
 
 .msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
-/* Grouping Logic (Bubbles only) */
+/* Grouping Logic */
 .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
 .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
 
@@ -162,7 +182,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 /* Message Reaction */
 .msg-reaction { 
     position: absolute; 
-    bottom: -10px; /* Pushed down slightly */
+    bottom: -10px; 
     right: 0; 
     background: white; 
     border-radius: 999px; 
@@ -301,10 +321,9 @@ body.chat-active .chat-window { transform: translateX(0); }
     </main>
 </div>
 
-<!-- Chat Details Overlay -->
+<!-- Chat Details Overlay, Message Options, New Chat Modal (same as before) -->
 <div id="chat-details-overlay" class="fixed inset-0 z-50 bg-black/40 hidden flex justify-end transition-opacity duration-200 opacity-0" onclick="closeChatDetails()">
     <div id="chat-details-panel" class="bg-white w-full md:w-96 h-full shadow-2xl transform translate-x-full flex flex-col relative" onclick="event.stopPropagation()">
-        <!-- Profile details content... (same as before) -->
          <div class="flex-1 overflow-y-auto bg-white">
              <div class="profile-banner" id="cd-banner"></div>
              <div class="profile-content-curve">
@@ -335,14 +354,12 @@ body.chat-active .chat-window { transform: translateX(0); }
     </div>
 </div>
 
-<!-- Message Options Modal -->
 <div id="msg-options-overlay" class="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeMsgOptions()">
     <div id="msg-options-modal" class="bg-white w-full md:w-[420px] md:rounded-2xl rounded-t-2xl shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()">
         <!-- Content injected via JS -->
     </div>
 </div>
 
-<!-- New Chat Modal -->
 <div id="new-chat-overlay" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200" onclick="closeNewChatModal()">
     <div id="new-chat-modal" class="bg-white w-full max-w-md h-[70vh] md:h-[600px] md:rounded-xl shadow-2xl flex flex-col transform translate-y-10 md:translate-y-0 overflow-hidden" onclick="event.stopPropagation()">
         <div class="h-12 border-b border-gray-100 flex items-center justify-between px-4 shrink-0 bg-white">
@@ -585,6 +602,7 @@ function loadMessages(chatId) {
             // Add spacing class if has reactions
             const div = document.createElement('div');
             div.className = `msg-group fade-in ${hasReactions ? 'has-reaction' : ''}`;
+            div.id = `msg-group-${msgDoc.id}`;
             
             const reactionHtml = hasReactions ? `<div class="msg-reaction like-animation"><i data-lucide="heart" class="w-3.5 h-3.5 fill-red-500 text-red-500"></i></div>` : '';
 
@@ -597,9 +615,9 @@ function loadMessages(chatId) {
             // Reply Block Logic (External to bubble now)
             let replyHtml = '';
             if (msg.replyTo) {
-                const isReplySelf = msg.replyTo.id === currentUser.id; // Did I send the original msg being replied to?
+                const isReplySelf = msg.replyTo.id === currentUser.id;
                 replyHtml = `
-                    <div class="reply-upper-block" onclick="scrollToMessage('${msg.replyTo.id}')">
+                    <div class="reply-upper-block" onclick="window.scrollToMessage('${msg.replyTo.id}')">
                         <span class="font-bold mb-0.5">${msg.replyTo.name || 'User'}</span>
                         <span class="truncate block opacity-80">${msg.replyTo.body || 'Message'}</span>
                     </div>
@@ -682,6 +700,17 @@ function loadMessages(chatId) {
     });
 }
 
+window.scrollToMessage = (msgId) => {
+    const el = document.getElementById(`msg-group-${msgId}`);
+    if (el) {
+        el.scrollIntoView({behavior: 'smooth', block: 'center'});
+        el.classList.add('highlight-message');
+        setTimeout(() => {
+            el.classList.remove('highlight-message');
+        }, 2000);
+    }
+};
+
 function renderSeenStatus(lastSelfMsgId = null) {
     const container = document.getElementById('seen-status-container');
     if (!container) return;
@@ -696,10 +725,14 @@ function renderSeenStatus(lastSelfMsgId = null) {
     if (allMsgs.length === 0) return;
     const lastEl = allMsgs[allMsgs.length - 1];
     
-    if (isReadByOther && lastEl.classList.contains('self')) {
-         container.innerHTML = `<div class="seen-status">Seen</div>`;
+    if (lastEl.classList.contains('self')) {
+         if (isReadByOther) {
+             container.innerHTML = `<div class="seen-status">Seen</div>`;
+         } else {
+             container.innerHTML = `<div class="seen-status">Delivered</div>`;
+         }
     } else {
-         container.innerHTML = '';
+        container.innerHTML = '';
     }
 }
 
@@ -729,7 +762,6 @@ window.handleSwipeMove = (e) => {
     if (!isSwiping) {
         if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
             isSwiping = true;
-            // If swiping starts, cancel any long press on the bubble
             if (pressTimer) {
                 clearTimeout(pressTimer);
                 pressTimer = null;
@@ -1027,7 +1059,6 @@ window.viewProfileFromDetails = () => {
 window.handlePressStart = (e, msgId, content, isSelf, type, reactions) => {
     if (e.type === 'mousedown' && e.button !== 0) return;
     
-    // Prevent default context menu on right click
     if (e.type === 'contextmenu') e.preventDefault();
     
     pressStartX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1045,8 +1076,8 @@ window.handlePressMove = (e) => {
     const diffX = Math.abs(x - pressStartX);
     const diffY = Math.abs(y - pressStartY);
     
-    // Increased tolerance (15px) for shaky fingers on mobile to prevent accidental cancellation
-    if(diffX > 15 || diffY > 15) {
+    // Increased tolerance to 20px to make hold more robust on mobile
+    if(diffX > 20 || diffY > 20) {
         clearTimeout(pressTimer);
         pressTimer = null;
     }
