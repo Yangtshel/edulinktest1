@@ -169,27 +169,29 @@ body.chat-active .chat-window { transform: translateX(0); }
 }
 .msg-bubble:active { transform: scale(0.98); transition: transform 0.1s; }
 
-/* Bubble colors and base border radius logic */
+/* 
+   CAPSULE DESIGN:
+   Default is fully rounded (22px).
+   Only the tail message gets a sharp corner.
+*/
 .msg-self { 
     background-color: var(--bg-chat-bubble-self); 
     color: white; 
-    border-bottom-right-radius: 4px; /* Default for stack */
+    /* Removed default 4px corner */
 }
 .msg-other { 
     background-color: var(--bg-chat-bubble-other); 
     color: #000; 
-    border-bottom-left-radius: 4px; /* Default for stack */
+    /* Removed default 4px corner */
 }
 
 /* 
    TAIL LOGIC - WHITE OVERLAY MASK TECHNIQUE
-   This creates a perfect convex "Messenger/Instagram" style tail by masking a square 
-   block with a white rounded corner overlay.
 */
 
 /* Self Tail */
 .msg-self.has-tail {
-    border-bottom-right-radius: 2px;
+    border-bottom-right-radius: 2px; /* Sharp corner for tail */
 }
 .msg-self.has-tail::before {
     content: "";
@@ -215,7 +217,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Other Tail */
 .msg-other.has-tail {
-    border-bottom-left-radius: 2px;
+    border-bottom-left-radius: 2px; /* Sharp corner for tail */
 }
 .msg-other.has-tail::before {
     content: "";
@@ -239,7 +241,6 @@ body.chat-active .chat-window { transform: translateX(0); }
     z-index: 1;
 }
 
-
 /* Connected Bubble Styling when Reply exists */
 .bubble-connected-self { border-top-right-radius: 4px; border-top-left-radius: 18px; margin-top: -4px; }
 .bubble-connected-other { border-top-left-radius: 4px; border-top-right-radius: 18px; margin-top: -4px; }
@@ -259,9 +260,9 @@ body.chat-active .chat-window { transform: translateX(0); }
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
 .emoji-large { font-size: 32px; line-height: 1.1; }
 
-/* Grouping Logic overrides */
-.msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
-.msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
+/* Removed Grouping Overrides to maintain Capsule Shape */
+/* .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; } */
+/* .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; } */
 
 /* Seen Status */
 .seen-status {
