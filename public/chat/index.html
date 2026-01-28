@@ -79,16 +79,32 @@ body.chat-active .chat-window { transform: translateX(0); }
 #chat-details-panel { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #chat-details-overlay.open #chat-details-panel { transform: translateX(0); }
 
-/* Profile Curve Style in Chat Details */
-.cd-curve-container { 
-    border-radius: 32px 32px 0 0; 
-    margin-top: -32px; 
-    position: relative; 
-    z-index: 10; 
-    background: white; 
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.06); 
-    min-height: calc(100% - 160px);
+/* Profile Design in Chat Details */
+.profile-banner {
+    height: 160px;
+    width: 100%;
+    background-color: #e5e7eb;
+    background-size: cover;
+    background-position: center;
+}
+
+.profile-content-curve {
+    border-radius: 30px 30px 0 0;
+    margin-top: -24px;
+    background: white;
+    position: relative;
+    z-index: 10;
+    padding-top: 10px;
+    min-height: 300px;
     padding-bottom: 80px;
+}
+
+.profile-avatar-wrapper {
+    margin-top: -60px; /* Pull up to overlap banner */
+    margin-left: 20px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 20;
 }
 
 .details-footer {
@@ -96,15 +112,15 @@ body.chat-active .chat-window { transform: translateX(0); }
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 72px;
+    height: 80px;
     background: white;
     border-top: 1px solid #f0f0f0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0 20px;
+    gap: 12px;
     z-index: 30;
-    gap: 16px;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 </style>
@@ -200,21 +216,19 @@ body.chat-active .chat-window { transform: translateX(0); }
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto bg-white">
              <!-- Banner -->
-             <div class="h-44 bg-gray-200 bg-cover bg-center" id="cd-banner"></div>
+             <div class="profile-banner" id="cd-banner"></div>
              
-             <!-- Overlapping Curve Container -->
-             <div class="cd-curve-container px-6 pt-0">
-                 <div class="flex justify-between items-end -mt-12 mb-3 px-1">
-                     <div class="bg-white p-1 rounded-full">
-                        <img id="cd-avatar" src="" class="w-24 h-24 rounded-full border-2 border-gray-50 bg-white object-cover shadow-sm">
-                     </div>
+             <!-- Content with overlapping curve and avatar -->
+             <div class="profile-content-curve">
+                 <div class="profile-avatar-wrapper">
+                    <img id="cd-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white bg-white object-cover shadow-sm">
                  </div>
                  
-                 <div class="mb-6 mt-2">
+                 <div class="px-6 mt-2">
                      <h2 id="cd-name" class="text-2xl font-bold text-gray-900 flex items-center gap-1">User</h2>
                      <div id="cd-username" class="text-sm text-gray-500 font-medium">@username</div>
                      
-                     <div class="flex gap-6 mt-5 mb-5 text-sm border-b border-gray-100 pb-5">
+                     <div class="flex gap-6 mt-6 mb-6 text-sm border-b border-gray-100 pb-6">
                         <div class="flex flex-col items-center">
                             <strong class="text-gray-900 text-lg" id="cd-following">0</strong>
                             <span class="text-gray-500 text-xs">Following</span>
@@ -226,15 +240,15 @@ body.chat-active .chat-window { transform: translateX(0); }
                      </div>
 
                      <div class="text-xs font-bold text-gray-500 uppercase mb-2">About</div>
-                     <p id="cd-bio" class="text-gray-700 text-[15px] leading-relaxed"></p>
+                     <p id="cd-bio" class="text-gray-700 text-[15px] leading-relaxed mb-6"></p>
                  </div>
              </div>
         </div>
 
-        <!-- Footer Header -->
+        <!-- Footer -->
         <div class="details-footer">
             <button onclick="viewProfileFromDetails()" class="flex-1 py-3 bg-[#0095f6] hover:bg-blue-600 rounded-xl font-bold text-sm transition-colors text-white shadow-sm text-center">View Profile</button>
-            <button onclick="closeChatDetails()" class="w-11 h-11 flex items-center justify-center hover:bg-gray-100 bg-gray-50 rounded-full transition-colors shrink-0">
+            <button onclick="closeChatDetails()" class="w-12 h-12 flex items-center justify-center hover:bg-gray-100 bg-gray-50 rounded-full border border-gray-200 transition-colors shrink-0">
                 <i data-lucide="x" class="w-5 h-5 text-gray-700"></i>
             </button>
         </div>
@@ -304,6 +318,7 @@ let currentMsgContext = null;
 let pressTimer = null;
 let pressStartX = 0;
 let pressStartY = 0;
+let conversationRenderId = 0; // Sequence ID to prevent duplicated renders
 
 onAuthStateChanged(auth, async (u) => {
     if (!u) {
@@ -332,6 +347,9 @@ function loadConversations() {
     );
 
     unsubscribeConversations = onSnapshot(q, async (snapshot) => {
+        // Increment render ID to invalidate previous async renders
+        const currentRenderId = ++conversationRenderId;
+
         if (snapshot.empty) {
             container.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm mt-10">No messages yet.<br>Start a conversation!</div>';
             return;
@@ -365,7 +383,6 @@ function loadConversations() {
             const lastMsg = chat.lastMessage || 'Start chatting';
             
             // Build the HTML for this item
-            // Note: We escape JSON to prevent syntax errors in the onclick
             const userJson = JSON.stringify(otherUser).replace(/"/g, '&quot;');
             
             return `
@@ -384,12 +401,14 @@ function loadConversations() {
             </div>`;
         }));
 
+        // Check if this render sequence is still the latest one
+        if (currentRenderId !== conversationRenderId) return;
+
         // Render everything at once to prevent duplicates
         container.innerHTML = renderedItems.join('');
     });
 }
 
-// Ensure openChat is globally accessible for the HTML strings
 window.openChat = async (chatId, user, userId) => {
     currentChatId = chatId;
     currentChatUser = { ...user, id: userId };
@@ -399,29 +418,21 @@ window.openChat = async (chatId, user, userId) => {
     document.getElementById('empty-state').classList.add('hidden');
     document.getElementById('active-chat-interface').classList.remove('hidden');
     
-    // Highlight the selected item manually since we just re-rendered or clicked
     document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-    // (Optional: Add 'active' class to clicked element, but a re-render from onSnapshot might clear it, 
-    // however loadConversations handles the 'active' class based on currentChatId)
     
     document.getElementById('chat-header-name').innerText = user.name;
     document.getElementById('chat-header-avatar').src = user.avatar;
     
-    // Fetch latest user data silently for details panel
     try {
         const uSnap = await getDoc(doc(db, "users", userId));
         if (uSnap.exists()) currentChatUser = { id: userId, ...uSnap.data() };
     } catch(e) {}
 
-    // Mark as read
     updateDoc(doc(db, "chats", chatId), {
         readBy: [currentUser.id, userId]
     }).catch(e => {});
 
     loadMessages(chatId);
-    
-    // Trigger a refresh of the list to update "active" state visuals if needed
-    // (Though usually unnecessary if snapshots handle it)
 };
 
 async function checkForSharedPost() {
@@ -702,7 +713,6 @@ window.closeChatDetails = () => {
 window.viewProfileFromDetails = () => {
     closeChatDetails();
     if (currentChatUser) {
-        // Explicitly set href to /home?profileId=... as requested
         window.location.href = `/home?profileId=${currentChatUser.id}`;
     }
 };
