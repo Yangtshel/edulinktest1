@@ -16,7 +16,7 @@ body{font-family:'Inter',sans-serif;background-color:#fff;overflow:hidden;oversc
 .fade-in{animation:fadeUp .3s cubic-bezier(.2,0,0,1) forwards;opacity:0;transform:translateY(10px)}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
-/* Chat Specific Styles */
+/* Chat Layout */
 .chat-layout { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
 .sidebar { width: 100%; height: 100%; border-right: 1px solid #dbdbdb; display: flex; flex-direction: column; background: #fff; z-index: 10; }
 .chat-window { flex: 1; height: 100%; display: flex; flex-direction: column; background: #fff; position: absolute; top: 0; left: 0; width: 100%; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1); z-index: 20; }
@@ -26,53 +26,61 @@ body{font-family:'Inter',sans-serif;background-color:#fff;overflow:hidden;oversc
     .chat-window { position: relative; transform: translateX(0); width: auto; }
 }
 
-/* Active State for Mobile */
+/* Mobile Active State */
 body.chat-active .sidebar { display: none; } 
 @media (min-width: 768px) { body.chat-active .sidebar { display: flex; } }
 body.chat-active .chat-window { transform: translateX(0); }
 
-/* Message Groups */
-.msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
+/* Messages */
+.msg-group { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; width: 100%; }
 .msg-group:hover .msg-actions { opacity: 1; }
 
-.msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 22px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; }
-.msg-self { align-self: flex-end; background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
-.msg-other { align-self: flex-start; background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
+.msg-container { display: flex; width: 100%; position: relative; }
+.msg-container.self { justify-content: flex-end; }
+.msg-container.other { justify-content: flex-start; }
 
-/* Grouping bubbles corners */
-.msg-self + .msg-self { border-top-right-radius: 4px; }
-.msg-other + .msg-other { border-top-left-radius: 4px; }
-.msg-self:last-child { border-bottom-right-radius: 22px; }
-.msg-other:last-child { border-bottom-left-radius: 22px; }
+.msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 22px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; transition: background-color 0.2s; }
+.msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
+.msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
+
+/* Grouping corners */
+.msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
+.msg-group + .msg-group .msg-other { border-top-left-radius: 4px; }
 
 /* Message Actions (Delete) */
-.msg-actions { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; padding: 0 10px; }
-.msg-self .msg-actions { right: 100%; display: flex; align-items: center; }
-.msg-other .msg-actions { left: 100%; display: flex; align-items: center; }
-.action-btn { width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; }
-.action-btn:hover { background: #e0e0e0; color: #ff3b30; }
+.msg-actions { opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; padding: 0 8px; }
+.msg-container.self .msg-actions { order: -1; } /* Left of bubble for self */
+.msg-container.other .msg-actions { order: 1; } /* Right of bubble for other */
 
-/* Post Card inside Chat (Instagram Style) */
-.chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 260px; margin-top: 4px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; }
-.msg-self .chat-post-card { background: #4db5f9; }
+.action-btn { width: 24px; height: 24px; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #999; }
+.action-btn:hover { background: #f0f0f0; color: #ff3b30; }
+
+/* Post Card */
+.chat-post-card { background: #efefef; border-radius: 16px; overflow: hidden; width: 260px; margin-top: 4px; cursor: pointer; transition: opacity 0.2s; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.05); }
+.msg-self .chat-post-card { background: #4db5f9; border: none; }
 .msg-self .cpc-footer { color: white; opacity: 0.95; }
 .msg-self .cpc-header span { color: white; }
 .chat-post-card:hover { opacity: 0.95; }
 
 .cpc-header { padding: 10px; display: flex; align-items: center; gap: 8px; }
-.cpc-img-container { width: 100%; aspect-ratio: 1/1; background: #e0e0e0; overflow: hidden; }
+.cpc-img-container { width: 100%; aspect-ratio: 1/1; background: #e0e0e0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .cpc-img { width: 100%; height: 100%; object-fit: cover; }
 .cpc-footer { padding: 12px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
 
+/* Heart */
+.heart-fixed { filter: drop-shadow(0 0 6px rgba(255, 48, 64, 0.6)); transition: transform 0.1s; }
+.heart-fixed:active { transform: scale(0.9); }
+
+/* Input */
 .chat-input-area { padding: 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #dbdbdb; background: #fff; }
 .chat-input { background: #efefef; border-radius: 22px; padding: 11px 16px; flex: 1; outline: none; border: 1px solid transparent; font-size: 15px; max-height: 100px; resize: none; transition: border 0.2s; }
 .chat-input:focus { border-color: #dbdbdb; }
 
-.user-item { padding: 8px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; }
+/* User List */
+.user-item { padding: 10px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; }
 .user-item:hover { background-color: #fafafa; }
 .user-item.active { background-color: #efefef; }
 
-/* Modal Animation */
 #new-chat-modal { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #new-chat-modal.open { transform: translateY(0); }
 </style>
@@ -80,7 +88,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 <body>
 
 <div class="chat-layout">
-    <!-- LEFT SIDEBAR: CHAT LIST -->
+    <!-- LEFT SIDEBAR -->
     <aside class="sidebar" id="sidebar-panel">
         <div class="h-16 flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
             <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
@@ -100,14 +108,13 @@ body.chat-active .chat-window { transform: translateX(0); }
         </div>
 
         <div class="flex-1 overflow-y-auto overflow-x-hidden" id="chat-list-container">
-            <!-- Chat List Items Render Here -->
             <div class="flex flex-col items-center justify-center h-40 opacity-50">
                 <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-gray-400"></i>
             </div>
         </div>
     </aside>
 
-    <!-- RIGHT MAIN: CHAT WINDOW -->
+    <!-- RIGHT MAIN -->
     <main class="chat-window hidden md:flex" id="chat-window-panel">
         <!-- Empty State -->
         <div id="empty-state" class="w-full h-full flex flex-col items-center justify-center text-center p-8 bg-white">
@@ -119,9 +126,8 @@ body.chat-active .chat-window { transform: translateX(0); }
             <button onclick="openNewChatModal()" class="bg-[#0095f6] text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-600 transition-colors">Send message</button>
         </div>
 
-        <!-- Active Chat Interface -->
+        <!-- Chat Interface -->
         <div id="active-chat-interface" class="w-full h-full flex flex-col hidden bg-white">
-            <!-- Header -->
             <header class="h-16 px-4 flex items-center justify-between border-b border-gray-100 shrink-0 bg-white/95 backdrop-blur z-20">
                 <div class="flex items-center gap-3">
                     <button onclick="closeChat()" class="md:hidden w-8 h-8 -ml-2 flex items-center justify-center hover:bg-gray-50 rounded-full">
@@ -142,12 +148,8 @@ body.chat-active .chat-window { transform: translateX(0); }
                 </div>
             </header>
 
-            <!-- Messages Area -->
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 pb-4 scroll-smooth">
-                <!-- Messages will be injected here -->
-            </div>
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 pb-4 scroll-smooth"></div>
 
-            <!-- Input Area -->
             <div class="chat-input-area">
                 <button class="shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors" onclick="document.getElementById('img-upload').click()">
                     <i data-lucide="image" class="w-6 h-6 text-gray-800"></i>
@@ -167,7 +169,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     </main>
 </div>
 
-<!-- New Chat / Share Modal -->
+<!-- Modal -->
 <div id="new-chat-overlay" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200" onclick="closeNewChatModal()">
     <div id="new-chat-modal" class="bg-white w-full max-w-md h-[70vh] md:h-[600px] md:rounded-xl shadow-2xl flex flex-col transform translate-y-10 md:translate-y-0 overflow-hidden" onclick="event.stopPropagation()">
         <div class="h-12 border-b border-gray-100 flex items-center justify-between px-4 shrink-0 bg-white">
@@ -176,13 +178,11 @@ body.chat-active .chat-window { transform: translateX(0); }
             <div class="w-8"></div>
         </div>
         
-        <!-- Search -->
         <div class="p-3 border-b border-gray-100 flex items-center gap-2">
             <span class="font-bold text-gray-900 text-[15px]">To:</span>
             <input type="text" id="user-search-input" placeholder="Search..." class="flex-1 outline-none text-[15px]" oninput="handleUserSearch(this.value)">
         </div>
 
-        <!-- Preview of post being shared (Hidden by default) -->
         <div id="share-preview-container" class="hidden p-3 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
             <img id="share-preview-img" class="w-12 h-12 rounded object-cover bg-gray-200">
             <div class="flex-1 min-w-0">
@@ -191,7 +191,6 @@ body.chat-active .chat-window { transform: translateX(0); }
             </div>
         </div>
 
-        <!-- List -->
         <div id="search-results" class="flex-1 overflow-y-auto p-2">
             <div class="text-gray-900 font-semibold text-sm px-4 py-3">Suggested</div>
             <div id="suggested-users-list"></div>
@@ -222,7 +221,6 @@ let selectedUserForNewChat = null;
 let unsubscribeMessages = null;
 let pendingSharePost = null;
 
-// Auth State Listener
 onAuthStateChanged(auth, async (u) => {
     if (!u) {
         window.location.href = 'index.html'; 
@@ -236,7 +234,7 @@ onAuthStateChanged(auth, async (u) => {
     checkForSharedPost();
 });
 
-// UI Logic: Load Conversations List (Client-side sorting)
+// Load Chats
 function loadConversations() {
     const q = query(
         collection(db, "chats"), 
@@ -245,16 +243,13 @@ function loadConversations() {
 
     onSnapshot(q, async (snapshot) => {
         const container = document.getElementById('chat-list-container');
-        
         if (snapshot.empty) {
             container.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm mt-10">No messages yet.<br>Start a conversation!</div>';
             return;
         }
 
         const chats = [];
-        snapshot.forEach(doc => {
-            chats.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => chats.push({ id: doc.id, ...doc.data() }));
 
         chats.sort((a, b) => {
             const tA = a.lastMessageTimestamp?.toMillis() || 0;
@@ -270,15 +265,15 @@ function loadConversations() {
 
             let otherUser = { name: 'User', avatar: 'https://via.placeholder.com/150' };
             try {
+                // In production, implement user caching to avoid repeated fetches
                 const uSnap = await getDoc(doc(db, "users", otherUserId));
                 if (uSnap.exists()) otherUser = uSnap.data();
-            } catch (e) { console.error(e); }
+            } catch (e) {}
 
             const isUnread = !chat.readBy || !chat.readBy.includes(currentUser.id);
             const isSelected = currentChatId === chat.id;
             const timeStr = formatTime(chat.lastMessageTimestamp);
             const lastMsg = chat.lastMessage || 'Start chatting';
-            const msgClass = isUnread ? "font-bold text-gray-900" : "text-gray-500";
             
             const div = document.createElement('div');
             div.className = `user-item ${isSelected ? 'active' : ''}`;
@@ -290,7 +285,7 @@ function loadConversations() {
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="font-normal text-gray-900 text-[15px] truncate">${otherUser.name}</div>
-                    <div class="flex items-center gap-1 text-[13px] ${msgClass}">
+                    <div class="flex items-center gap-1 text-[13px] ${isUnread ? "font-bold text-gray-900" : "text-gray-500"}">
                         <span class="truncate block max-w-[140px]">${lastMsg}</span>
                         <span class="shrink-0 text-gray-400 font-normal">· ${timeStr}</span>
                     </div>
@@ -301,10 +296,10 @@ function loadConversations() {
     });
 }
 
+// Shared Post Check
 async function checkForSharedPost() {
     const urlParams = new URLSearchParams(window.location.search);
     const sharedPostId = urlParams.get('sharePostId');
-    
     if (sharedPostId) {
         try {
             const postSnap = await getDoc(doc(db, "posts", sharedPostId));
@@ -315,17 +310,16 @@ async function checkForSharedPost() {
                 document.getElementById('start-chat-btn').innerText = "Send";
                 const previewDiv = document.getElementById('share-preview-container');
                 previewDiv.classList.remove('hidden');
-                document.getElementById('share-preview-text').innerText = pendingSharePost.content || "Image Post";
-                let img = 'https://via.placeholder.com/150';
-                if (pendingSharePost.image) img = pendingSharePost.image;
-                if (pendingSharePost.media && Array.isArray(pendingSharePost.media) && pendingSharePost.media.length > 0) img = pendingSharePost.media[0];
+                document.getElementById('share-preview-text').innerText = pendingSharePost.content || "Post";
+                let img = pendingSharePost.image || (pendingSharePost.media?.[0]) || 'https://via.placeholder.com/150';
                 document.getElementById('share-preview-img').src = img;
                 window.history.replaceState({}, document.title, "chat.html");
             }
-        } catch (e) { console.error("Error fetching shared post", e); }
+        } catch (e) {}
     }
 }
 
+// Chat Window Logic
 window.openChat = async (chatId, user, userId) => {
     currentChatId = chatId;
     currentChatUser = { ...user, id: userId };
@@ -342,7 +336,7 @@ window.openChat = async (chatId, user, userId) => {
 
     updateDoc(doc(db, "chats", chatId), {
         readBy: [currentUser.id, userId]
-    }).catch(e => console.log("Read receipt error:", e));
+    }).catch(e => {});
 
     loadMessages(chatId);
 };
@@ -355,72 +349,69 @@ window.closeChat = () => {
 
 function loadMessages(chatId) {
     if (unsubscribeMessages) unsubscribeMessages();
-    
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("timestamp", "asc"));
     const container = document.getElementById('messages-container');
-    container.innerHTML = '';
 
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
         container.innerHTML = ''; 
-        
         snapshot.forEach((msgDoc) => {
             const msg = msgDoc.data();
             const isSelf = msg.senderId === currentUser.id;
 
             const div = document.createElement('div');
-            div.className = `msg-group fade-in ${isSelf ? 'msg-self' : 'msg-other'}`;
+            div.className = `msg-group fade-in`;
             
             let contentHtml = '';
             let bubbleStyle = '';
 
             if (msg.type === 'image') {
-                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer" onclick="window.open('${msg.content}', '_blank')">`;
+                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100" onclick="window.open('${msg.content}', '_blank')">`;
                 bubbleStyle = 'padding: 4px; background: transparent;';
             } else if (msg.type === 'post') {
                 let postData = typeof msg.postData === 'string' ? JSON.parse(msg.postData) : msg.postData;
                 contentHtml = renderPostCard(postData, isSelf);
                 bubbleStyle = 'padding: 0; background: transparent; overflow: hidden;';
             } else if (msg.type === 'heart') {
-                 contentHtml = `<i data-lucide="heart" class="w-10 h-10 text-red-500 fill-red-500"></i>`;
+                 contentHtml = `<i data-lucide="heart" class="w-12 h-12 text-[#ff3040] fill-[#ff3040] heart-fixed"></i>`;
                  bubbleStyle = 'background: transparent; padding: 0;';
             } else {
                 contentHtml = linkify(msg.content);
             }
 
-            // Trash button for own messages
-            const deleteBtn = isSelf ? 
-                `<div class="msg-actions">
-                    <div class="action-btn" onclick="deleteMessage('${msgDoc.id}')" title="Unsend">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+            // Delete Actions
+            // For self: Unsend
+            // For others: Delete for me (local hide - simulated by deleting for now per request or just disable)
+            // Reverting to Unsend for Self ONLY to maintain data integrity
+            const actions = `
+                <div class="msg-actions">
+                    <div class="action-btn" onclick="deleteMessage('${msgDoc.id}', ${isSelf})" title="${isSelf ? 'Unsend' : 'Delete'}">
+                        <i data-lucide="${isSelf ? 'trash-2' : 'x'}" class="w-4 h-4"></i>
                     </div>
-                 </div>` : '';
+                </div>
+            `;
 
             div.innerHTML = `
-                <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'}" style="${bubbleStyle}">
-                    ${contentHtml}
+                <div class="msg-container ${isSelf ? 'self' : 'other'}">
+                    <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'}" style="${bubbleStyle}">
+                        ${contentHtml}
+                    </div>
+                    ${actions}
                 </div>
-                ${deleteBtn}
             `;
 
             container.appendChild(div);
         });
 
-        setTimeout(() => {
-            container.scrollTop = container.scrollHeight;
-        }, 50);
+        setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
         lucide.createIcons();
     });
 }
 
 function renderPostCard(post, isSelf) {
-    let img = null;
-    if(post.image) img = post.image;
-    if(post.media && Array.isArray(post.media) && post.media.length > 0) img = post.media[0];
-
-    // If no image, show placeholder or styled text area
+    let img = post.image || (post.media?.[0]);
     const imgHtml = img ? 
         `<div class="cpc-img-container"><img src="${img}" class="cpc-img"></div>` : 
-        `<div class="cpc-img-container flex items-center justify-center bg-gray-200"><i data-lucide="file-text" class="w-10 h-10 text-gray-400"></i></div>`;
+        `<div class="cpc-img-container bg-gray-100"><i data-lucide="file-text" class="w-8 h-8 text-gray-400"></i></div>`;
 
     return `
         <div class="chat-post-card" onclick="window.location.href='index.html?postId=${post.id}'">
@@ -430,7 +421,7 @@ function renderPostCard(post, isSelf) {
             </div>
             ${imgHtml}
             <div class="cpc-footer">
-                <p class="truncate font-medium">${post.content || 'View Post'}</p>
+                <p class="truncate font-medium">${post.content || 'Shared post'}</p>
             </div>
         </div>
     `;
@@ -440,31 +431,25 @@ function linkify(text) {
     if(!text) return '';
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, (url) => {
-        return `<a href="${url}" target="_blank" class="underline hover:opacity-80">${url}</a>`;
+        return `<a href="${url}" target="_blank" class="underline hover:opacity-80 break-all">${url}</a>`;
     });
 }
 
 function formatTime(timestamp) {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 86400000) { 
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (diff < 604800000) { 
-        return date.toLocaleDateString([], { weekday: 'short' });
-    } else {
-        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
+    const diff = new Date() - date;
+    if (diff < 86400000) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diff < 604800000) return date.toLocaleDateString([], { weekday: 'short' });
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 window.handleTyping = (e) => {
-    const input = e.target;
+    const val = e.target.value.trim();
     const sendBtn = document.getElementById('send-btn');
     const likeBtn = document.getElementById('like-btn');
     
-    if (input.value.trim().length > 0) {
+    if (val.length > 0) {
         sendBtn.classList.remove('hidden');
         likeBtn.classList.add('hidden');
     } else {
@@ -482,9 +467,25 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
     if (!currentChatId || !currentUser) return;
     
     const input = document.getElementById('message-input');
-    const msgContent = content || input.value.trim();
+    let msgContent = content || input.value.trim();
     
     if (!msgContent && type === 'text') return;
+
+    // Check for Post Link Pattern (Simple detection for EduLink URLs)
+    // Matches https://.../home?postId=XYZ
+    const postLinkMatch = msgContent.match(/postId=([a-zA-Z0-9_-]+)/);
+    if (type === 'text' && postLinkMatch) {
+        const postId = postLinkMatch[1];
+        try {
+            const postSnap = await getDoc(doc(db, "posts", postId));
+            if (postSnap.exists()) {
+                type = 'post';
+                extraData = { postData: { id: postSnap.id, ...postSnap.data() } };
+                // Keep the content empty or descriptive
+                msgContent = ''; 
+            }
+        } catch (e) { console.log('Link expansion failed', e); }
+    }
 
     input.value = '';
     document.getElementById('send-btn').classList.add('hidden');
@@ -504,7 +505,7 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
         
         let preview = msgContent;
         if (type === 'image') preview = 'Sent a photo';
-        if (type === 'post') preview = `Sent a post by ${extraData.postData.authorName || 'someone'}`;
+        if (type === 'post') preview = `Sent a post`;
         if (type === 'heart') preview = '❤️';
 
         await updateDoc(doc(db, "chats", currentChatId), {
@@ -519,39 +520,49 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
 
 window.sendHeart = () => sendMessage('heart', '❤️');
 
-// Improved Image Upload with Firebase Storage
 window.handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show loading state/toast ideally, for now just console
-    console.log("Uploading...");
+    // Show a temporary toast or loading indicator in input area?
+    const btn = document.getElementById('send-btn');
+    btn.innerText = '...';
+    btn.classList.remove('hidden');
     
     try {
         const storageRef = ref(storage, `chat_images/${currentChatId}/${Date.now()}_${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
-        sendMessage('image', downloadURL);
+        await sendMessage('image', downloadURL);
     } catch (error) {
         console.error("Upload failed", error);
-        alert("Failed to send image. Please try again.");
+        alert("Failed to upload image. " + error.message);
+    } finally {
+        btn.innerText = 'Send';
+        btn.classList.add('hidden');
+        e.target.value = '';
     }
 };
 
-// Delete Message Logic
-window.deleteMessage = async (msgId) => {
+window.deleteMessage = async (msgId, isSelf) => {
+    if (!isSelf) {
+        if (!confirm("Remove this message from your view? (This doesn't delete it for others)")) return;
+        // In a real app, we'd add ID to a 'hiddenFor' array. 
+        // For this single-file requirement, we'll just alert that this feature requires backend support.
+        alert("Deleting others' messages is restricted.");
+        return;
+    }
+
     if(confirm("Unsend this message?")) {
         try {
             await deleteDoc(doc(db, `chats/${currentChatId}/messages`, msgId));
-            // Optional: Update last message in chat doc if it was the last one (skipped for simplicity in MVP)
         } catch (error) {
             console.error("Error deleting message", error);
-            alert("Could not delete message");
         }
     }
 };
 
-// New Chat Flow
+// Modal Logic
 window.openNewChatModal = () => {
     document.getElementById('new-chat-overlay').classList.remove('hidden');
     setTimeout(() => {
@@ -584,7 +595,6 @@ async function loadSuggestedUsers() {
     const snap = await getDocs(q);
     const list = document.getElementById('suggested-users-list');
     list.innerHTML = '';
-    
     snap.forEach(doc => {
         const u = {id: doc.id, ...doc.data()};
         if (u.id === currentUser.id) return;
@@ -598,23 +608,21 @@ window.handleUserSearch = async (val) => {
     
     const list = document.getElementById('suggested-users-list');
     list.innerHTML = '<div class="p-4 text-center"><i data-lucide="loader-2" class="animate-spin w-5 h-5 mx-auto"></i></div>';
-    lucide.createIcons();
-
+    
     const q = query(collection(db, "users"));
     const snap = await getDocs(q);
     list.innerHTML = '';
-    
     let found = false;
     snap.forEach(doc => {
         const u = {id: doc.id, ...doc.data()};
         if (u.id === currentUser.id) return;
-        if (u.name.toLowerCase().includes(term) || (u.username && u.username.toLowerCase().includes(term))) {
+        if (u.name.toLowerCase().includes(term) || (u.username || '').toLowerCase().includes(term)) {
             renderSearchUserItem(u, list);
             found = true;
         }
     });
-
     if (!found) list.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No users found.</div>';
+    lucide.createIcons();
 };
 
 function renderSearchUserItem(user, container) {
@@ -645,7 +653,6 @@ function selectUserForChat(user, element) {
     indicator.style.backgroundColor = '#0095f6';
     indicator.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-white"></i>';
     lucide.createIcons();
-
     selectedUserForNewChat = user;
     const btn = document.getElementById('start-chat-btn');
     btn.disabled = false;
@@ -655,51 +662,37 @@ function selectUserForChat(user, element) {
 
 window.startChat = async () => {
     if (!selectedUserForNewChat) return;
-    
-    const targetUserId = selectedUserForNewChat.id;
     const targetUser = selectedUserForNewChat;
-    
-    const modal = document.getElementById('new-chat-modal');
-    document.getElementById('new-chat-overlay').classList.add('opacity-0');
-    modal.classList.remove('open');
-    setTimeout(() => document.getElementById('new-chat-overlay').classList.add('hidden'), 300);
+    closeNewChatModal();
 
     const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.id));
     const snap = await getDocs(q);
     let chatId = null;
-
     snap.forEach(doc => {
         const data = doc.data();
-        if (data.participants.includes(targetUserId) && data.participants.length === 2) {
-            chatId = doc.id;
-        }
+        if (data.participants.includes(targetUser.id) && data.participants.length === 2) chatId = doc.id;
     });
 
     if (!chatId) {
-        const newChatRef = await addDoc(collection(db, "chats"), {
-            participants: [currentUser.id, targetUserId],
+        const ref = await addDoc(collection(db, "chats"), {
+            participants: [currentUser.id, targetUser.id],
             lastMessage: pendingSharePost ? 'Sent a post' : 'Started a conversation',
             lastMessageTimestamp: serverTimestamp(),
             readBy: [currentUser.id]
         });
-        chatId = newChatRef.id;
+        chatId = ref.id;
     }
 
-    await openChat(chatId, targetUser, targetUserId);
+    await openChat(chatId, targetUser, targetUser.id);
 
     if (pendingSharePost) {
         await sendMessage('post', '', { postData: pendingSharePost });
         pendingSharePost = null;
-        document.getElementById('modal-title').innerText = "New Message";
-        document.getElementById('start-chat-btn').innerText = "Chat";
-        document.getElementById('share-preview-container').classList.add('hidden');
     }
 };
 
 window.viewProfile = () => {
-    if (currentChatUser) {
-        window.location.href = `index.html?profileId=${currentChatUser.id}`;
-    }
+    if (currentChatUser) window.location.href = `index.html?profileId=${currentChatUser.id}`;
 };
 
 lucide.createIcons();
