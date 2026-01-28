@@ -392,6 +392,13 @@ function loadConversations() {
             const timeStr = formatTime(chat.lastMessageTimestamp);
             const lastMsg = chat.lastMessage || 'Start chatting';
             
+            // Status logic for Sent/Delivered/Seen
+            let statusHtml = '';
+            if (chat.lastSenderId === currentUser.id) {
+                const isSeen = chat.readBy && chat.readBy.includes(otherUserId);
+                statusHtml = `<span class="shrink-0 text-gray-400 font-normal"> · ${isSeen ? 'Seen' : 'Delivered'}</span>`;
+            }
+
             const userJson = JSON.stringify(otherUser).replace(/"/g, '&quot;');
             
             return `
@@ -405,6 +412,7 @@ function loadConversations() {
                     <div class="flex items-center gap-1 text-[13px] ${isUnread ? "font-bold text-gray-900" : "text-gray-500"}">
                         <span class="truncate block max-w-[140px]">${lastMsg}</span>
                         <span class="shrink-0 text-gray-400 font-normal">· ${timeStr}</span>
+                        ${statusHtml}
                     </div>
                 </div>
             </div>`;
@@ -678,7 +686,8 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
         await updateDoc(doc(db, "chats", currentChatId), {
             lastMessage: preview,
             lastMessageTimestamp: serverTimestamp(),
-            readBy: [currentUser.id]
+            readBy: [currentUser.id],
+            lastSenderId: currentUser.id // Store who sent the last message
         });
     } catch (error) {
         console.error("Error sending message:", error);
@@ -960,7 +969,8 @@ window.startChat = async () => {
             participants: [currentUser.id, targetUser.id],
             lastMessage: pendingSharePost ? 'Sent a post' : 'Started a conversation',
             lastMessageTimestamp: serverTimestamp(),
-            readBy: [currentUser.id]
+            readBy: [currentUser.id],
+            lastSenderId: currentUser.id // Store initial sender
         });
         chatId = ref.id;
     }
