@@ -44,6 +44,23 @@ body.chat-active .chat-window { transform: translateX(0); }
 @keyframes highlightMsg { 0% { background-color: rgba(0, 149, 246, 0.1); } 100% { background-color: transparent; } }
 .highlight-message .msg-bubble { animation: highlightMsg 2s ease-out; }
 
+/* Avatar Styles */
+.msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    align-self: flex-end; 
+    margin-bottom: 4px;
+}
+.msg-avatar-placeholder {
+    width: 28px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
 /* Swipe Wrapper */
 .msg-swipe-wrapper {
     position: relative;
@@ -90,8 +107,13 @@ body.chat-active .chat-window { transform: translateX(0); }
     position: relative;
     z-index: 1;
     margin-bottom: 0;
-    transition: opacity 0.2s;
+    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     line-height: 1.3;
+}
+
+.reply-upper-block:active {
+    transform: scale(1.02);
+    opacity: 1;
 }
 
 /* Rounded corners logic to attach to bubble */
@@ -106,7 +128,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 .reply-block-other {
     background-color: #e5e5e5; /* Slightly darker gray than bubble */
-    color: #000;
+    color: #000000;
     align-self: flex-start;
     margin-left: 0;
     border-left: 3px solid #b0b0b0; /* Subtle grey accent line */
@@ -127,7 +149,11 @@ body.chat-active .chat-window { transform: translateX(0); }
     opacity: 0.95;
 }
 
-.reply-upper-block:active { opacity: 0.8; }
+/* Ensure Text Color in Reply Block Other is Black */
+.reply-block-other .reply-header, 
+.reply-block-other .reply-body {
+    color: #000000;
+}
 
 /* Main Bubble */
 .msg-bubble { 
@@ -618,22 +644,36 @@ function loadMessages(chatId) {
     const container = document.getElementById('messages-container');
 
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        const messages = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            if(!d.hiddenBy || !d.hiddenBy.includes(currentUser.id)) {
+                messages.push({ id: doc.id, ...d });
+            }
+        });
+
         container.innerHTML = ''; 
-        
         let lastMessageFromSelf = null;
 
-        snapshot.forEach((msgDoc) => {
-            const msg = msgDoc.data();
-            if (msg.hiddenBy && msg.hiddenBy.includes(currentUser.id)) return;
+        messages.forEach((msg, index) => {
             const isSelf = msg.senderId === currentUser.id;
             
-            if (isSelf) lastMessageFromSelf = { id: msgDoc.id, ...msg };
+            if (isSelf) lastMessageFromSelf = { id: msg.id, ...msg };
             
+            // Avatar logic: Show if not self AND (next msg is from different sender OR undefined)
+            let showAvatar = false;
+            if (!isSelf) {
+                const nextMsg = messages[index + 1];
+                if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                    showAvatar = true;
+                }
+            }
+
             const hasReactions = msg.reactions && msg.reactions.length > 0;
             
             const div = document.createElement('div');
             div.className = `msg-group fade-in ${hasReactions ? 'has-reaction' : ''}`;
-            div.id = `msg-group-${msgDoc.id}`;
+            div.id = `msg-group-${msg.id}`;
             
             const reactionHtml = hasReactions ? `<div class="msg-reaction like-animation"><i data-lucide="heart" class="w-3.5 h-3.5 fill-red-500 text-red-500"></i></div>` : '';
 
@@ -661,7 +701,6 @@ function loadMessages(chatId) {
                     </div>
                 `;
                 
-                // If text bubble, adjust border radius to look connected
                 if (!isTransparent) {
                    bubbleClass += isSelf ? ' bubble-connected-self' : ' bubble-connected-other';
                 }
@@ -697,18 +736,17 @@ function loadMessages(chatId) {
 
             // Swipe Handlers
             const swipeHandlers = `
-                ontouchstart="handleSwipeStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', '${isSelf ? 'You' : (currentChatUser ? currentChatUser.name : 'User')}')"
+                ontouchstart="handleSwipeStart(event, '${msg.id}', '${escapeHtml(rawContent)}', '${isSelf ? 'You' : (currentChatUser ? currentChatUser.name : 'User')}')"
                 ontouchmove="handleSwipeMove(event)"
                 ontouchend="handleSwipeEnd(event)"
             `;
 
             // Interaction Handlers (Click + Hold + Double Click)
-            // handleMessageClick handles single tap with delay to wait for potential double tap
             const interactHandlers = `
-                ondblclick="toggleMessageLike('${msgDoc.id}')"
-                onclick="handleMessageClick(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
-                onmousedown="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
-                ontouchstart="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson}')"
+                ondblclick="toggleMessageLike('${msg.id}')"
+                onclick="handleMessageClick(event, '${msg.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
+                onmousedown="handlePressStart(event, '${msg.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
+                ontouchstart="handlePressStart(event, '${msg.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson}')"
                 onmouseup="handlePressEnd(event)"
                 ontouchend="handlePressEnd(event)"
                 onmousemove="handlePressMove(event)"
@@ -716,10 +754,23 @@ function loadMessages(chatId) {
                 oncontextmenu="return false;"
             `;
 
+            // Avatar Rendering
+            let avatarElement = '';
+            if (!isSelf) {
+                if (showAvatar) {
+                    const avatarUrl = currentChatUser?.avatar || 'https://via.placeholder.com/150';
+                    avatarElement = `<img src="${avatarUrl}" class="msg-avatar">`;
+                } else {
+                    avatarElement = `<div class="msg-avatar-placeholder"></div>`;
+                }
+            }
+
             div.innerHTML = `
                 <div class="msg-container ${isSelf ? 'self' : 'other'}">
                     
-                    <div class="msg-swipe-wrapper" id="swipe-${msgDoc.id}" ${swipeHandlers}>
+                    ${!isSelf ? avatarElement : ''}
+
+                    <div class="msg-swipe-wrapper" id="swipe-${msg.id}" ${swipeHandlers}>
                         
                         <div class="reply-icon-container">
                             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
