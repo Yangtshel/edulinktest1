@@ -176,31 +176,6 @@ body.chat-active .chat-window { transform: translateX(0); }
 .bubble-connected-self { border-top-right-radius: 4px; border-top-left-radius: 18px; margin-top: -4px; }
 .bubble-connected-other { border-top-left-radius: 4px; border-top-right-radius: 18px; margin-top: -4px; }
 
-/* Tails */
-.msg-bubble.with-tail-self { border-bottom-right-radius: 2px; }
-.msg-bubble.with-tail-self::after {
-    content: "";
-    position: absolute;
-    bottom: 0px;
-    right: -8px;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle at top left, transparent 65%, var(--bg-chat-bubble-self) 65%);
-    z-index: 1;
-}
-
-.msg-bubble.with-tail-other { border-bottom-left-radius: 2px; }
-.msg-bubble.with-tail-other::after {
-    content: "";
-    position: absolute;
-    bottom: 0px;
-    left: -8px;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle at top right, transparent 65%, var(--bg-chat-bubble-other) 65%);
-    z-index: 1;
-}
-
 /* Transparent Bubble for Hearts/Emojis - High Specificity */
 .bubble-transparent, .msg-container .bubble-transparent { 
     background-color: transparent !important; 
@@ -209,7 +184,6 @@ body.chat-active .chat-window { transform: translateX(0); }
     padding: 0 !important; 
     border: none !important;
 }
-.bubble-transparent::after { display: none !important; }
 
 /* Emoji Sizes */
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
@@ -687,19 +661,10 @@ function loadMessages(chatId) {
             
             // Avatar logic
             let showAvatar = false;
-            let showTail = false;
-
             if (!isSelf) {
                 const nextMsg = messages[index + 1];
                 if (!nextMsg || nextMsg.senderId !== msg.senderId) {
                     showAvatar = true;
-                    showTail = true;
-                }
-            } else {
-                // Self Tail Logic
-                const nextMsg = messages[index + 1];
-                if (!nextMsg || nextMsg.senderId !== msg.senderId) {
-                    showTail = true;
                 }
             }
 
@@ -717,11 +682,6 @@ function loadMessages(chatId) {
             let bubbleStyle = '';
             let rawContent = msg.content;
             let bubbleClass = isSelf ? 'msg-self' : 'msg-other';
-            
-            if (showTail) {
-                bubbleClass += isSelf ? ' with-tail-self' : ' with-tail-other';
-            }
-
             let isTransparent = false;
             let replyHtml = '';
             
