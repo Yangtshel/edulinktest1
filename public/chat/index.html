@@ -81,8 +81,6 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Reply Block - Integrated Style */
 .reply-upper-block {
-    background-color: rgba(0,0,0,0.05);
-    color: #666;
     border-radius: 18px 18px 18px 18px;
     padding: 10px 14px;
     margin-bottom: -10px; /* Overlap slightly */
@@ -91,29 +89,32 @@ body.chat-active .chat-window { transform: translateX(0); }
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    opacity: 0.9;
+    opacity: 0.95;
     transition: opacity 0.2s;
     position: relative;
     z-index: 1;
-    transform: scale(0.95);
+    transform: scale(0.92);
     transform-origin: bottom center;
-    border: 1px solid rgba(0,0,0,0.05);
-}
-.msg-container.self .reply-upper-block { 
-    background-color: #f0f0f0; 
-    align-self: flex-end;
-    margin-right: 0;
-}
-.msg-container.other .reply-upper-block { 
-    background-color: #f0f0f0; 
-    align-self: flex-start;
-    margin-left: 0;
+    border: 1px solid rgba(0,0,0,0.02);
 }
 
-.reply-upper-block:active { opacity: 0.7; }
-.reply-bar-indicator {
-    width: 2px; height: 100%; background: #ccc; position: absolute; left: 0; top: 0; display: none;
+.reply-block-self {
+    background-color: #eff6ff; /* Very Light Blue */
+    color: #1e40af; /* Dark Blue Text */
+    align-self: flex-end;
+    margin-right: 0;
+    border-left: 3px solid #60a5fa;
 }
+
+.reply-block-other {
+    background-color: #f3f4f6; /* Gray-100 */
+    color: #4b5563; /* Gray-600 */
+    align-self: flex-start;
+    margin-left: 0;
+    border-left: 3px solid #d1d5db;
+}
+
+.reply-upper-block:active { opacity: 0.8; }
 
 /* Main Bubble */
 .msg-bubble { 
@@ -132,6 +133,17 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 .msg-self { background-color: var(--bg-chat-bubble-self); color: white; border-bottom-right-radius: 4px; }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
+
+/* Transparent Bubble for Hearts/Emojis */
+.bubble-transparent { 
+    background: transparent !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+}
+
+/* Emoji Sizes */
+.emoji-jumbo { font-size: 48px; line-height: 1.1; }
+.emoji-large { font-size: 32px; line-height: 1.1; }
 
 /* Grouping Logic */
 .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; }
@@ -599,7 +611,6 @@ function loadMessages(chatId) {
             
             const hasReactions = msg.reactions && msg.reactions.length > 0;
             
-            // Add spacing class if has reactions
             const div = document.createElement('div');
             div.className = `msg-group fade-in ${hasReactions ? 'has-reaction' : ''}`;
             div.id = `msg-group-${msgDoc.id}`;
@@ -611,32 +622,51 @@ function loadMessages(chatId) {
             let contentHtml = '';
             let bubbleStyle = '';
             let rawContent = msg.content;
+            let bubbleClass = isSelf ? 'msg-self' : 'msg-other';
+            let isTransparent = false;
 
-            // Reply Block Logic (External to bubble now)
+            // Reply Block Logic
             let replyHtml = '';
             if (msg.replyTo) {
-                const isReplySelf = msg.replyTo.id === currentUser.id;
+                // Determine reply block style based on bubble context
+                const replyClass = isSelf ? 'reply-block-self' : 'reply-block-other';
                 replyHtml = `
-                    <div class="reply-upper-block" onclick="window.scrollToMessage('${msg.replyTo.id}')">
+                    <div class="reply-upper-block ${replyClass}" onclick="window.scrollToMessage('${msg.replyTo.id}')">
                         <span class="font-bold mb-0.5">${msg.replyTo.name || 'User'}</span>
-                        <span class="truncate block opacity-80">${msg.replyTo.body || 'Message'}</span>
+                        <span class="truncate block opacity-90">${msg.replyTo.body || 'Message'}</span>
                     </div>
                 `;
             }
 
+            // Emoji Detection (Simple logic: check if only emojis/spaces and length < 10)
+            const isEmojiOnly = msg.type === 'text' && 
+                                /^[ \p{Emoji_Presentation}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{200D}]+$/u.test(msg.content) && 
+                                msg.content.length < 15;
+
             if (msg.type === 'image') {
-                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100" onclick="window.open('${msg.content}', '_blank')">`;
+                contentHtml = `<img src="${msg.content}" class="rounded-lg max-w-full cursor-pointer border border-gray-100" onclick="window.open('${msg.content}', '_blank'); event.stopPropagation();">`;
                 bubbleStyle = 'padding: 4px; background: transparent;';
+                bubbleClass = 'bubble-transparent';
+                isTransparent = true;
                 rawContent = "Photo";
             } else if (msg.type === 'post') {
                 let postData = typeof msg.postData === 'string' ? JSON.parse(msg.postData) : msg.postData;
                 contentHtml = renderPostCard(postData, isSelf);
                 bubbleStyle = 'padding: 0; background: transparent;';
+                bubbleClass = 'bubble-transparent';
+                isTransparent = true;
                 rawContent = "Post";
             } else if (msg.type === 'heart') {
                  contentHtml = `<i data-lucide="heart" class="w-12 h-12 text-[#ff3040] fill-[#ff3040] heart-fixed"></i>`;
                  bubbleStyle = 'background: transparent; padding: 0;';
+                 bubbleClass = 'bubble-transparent';
+                 isTransparent = true;
                  rawContent = "";
+            } else if (isEmojiOnly) {
+                contentHtml = `<div class="${msg.content.length <= 6 ? 'emoji-jumbo' : 'emoji-large'}">${msg.content}</div>`;
+                bubbleStyle = 'background: transparent; padding: 0;';
+                bubbleClass = 'bubble-transparent';
+                isTransparent = true;
             } else {
                 contentHtml = linkify(msg.content);
             }
@@ -648,9 +678,11 @@ function loadMessages(chatId) {
                 ontouchend="handleSwipeEnd(event)"
             `;
 
-            // Hold/Click Handlers on Bubble
+            // Interaction Handlers (Click + Hold)
+            // Added explicit click handler for single tap options, stopping propagation if necessary
             const interactHandlers = `
                 ondblclick="toggleMessageLike('${msgDoc.id}')"
+                onclick="handleMessageClick(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
                 onmousedown="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson})"
                 ontouchstart="handlePressStart(event, '${msgDoc.id}', '${escapeHtml(rawContent)}', ${isSelf}, '${msg.type}', ${reactionsJson}')"
                 onmouseup="handlePressEnd(event)"
@@ -660,7 +692,6 @@ function loadMessages(chatId) {
                 oncontextmenu="return false;"
             `;
 
-            // Structure: Wrapper -> Icon + ContentStack (Reply + Bubble)
             div.innerHTML = `
                 <div class="msg-container ${isSelf ? 'self' : 'other'}">
                     
@@ -674,7 +705,7 @@ function loadMessages(chatId) {
                         
                         <div class="msg-content-stack">
                             ${replyHtml}
-                            <div class="msg-bubble ${isSelf ? 'msg-self' : 'msg-other'} noselect" style="${bubbleStyle}" ${interactHandlers}>
+                            <div class="msg-bubble ${bubbleClass} noselect" style="${bubbleStyle}" ${interactHandlers}>
                                 ${contentHtml}
                                 ${reactionHtml}
                             </div>
@@ -699,6 +730,21 @@ function loadMessages(chatId) {
         lucide.createIcons();
     });
 }
+
+window.handleMessageClick = (e, msgId, content, isSelf, type, reactions) => {
+    // If it's an image or post, the specific handler usually stops prop or handles it.
+    // But for text/hearts, we want single tap to open options.
+    // We also want to allow text selection if user drags, but 'onclick' fires on mouseup.
+    // We'll rely on our existing openMsgOptions logic.
+    
+    // Tiny delay to distinguish from dblclick if needed, but instant is snappier as requested.
+    // Double click handler is on the element too, so simple click fires first.
+    
+    // Prevent firing if we just finished a long press (pressTimer would have fired)
+    if(pressTimer === null && activeSwipeEl === null) {
+        openMsgOptions(msgId, content, isSelf, type, reactions);
+    }
+};
 
 window.scrollToMessage = (msgId) => {
     const el = document.getElementById(`msg-group-${msgId}`);
