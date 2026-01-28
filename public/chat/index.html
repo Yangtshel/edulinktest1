@@ -49,8 +49,8 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Message Actions (Delete) */
 .msg-actions { opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; padding: 0 8px; }
-.msg-container.self .msg-actions { order: -1; } /* Left of bubble for self */
-.msg-container.other .msg-actions { order: 1; } /* Right of bubble for other */
+.msg-container.self .msg-actions { order: -1; } 
+.msg-container.other .msg-actions { order: 1; } 
 
 .action-btn { width: 24px; height: 24px; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #999; }
 .action-btn:hover { background: #f0f0f0; color: #ff3b30; }
@@ -67,8 +67,8 @@ body.chat-active .chat-window { transform: translateX(0); }
 .cpc-img { width: 100%; height: 100%; object-fit: cover; }
 .cpc-footer { padding: 12px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
 
-/* Heart */
-.heart-fixed { filter: drop-shadow(0 0 6px rgba(255, 48, 64, 0.6)); transition: transform 0.1s; }
+/* Heart - Normal Icon */
+.heart-fixed { transition: transform 0.1s; }
 .heart-fixed:active { transform: scale(0.9); }
 
 /* Input */
@@ -83,6 +83,11 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 #new-chat-modal { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #new-chat-modal.open { transform: translateY(0); }
+
+/* Custom Alert Overlay */
+#custom-alert-overlay { background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(2px); }
+.custom-alert-box { animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
@@ -169,7 +174,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     </main>
 </div>
 
-<!-- Modal -->
+<!-- New Chat Modal -->
 <div id="new-chat-overlay" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200" onclick="closeNewChatModal()">
     <div id="new-chat-modal" class="bg-white w-full max-w-md h-[70vh] md:h-[600px] md:rounded-xl shadow-2xl flex flex-col transform translate-y-10 md:translate-y-0 overflow-hidden" onclick="event.stopPropagation()">
         <div class="h-12 border-b border-gray-100 flex items-center justify-between px-4 shrink-0 bg-white">
@@ -202,6 +207,20 @@ body.chat-active .chat-window { transform: translateX(0); }
     </div>
 </div>
 
+<!-- Custom Action Alert Modal (Instagram Style) -->
+<div id="custom-alert-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-[80%] max-w-[270px] overflow-hidden text-center shadow-2xl custom-alert-box" onclick="event.stopPropagation()">
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-1" id="alert-title">Unsend Message?</h3>
+            <p class="text-gray-500 text-[13px] leading-relaxed" id="alert-msg">This will remove the message for everyone.</p>
+        </div>
+        <div class="border-t border-gray-200 flex flex-col">
+            <button id="alert-confirm-btn" class="w-full py-3.5 text-red-500 font-bold border-b border-gray-200 active:bg-gray-50 text-[15px]">Unsend</button>
+            <button onclick="closeCustomAlert()" class="w-full py-3.5 text-gray-900 active:bg-gray-50 text-[15px]">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -220,6 +239,7 @@ let currentChatUser = null;
 let selectedUserForNewChat = null;
 let unsubscribeMessages = null;
 let pendingSharePost = null;
+let alertConfirmAction = null;
 
 onAuthStateChanged(auth, async (u) => {
     if (!u) {
@@ -265,7 +285,6 @@ function loadConversations() {
 
             let otherUser = { name: 'User', avatar: 'https://via.placeholder.com/150' };
             try {
-                // In production, implement user caching to avoid repeated fetches
                 const uSnap = await getDoc(doc(db, "users", otherUserId));
                 if (uSnap.exists()) otherUser = uSnap.data();
             } catch (e) {}
@@ -347,6 +366,12 @@ window.closeChat = () => {
     if (unsubscribeMessages) unsubscribeMessages();
 };
 
+window.viewProfile = () => {
+    if (currentChatUser) {
+        window.location.href = `index.html?profileId=${currentChatUser.id}`;
+    }
+};
+
 function loadMessages(chatId) {
     if (unsubscribeMessages) unsubscribeMessages();
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("timestamp", "asc"));
@@ -372,16 +397,13 @@ function loadMessages(chatId) {
                 contentHtml = renderPostCard(postData, isSelf);
                 bubbleStyle = 'padding: 0; background: transparent; overflow: hidden;';
             } else if (msg.type === 'heart') {
+                 // Clean red heart icon
                  contentHtml = `<i data-lucide="heart" class="w-12 h-12 text-[#ff3040] fill-[#ff3040] heart-fixed"></i>`;
                  bubbleStyle = 'background: transparent; padding: 0;';
             } else {
                 contentHtml = linkify(msg.content);
             }
 
-            // Delete Actions
-            // For self: Unsend
-            // For others: Delete for me (local hide - simulated by deleting for now per request or just disable)
-            // Reverting to Unsend for Self ONLY to maintain data integrity
             const actions = `
                 <div class="msg-actions">
                     <div class="action-btn" onclick="deleteMessage('${msgDoc.id}', ${isSelf})" title="${isSelf ? 'Unsend' : 'Delete'}">
@@ -408,7 +430,9 @@ function loadMessages(chatId) {
 }
 
 function renderPostCard(post, isSelf) {
-    let img = post.image || (post.media?.[0]);
+    let img = post.image || (post.media && post.media.length > 0 ? post.media[0] : null);
+    
+    // If we have an image URL
     const imgHtml = img ? 
         `<div class="cpc-img-container"><img src="${img}" class="cpc-img"></div>` : 
         `<div class="cpc-img-container bg-gray-100"><i data-lucide="file-text" class="w-8 h-8 text-gray-400"></i></div>`;
@@ -471,8 +495,7 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
     
     if (!msgContent && type === 'text') return;
 
-    // Check for Post Link Pattern (Simple detection for EduLink URLs)
-    // Matches https://.../home?postId=XYZ
+    // Detect Post Link
     const postLinkMatch = msgContent.match(/postId=([a-zA-Z0-9_-]+)/);
     if (type === 'text' && postLinkMatch) {
         const postId = postLinkMatch[1];
@@ -480,8 +503,20 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
             const postSnap = await getDoc(doc(db, "posts", postId));
             if (postSnap.exists()) {
                 type = 'post';
-                extraData = { postData: { id: postSnap.id, ...postSnap.data() } };
-                // Keep the content empty or descriptive
+                // Fetch author info to ensure the card looks good immediately
+                const postRaw = postSnap.data();
+                // Get author info for the post preview if missing
+                if(!postRaw.authorAvatar || !postRaw.authorName) {
+                    try {
+                        const authSnap = await getDoc(doc(db, "users", postRaw.authorId));
+                        if(authSnap.exists()){
+                            const ad = authSnap.data();
+                            postRaw.authorName = ad.name;
+                            postRaw.authorAvatar = ad.avatar;
+                        }
+                    } catch(e){}
+                }
+                extraData = { postData: { id: postSnap.id, ...postRaw } };
                 msgContent = ''; 
             }
         } catch (e) { console.log('Link expansion failed', e); }
@@ -524,7 +559,6 @@ window.handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show a temporary toast or loading indicator in input area?
     const btn = document.getElementById('send-btn');
     btn.innerText = '...';
     btn.classList.remove('hidden');
@@ -544,22 +578,42 @@ window.handleImageUpload = async (e) => {
     }
 };
 
+// Custom Alert Logic
+window.showCustomAlert = (title, message, onConfirm) => {
+    const overlay = document.getElementById('custom-alert-overlay');
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-msg').innerText = message;
+    
+    const confirmBtn = document.getElementById('alert-confirm-btn');
+    // Remove old listeners by cloning
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+    
+    newBtn.onclick = () => {
+        onConfirm();
+        closeCustomAlert();
+    };
+    
+    overlay.classList.remove('hidden');
+};
+
+window.closeCustomAlert = () => {
+    document.getElementById('custom-alert-overlay').classList.add('hidden');
+};
+
 window.deleteMessage = async (msgId, isSelf) => {
     if (!isSelf) {
-        if (!confirm("Remove this message from your view? (This doesn't delete it for others)")) return;
-        // In a real app, we'd add ID to a 'hiddenFor' array. 
-        // For this single-file requirement, we'll just alert that this feature requires backend support.
-        alert("Deleting others' messages is restricted.");
+        showCustomAlert("Cannot Delete", "You can only unsend your own messages.", () => {});
         return;
     }
 
-    if(confirm("Unsend this message?")) {
+    showCustomAlert("Unsend Message?", "This will unsend the message for everyone.", async () => {
         try {
             await deleteDoc(doc(db, `chats/${currentChatId}/messages`, msgId));
         } catch (error) {
             console.error("Error deleting message", error);
         }
-    }
+    });
 };
 
 // Modal Logic
@@ -689,10 +743,6 @@ window.startChat = async () => {
         await sendMessage('post', '', { postData: pendingSharePost });
         pendingSharePost = null;
     }
-};
-
-window.viewProfile = () => {
-    if (currentChatUser) window.location.href = `index.html?profileId=${currentChatUser.id}`;
 };
 
 lucide.createIcons();
