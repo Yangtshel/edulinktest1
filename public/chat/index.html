@@ -147,8 +147,6 @@ body.chat-active .chat-window { transform: translateX(0); }
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="icon-btn" onclick="alert('Voice call coming soon')"><i data-lucide="phone" class="w-6 h-6 text-gray-800"></i></button>
-                    <button class="icon-btn" onclick="alert('Video call coming soon')"><i data-lucide="video" class="w-7 h-7 text-gray-800"></i></button>
                     <button class="icon-btn"><i data-lucide="info" class="w-6 h-6 text-gray-800"></i></button>
                 </div>
             </header>
@@ -238,6 +236,7 @@ let currentChatId = null;
 let currentChatUser = null;
 let selectedUserForNewChat = null;
 let unsubscribeMessages = null;
+let unsubscribeConversations = null;
 let pendingSharePost = null;
 
 onAuthStateChanged(auth, async (u) => {
@@ -255,12 +254,14 @@ onAuthStateChanged(auth, async (u) => {
 
 // Load Chats
 function loadConversations() {
+    if (unsubscribeConversations) unsubscribeConversations();
+    
     const q = query(
         collection(db, "chats"), 
         where("participants", "array-contains", currentUser.id)
     );
 
-    onSnapshot(q, async (snapshot) => {
+    unsubscribeConversations = onSnapshot(q, async (snapshot) => {
         const container = document.getElementById('chat-list-container');
         if (snapshot.empty) {
             container.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm mt-10">No messages yet.<br>Start a conversation!</div>';
@@ -439,9 +440,6 @@ function renderPostCard(post, isSelf) {
     else if (post.media && Array.isArray(post.media) && post.media.length > 0) img = post.media[0];
     else if (typeof post.media === 'string') img = post.media;
 
-    // Check if the media is actually a video or empty, if so, don't show the image block if we want only images
-    // The user requirement: "if a post donest hve an image jsut dont show the image container"
-    
     const hasImage = img && !img.includes('video') && !img.endsWith('.mp4');
 
     const imgHtml = hasImage ? 
@@ -516,7 +514,6 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
                 type = 'post';
                 // Fetch author info to ensure the card looks good immediately
                 const postRaw = postSnap.data();
-                // Get author info for the post preview if missing
                 if(!postRaw.authorAvatar || !postRaw.authorName) {
                     try {
                         const authSnap = await getDoc(doc(db, "users", postRaw.authorId));
@@ -596,7 +593,6 @@ window.showCustomAlert = (title, message, confirmText, isRed, onConfirm) => {
     document.getElementById('alert-msg').innerText = message;
     
     const confirmBtn = document.getElementById('alert-confirm-btn');
-    // Remove old listeners by cloning
     const newBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
     
@@ -620,6 +616,10 @@ window.deleteMessage = async (msgId, isSelf) => {
         showCustomAlert("Unsend Message?", "This will remove the message for everyone.", "Unsend", true, async () => {
             try {
                 await deleteDoc(doc(db, `chats/${currentChatId}/messages`, msgId));
+                // Update the chat preview text to indicate deletion
+                updateDoc(doc(db, "chats", currentChatId), {
+                    lastMessage: "Message unsent"
+                }).catch(e=>{});
             } catch (error) {
                 console.error("Error deleting message", error);
             }
@@ -627,7 +627,6 @@ window.deleteMessage = async (msgId, isSelf) => {
     } else {
         showCustomAlert("Delete for Me?", "This message will be hidden from your view.", "Delete", true, async () => {
             try {
-                // Update the message document to include current user in 'hiddenBy'
                 await updateDoc(doc(db, `chats/${currentChatId}/messages`, msgId), {
                     hiddenBy: arrayUnion(currentUser.id)
                 });
