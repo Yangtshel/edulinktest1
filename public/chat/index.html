@@ -118,21 +118,21 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Rounded corners logic to attach to bubble */
 .reply-block-self {
-    /* Changed from translucent black to solid darker blue to match theme */
-    background-color: #2a8bf2; 
-    color: rgba(255,255,255,0.95);
+    /* Self Reply: Grey Background, Black Text (Contrast with Blue Bubble) */
+    background-color: #f0f0f0; 
+    color: #000000;
     align-self: flex-end;
     margin-right: 0;
     border-radius: 18px 18px 4px 18px;
-    /* Optional: Subtle separator if needed, but color diff is usually enough */
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .reply-block-other {
-    background-color: #e5e5e5; /* Slightly darker gray than bubble */
-    color: #000000;
+    /* Other Reply: Blue Background, White Text (Contrast with Grey Bubble) */
+    background-color: #3797f0;
+    color: #ffffff;
     align-self: flex-start;
     margin-left: 0;
-    border-left: 3px solid #b0b0b0; /* Subtle grey accent line */
     border-radius: 18px 18px 18px 4px;
 }
 
@@ -150,11 +150,9 @@ body.chat-active .chat-window { transform: translateX(0); }
     opacity: 0.95;
 }
 
-/* Ensure Text Color in Reply Block Other is Black */
-.reply-block-other .reply-header, 
-.reply-block-other .reply-body {
-    color: #000000;
-}
+/* Ensure Text Color Logic */
+.reply-block-self .reply-header, .reply-block-self .reply-body { color: #000000; }
+.reply-block-other .reply-header, .reply-block-other .reply-body { color: #ffffff; }
 
 /* Main Bubble */
 .msg-bubble { 
@@ -175,9 +173,33 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-other { background-color: var(--bg-chat-bubble-other); color: #000; border-bottom-left-radius: 4px; }
 
 /* Connected Bubble Styling when Reply exists */
-/* Pull up the bubble to overlap the reply block slightly for seamless look */
 .bubble-connected-self { border-top-right-radius: 4px; border-top-left-radius: 18px; margin-top: -4px; }
 .bubble-connected-other { border-top-left-radius: 4px; border-top-right-radius: 18px; margin-top: -4px; }
+
+/* Tails */
+.msg-bubble.with-tail-self { border-bottom-right-radius: 2px; }
+.msg-bubble.with-tail-self::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    right: -8px;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at top left, transparent 65%, var(--bg-chat-bubble-self) 65%);
+    z-index: 1;
+}
+
+.msg-bubble.with-tail-other { border-bottom-left-radius: 2px; }
+.msg-bubble.with-tail-other::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    left: -8px;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at top right, transparent 65%, var(--bg-chat-bubble-other) 65%);
+    z-index: 1;
+}
 
 /* Transparent Bubble for Hearts/Emojis - High Specificity */
 .bubble-transparent, .msg-container .bubble-transparent { 
@@ -187,6 +209,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     padding: 0 !important; 
     border: none !important;
 }
+.bubble-transparent::after { display: none !important; }
 
 /* Emoji Sizes */
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
@@ -662,12 +685,21 @@ function loadMessages(chatId) {
             
             if (isSelf) lastMessageFromSelf = { id: msg.id, ...msg };
             
-            // Avatar logic: Show if not self AND (next msg is from different sender OR undefined)
+            // Avatar logic
             let showAvatar = false;
+            let showTail = false;
+
             if (!isSelf) {
                 const nextMsg = messages[index + 1];
                 if (!nextMsg || nextMsg.senderId !== msg.senderId) {
                     showAvatar = true;
+                    showTail = true;
+                }
+            } else {
+                // Self Tail Logic
+                const nextMsg = messages[index + 1];
+                if (!nextMsg || nextMsg.senderId !== msg.senderId) {
+                    showTail = true;
                 }
             }
 
@@ -685,6 +717,11 @@ function loadMessages(chatId) {
             let bubbleStyle = '';
             let rawContent = msg.content;
             let bubbleClass = isSelf ? 'msg-self' : 'msg-other';
+            
+            if (showTail) {
+                bubbleClass += isSelf ? ' with-tail-self' : ' with-tail-other';
+            }
+
             let isTransparent = false;
             let replyHtml = '';
             
