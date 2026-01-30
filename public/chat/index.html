@@ -99,9 +99,9 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-container.self .msg-content-stack { align-items: flex-end; }
 .msg-container.other .msg-content-stack { align-items: flex-start; }
 
-/* Reply Block - Capsule Style */
+/* Reply Block - Integrated Style */
 .reply-upper-block {
-    padding: 12px 14px;
+    padding: 10px 12px;
     font-size: 13px;
     cursor: pointer;
     max-width: 100%;
@@ -109,60 +109,53 @@ body.chat-active .chat-window { transform: translateX(0); }
     flex-direction: column;
     position: relative;
     z-index: 1;
-    margin-bottom: -8px; /* Negative margin to pull bubble up slightly */
+    margin-bottom: 0;
     transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     line-height: 1.3;
-    overflow: hidden;
 }
 
 .reply-upper-block:active {
-    transform: scale(0.98);
-    opacity: 0.9;
+    transform: scale(1.02);
+    opacity: 1;
 }
 
 /* Rounded corners logic to attach to bubble */
 .reply-block-self {
-    /* Self Reply: Grey Background */
-    background-color: #f2f2f2; 
+    /* Self Reply: Grey Background, Black Text (Contrast with Blue Bubble) */
+    background-color: #f0f0f0; 
     color: #000000;
     align-self: flex-end;
     margin-right: 0;
-    /* Top fully rounded, bottom connected */
-    border-radius: 18px 18px 18px 18px;
-    border: 1px solid rgba(0,0,0,0.02);
+    border-radius: 18px 18px 4px 18px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .reply-block-other {
-    /* Other Reply: Theme Color slightly dimmed or just Grey to contrast? 
-       Instagram typically uses a grey box for the context, then the bubble is white/grey.
-       Here 'other' bubble is grey, so reply block should be maybe darker or primary color?
-       Let's stick to a colored block for contrast if the bubble is grey.
-    */
-    background-color: rgba(0, 149, 246, 0.1);
-    color: #000;
+    /* Other Reply: Blue Background, White Text (Contrast with Grey Bubble) */
+    background-color: #3797f0;
+    color: #ffffff;
     align-self: flex-start;
     margin-left: 0;
-    border-radius: 18px 18px 18px 18px;
+    border-radius: 18px 18px 18px 4px;
 }
 
 .reply-header {
     font-size: 11px;
     margin-bottom: 2px;
-    font-weight: 600;
-    opacity: 0.7;
+    font-weight: 500;
+    opacity: 0.8;
 }
 
 .reply-body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0.9;
+    opacity: 0.95;
 }
 
 /* Ensure Text Color Logic */
 .reply-block-self .reply-header, .reply-block-self .reply-body { color: #000000; }
-.reply-block-other .reply-header { color: #0095f6; }
-.reply-block-other .reply-body { color: #000; }
+.reply-block-other .reply-header, .reply-block-other .reply-body { color: #ffffff; }
 
 /* Main Bubble */
 .msg-bubble { 
@@ -182,6 +175,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 /* 
    CAPSULE DESIGN:
    Default is fully rounded (22px).
+   Only the tail message gets a sharp corner.
 */
 .msg-self { 
     background-color: var(--bg-chat-bubble-self); 
@@ -193,36 +187,64 @@ body.chat-active .chat-window { transform: translateX(0); }
 }
 
 /* 
-   TAIL LOGIC
+   TAIL LOGIC - WHITE OVERLAY MASK TECHNIQUE
 */
-.msg-self.has-tail { border-bottom-right-radius: 2px; }
+
+/* Self Tail */
+.msg-self.has-tail {
+    border-bottom-right-radius: 2px; /* Sharp corner for tail */
+}
 .msg-self.has-tail::before {
-    content: ""; position: absolute; bottom: 0; right: -8px; width: 20px; height: 20px;
-    background-color: var(--bg-chat-bubble-self); z-index: 0; 
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--bg-chat-bubble-self);
+    z-index: 0; 
 }
 .msg-self.has-tail::after {
-    content: ""; position: absolute; bottom: 0; right: -10px; width: 10px; height: 20px;
-    background-color: #fff; border-bottom-left-radius: 10px; z-index: 1;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -10px;
+    width: 10px;
+    height: 20px;
+    background-color: #fff; /* Match background */
+    border-bottom-left-radius: 10px;
+    z-index: 1;
 }
 
-.msg-other.has-tail { border-bottom-left-radius: 2px; }
+/* Other Tail */
+.msg-other.has-tail {
+    border-bottom-left-radius: 2px; /* Sharp corner for tail */
+}
 .msg-other.has-tail::before {
-    content: ""; position: absolute; bottom: 0; left: -8px; width: 20px; height: 20px;
-    background-color: var(--bg-chat-bubble-other); z-index: 0;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--bg-chat-bubble-other);
+    z-index: 0;
 }
 .msg-other.has-tail::after {
-    content: ""; position: absolute; bottom: 0; left: -10px; width: 10px; height: 20px;
-    background-color: #fff; border-bottom-right-radius: 10px; z-index: 1;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -10px;
+    width: 10px;
+    height: 20px;
+    background-color: #fff;
+    border-bottom-right-radius: 10px;
+    z-index: 1;
 }
 
-/* Connected Bubble Styling - Refined for "Capsule" look */
-/* We push the bubble up slightly to overlap the reply block or just sit tight */
-.bubble-connected-self { 
-    margin-top: 2px; /* Small gap to look like stacked capsules */
-}
-.bubble-connected-other { 
-    margin-top: 2px; 
-}
+/* Connected Bubble Styling when Reply exists */
+.bubble-connected-self { border-top-right-radius: 4px; border-top-left-radius: 18px; margin-top: -4px; }
+.bubble-connected-other { border-top-left-radius: 4px; border-top-right-radius: 18px; margin-top: -4px; }
 
 /* Transparent Bubble for Hearts/Emojis - High Specificity */
 .bubble-transparent, .msg-container .bubble-transparent { 
@@ -232,6 +254,7 @@ body.chat-active .chat-window { transform: translateX(0); }
     padding: 0 !important; 
     border: none !important;
 }
+/* Ensure no tail on transparent bubbles */
 .bubble-transparent::before, .bubble-transparent::after { display: none !important; }
 
 /* Emoji Sizes */
@@ -240,15 +263,28 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Seen Status */
 .seen-status {
-    font-size: 11px; color: #8e8e8e; font-weight: 500; margin-top: 2px; margin-bottom: 10px;
-    text-align: right; width: 100%; padding-right: 10px; animation: fadeIn 0.3s ease;
+    font-size: 11px;
+    color: #8e8e8e;
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 10px;
+    text-align: right;
+    width: 100%;
+    padding-right: 10px;
+    animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
 /* Reply Context Banner (Input Area) */
 #reply-context-bar {
-    display: none; align-items: center; justify-content: space-between; padding: 12px 16px;
-    background: #f9f9f9; border-top: 1px solid #dbdbdb; border-bottom: 1px solid #dbdbdb; font-size: 14px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f9f9f9;
+    border-top: 1px solid #dbdbdb;
+    border-bottom: 1px solid #dbdbdb;
+    font-size: 14px;
 }
 #reply-context-bar.active { display: flex; }
 
@@ -269,9 +305,20 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Message Reaction */
 .msg-reaction { 
-    position: absolute; bottom: -10px; right: 0; background: white; border-radius: 999px;
-    padding: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); border: 1px solid #f0f0f0;
-    display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; z-index: 10; 
+    position: absolute; 
+    bottom: -10px; 
+    right: 0; 
+    background: white; 
+    border-radius: 999px; 
+    padding: 2px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15); 
+    border: 1px solid #f0f0f0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 24px; 
+    height: 24px; 
+    z-index: 10; 
 }
 .msg-self .msg-reaction { right: 0; }
 .msg-other .msg-reaction { left: 0; right: auto; }
@@ -282,9 +329,12 @@ body.chat-active .chat-window { transform: translateX(0); }
 .chat-input:focus { border-color: #dbdbdb; }
 
 /* User List */
-.user-item { padding: 10px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; }
+.user-item { padding: 10px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; position: relative; }
 .user-item:hover { background-color: #fafafa; }
 .user-item.active { background-color: #efefef; }
+.more-actions-btn { opacity: 0; transition: opacity 0.2s; }
+.user-item:hover .more-actions-btn, .user-item:active .more-actions-btn { opacity: 1; }
+@media (max-width: 768px) { .more-actions-btn { opacity: 1; } }
 
 #new-chat-modal { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #new-chat-modal.open { transform: translateY(0); }
@@ -293,6 +343,10 @@ body.chat-active .chat-window { transform: translateX(0); }
 #chat-details-panel { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 #chat-details-overlay.open #chat-details-panel { transform: translateX(0); }
 
+/* Sidebar Options Overlay */
+#sidebar-options-overlay { transition: opacity 0.2s; }
+#sidebar-options-modal { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
 /* Profile Design */
 .profile-banner { height: 160px; width: 100%; background-color: #e5e7eb; background-size: cover; background-position: center; }
 .profile-content-curve { border-radius: 30px 30px 0 0; margin-top: -24px; background: white; position: relative; z-index: 10; padding-top: 10px; min-height: 300px; padding-bottom: 80px; }
@@ -300,14 +354,6 @@ body.chat-active .chat-window { transform: translateX(0); }
 .details-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; background: white; border-top: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 20px; gap: 12px; z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
 .like-animation { animation: popLike 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes popLike { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-
-/* Empty Chat Placeholder */
-.empty-chat-placeholder {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; padding: 20px; opacity: 0; animation: fadeIn 0.5s ease 0.2s forwards;
-}
-.empty-icon-circle {
-    width: 80px; height: 80px; border-radius: 50%; border: 2px solid #000; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
-}
 
 </style>
 </head>
@@ -369,13 +415,8 @@ body.chat-active .chat-window { transform: translateX(0); }
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-1">
-                     <button class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors" onclick="deleteChat()">
-                        <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
-                    </button>
-                    <button class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors" onclick="openChatDetails()">
-                        <i data-lucide="info" class="w-6 h-6 text-gray-800"></i>
-                    </button>
+                <div class="flex items-center gap-3">
+                    <button class="icon-btn" onclick="openChatDetails()"><i data-lucide="info" class="w-6 h-6 text-gray-800"></i></button>
                 </div>
             </header>
 
@@ -409,6 +450,23 @@ body.chat-active .chat-window { transform: translateX(0); }
             </div>
         </div>
     </main>
+</div>
+
+<!-- Sidebar Options Modal -->
+<div id="sidebar-options-overlay" class="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200" onclick="closeSidebarOptions()">
+    <div id="sidebar-options-modal" class="bg-white w-full md:w-[350px] md:rounded-2xl rounded-t-2xl shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        <div class="p-2 flex flex-col gap-1">
+             <div class="px-4 py-3 border-b border-gray-100">
+                <div class="font-bold text-gray-900 text-center text-sm" id="sidebar-opt-name">Options</div>
+            </div>
+            <button onclick="deleteConversation()" class="w-full text-left px-4 py-3 hover:bg-red-50 rounded-xl font-bold text-red-600 flex items-center gap-3 text-sm">
+                <i data-lucide="trash-2" class="w-5 h-5"></i> Delete Chat
+            </button>
+        </div>
+        <div class="p-2 border-t border-gray-100">
+            <button onclick="closeSidebarOptions()" class="w-full py-3 font-bold text-gray-900 hover:bg-gray-50 rounded-xl text-sm">Cancel</button>
+        </div>
+    </div>
 </div>
 
 <!-- Chat Details Overlay, Message Options, New Chat Modal (same as before) -->
@@ -481,7 +539,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, orderBy, serverTimestamp, addDoc, limit, getDocs, deleteDoc, arrayUnion, arrayRemove, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = { apiKey: "AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno", authDomain: "edulinki.firebaseapp.com", projectId: "edulinki", storageBucket: "edulinki.firebasestorage.app", messagingSenderId: "248886466474", appId: "1:248886466474:web:160043201a6b28bafbbdd3", measurementId: "G-MQBH12VL7N" };
@@ -501,6 +559,7 @@ let unsubscribeChatMeta = null;
 let pendingSharePost = null;
 let currentMsgContext = null;
 let currentReplyContext = null;
+let contextMenuChatId = null; // For sidebar options
 
 // Gestures
 let pressTimer = null;
@@ -543,32 +602,30 @@ function loadConversations() {
     unsubscribeConversations = onSnapshot(q, async (snapshot) => {
         const currentRenderId = ++conversationRenderId;
 
-        if (snapshot.empty) {
-            container.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm mt-10">No messages yet.<br>Start a conversation!</div>';
-            return;
-        }
-
         const chatsData = [];
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            // FILTER: Don't show chats hidden/deleted by current user
-            if (!d.hiddenBy || !d.hiddenBy.includes(currentUser.id)) {
-                chatsData.push({ id: doc.id, ...d });
-            }
+        snapshot.forEach(doc => chatsData.push({ id: doc.id, ...doc.data() }));
+
+        // Filter out chats deleted by the current user
+        const visibleChats = chatsData.filter(chat => {
+            if (!chat.clearedAt || !chat.clearedAt[currentUser.id]) return true;
+            const clearedTime = chat.clearedAt[currentUser.id];
+            // If chat has no messages, or last message is older than clear time, hide it
+            if (!chat.lastMessageTimestamp) return false;
+            return chat.lastMessageTimestamp.toMillis() > clearedTime.toMillis();
         });
 
-        if (chatsData.length === 0) {
+        if (visibleChats.length === 0) {
             container.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm mt-10">No messages yet.<br>Start a conversation!</div>';
             return;
         }
 
-        chatsData.sort((a, b) => {
+        visibleChats.sort((a, b) => {
             const tA = a.lastMessageTimestamp?.toMillis() || 0;
             const tB = b.lastMessageTimestamp?.toMillis() || 0;
             return tB - tA; 
         });
 
-        const renderedItems = await Promise.all(chatsData.map(async (chat) => {
+        const renderedItems = await Promise.all(visibleChats.map(async (chat) => {
             const otherUserId = chat.participants.find(uid => uid !== currentUser.id);
             if (!otherUserId) return '';
 
@@ -591,7 +648,9 @@ function loadConversations() {
             const userJson = JSON.stringify(otherUser).replace(/"/g, '&quot;');
             
             return `
-            <div class="user-item ${isSelected ? 'active' : ''}" onclick="openChat('${chat.id}', ${userJson}, '${otherUserId}')">
+            <div class="user-item ${isSelected ? 'active' : ''}" 
+                 onclick="openChat('${chat.id}', ${userJson}, '${otherUserId}')"
+                 oncontextmenu="handleChatContextMenu(event, '${chat.id}', '${otherUser.name}')">
                 <div class="relative shrink-0">
                     <img src="${otherUser.avatar}" class="w-14 h-14 rounded-full border border-gray-100 object-cover">
                 </div>
@@ -603,6 +662,10 @@ function loadConversations() {
                     </div>
                 </div>
                 ${statusHtml}
+                <button class="more-actions-btn w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-500" 
+                        onclick="event.stopPropagation(); openSidebarOptions('${chat.id}', '${otherUser.name}')">
+                    <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                </button>
             </div>`;
         }));
 
@@ -611,6 +674,59 @@ function loadConversations() {
         lucide.createIcons();
     });
 }
+
+// Sidebar Options Logic
+window.handleChatContextMenu = (e, chatId, name) => {
+    e.preventDefault();
+    openSidebarOptions(chatId, name);
+}
+
+window.openSidebarOptions = (chatId, name) => {
+    contextMenuChatId = chatId;
+    document.getElementById('sidebar-opt-name').innerText = name;
+    
+    const overlay = document.getElementById('sidebar-options-overlay');
+    const modal = document.getElementById('sidebar-options-modal');
+    
+    overlay.classList.remove('hidden');
+    setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        modal.classList.remove('translate-y-full', 'md:scale-95');
+        modal.classList.add('translate-y-0', 'md:scale-100');
+    }, 10);
+};
+
+window.closeSidebarOptions = () => {
+    const overlay = document.getElementById('sidebar-options-overlay');
+    const modal = document.getElementById('sidebar-options-modal');
+    
+    overlay.classList.add('opacity-0');
+    modal.classList.add('translate-y-full', 'md:scale-95');
+    modal.classList.remove('translate-y-0', 'md:scale-100');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        contextMenuChatId = null;
+    }, 200);
+};
+
+window.deleteConversation = async () => {
+    if (!contextMenuChatId || !currentUser) return;
+    
+    try {
+        // Soft delete: Mark the time cleared for the current user
+        await updateDoc(doc(db, "chats", contextMenuChatId), {
+            [`clearedAt.${currentUser.id}`]: serverTimestamp()
+        });
+        
+        // If current chat is open, close it
+        if (currentChatId === contextMenuChatId) {
+            closeChat();
+        }
+    } catch(e) {
+        console.error("Error deleting chat", e);
+    }
+    closeSidebarOptions();
+};
 
 window.openChat = async (chatId, user, userId) => {
     currentChatId = chatId;
@@ -632,6 +748,8 @@ window.openChat = async (chatId, user, userId) => {
         if (docSnap.exists()) {
             currentChatData = docSnap.data();
             renderSeenStatus(); 
+            // If the chat was just cleared/deleted while open (edge case), reload messages
+            loadMessages(chatId);
         }
     });
 
@@ -645,20 +763,6 @@ window.openChat = async (chatId, user, userId) => {
     }).catch(e => {});
 
     loadMessages(chatId);
-};
-
-window.deleteChat = async () => {
-    if (!currentChatId || !currentUser) return;
-    if (!confirm("Delete this chat? It will be hidden from your list.")) return;
-
-    try {
-        await updateDoc(doc(db, "chats", currentChatId), {
-            hiddenBy: arrayUnion(currentUser.id)
-        });
-        closeChat();
-    } catch(e) {
-        alert("Could not delete chat");
-    }
 };
 
 async function checkForSharedPost() {
@@ -688,6 +792,9 @@ window.closeChat = () => {
     currentChatId = null;
     if (unsubscribeMessages) unsubscribeMessages();
     if (unsubscribeChatMeta) unsubscribeChatMeta();
+    document.getElementById('chat-window-panel').classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+    document.getElementById('active-chat-interface').classList.add('hidden');
 };
 
 window.viewProfile = () => {
@@ -702,28 +809,40 @@ function loadMessages(chatId) {
     const container = document.getElementById('messages-container');
 
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        // EMPTY STATE
-        if (snapshot.empty) {
+        const messages = [];
+        
+        // Determine the cutoff time for messages (Soft Delete Logic)
+        let cutoffTime = 0;
+        if (currentChatData && currentChatData.clearedAt && currentChatData.clearedAt[currentUser.id]) {
+            cutoffTime = currentChatData.clearedAt[currentUser.id].toMillis();
+        }
+
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const msgTime = d.timestamp ? d.timestamp.toMillis() : Date.now();
+            
+            // Only include messages newer than the clearedAt timestamp
+            if (msgTime > cutoffTime) {
+                if(!d.hiddenBy || !d.hiddenBy.includes(currentUser.id)) {
+                    messages.push({ id: doc.id, ...d });
+                }
+            }
+        });
+
+        // EMPTY STATE LOGIC
+        if (messages.length === 0) {
             container.innerHTML = `
-                <div class="empty-chat-placeholder">
-                    <div class="empty-icon-circle">
-                        <i data-lucide="message-circle" class="w-10 h-10 text-black"></i>
+                <div class="h-full flex flex-col items-center justify-center opacity-0 animate-[fadeIn_0.5s_forwards]">
+                    <div class="w-24 h-24 rounded-full border-2 border-gray-900 flex items-center justify-center mb-4">
+                        <i data-lucide="message-circle" class="w-10 h-10 text-gray-900"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">Start a conversation</h3>
-                    <p class="text-sm text-gray-500">Learn something new</p>
+                    <div class="text-xl font-semibold text-gray-900 mb-1">Start a conversation</div>
+                    <div class="text-sm text-gray-500">Learning something new today</div>
                 </div>
             `;
             lucide.createIcons();
             return;
         }
-
-        const messages = [];
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            if(!d.hiddenBy || !d.hiddenBy.includes(currentUser.id)) {
-                messages.push({ id: doc.id, ...d });
-            }
-        });
 
         // Track existing elements to handle removals
         const existingIds = new Set();
@@ -732,6 +851,11 @@ function loadMessages(chatId) {
         let lastMessageFromSelf = null;
         let isAtBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) < 100;
         let didAddMessage = false;
+
+        // Clean container if it has the empty state placeholder
+        if (container.querySelector('.text-xl.font-semibold')) {
+            container.innerHTML = '';
+        }
 
         messages.forEach((msg, index) => {
             if (msg.senderId === currentUser.id) lastMessageFromSelf = { id: msg.id, ...msg };
@@ -887,6 +1011,7 @@ function generateMessageHTML(msg, isSelf, showAvatar, showTail, isEmojiOnly, eff
     let avatarElement = '';
     if (!isSelf) {
         const avatarUrl = currentChatUser?.avatar || 'https://via.placeholder.com/150';
+        // Always show avatar for other users per requirement
         avatarElement = `<img src="${avatarUrl}" class="msg-avatar">`;
     }
 
@@ -1210,11 +1335,6 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
     }
 
     try {
-        // UNHIDE chat if it was deleted by either party
-        await updateDoc(doc(db, "chats", currentChatId), {
-            hiddenBy: [] // Reset hidden state so both users see the new message
-        }).catch(e => console.log('Chat was not hidden or error unhiding'));
-
         await addDoc(collection(db, `chats/${currentChatId}/messages`), messageData);
         
         let preview = msgContent;
@@ -1222,6 +1342,10 @@ window.sendMessage = async (type = 'text', content = null, extraData = {}) => {
         if (type === 'post') preview = `Sent a post`;
         if (type === 'heart') preview = '❤️';
 
+        // When sending a message, we essentially "un-clear" it for ourselves implicitly because the new timestamp > clearedAt
+        // However, we don't need to delete the `clearedAt` field, simply because the logic is "show messages newer than clearedAt".
+        // The new message is newer, so it shows up. The old messages remain hidden.
+        
         await updateDoc(doc(db, "chats", currentChatId), {
             lastMessage: preview,
             lastMessageTimestamp: serverTimestamp(),
