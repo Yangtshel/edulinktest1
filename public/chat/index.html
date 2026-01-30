@@ -46,17 +46,20 @@ body.chat-active .chat-window { transform: translateX(0); }
 
 /* Avatar Styles */
 .msg-avatar {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     margin-right: 8px;
     object-fit: cover;
     flex-shrink: 0;
     align-self: flex-end; 
     margin-bottom: 4px;
+    aspect-ratio: 1/1;
+    border: 1px solid rgba(0,0,0,0.05); /* Define circle edge clearly */
 }
+/* Placeholder no longer needed if avatar is on every message, but kept for safety */
 .msg-avatar-placeholder {
-    width: 28px;
+    width: 30px;
     margin-right: 8px;
     flex-shrink: 0;
 }
@@ -177,12 +180,10 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-self { 
     background-color: var(--bg-chat-bubble-self); 
     color: white; 
-    /* Removed default 4px corner */
 }
 .msg-other { 
     background-color: var(--bg-chat-bubble-other); 
     color: #000; 
-    /* Removed default 4px corner */
 }
 
 /* 
@@ -259,10 +260,6 @@ body.chat-active .chat-window { transform: translateX(0); }
 /* Emoji Sizes */
 .emoji-jumbo { font-size: 48px; line-height: 1.1; }
 .emoji-large { font-size: 32px; line-height: 1.1; }
-
-/* Removed Grouping Overrides to maintain Capsule Shape */
-/* .msg-group + .msg-group .msg-self { border-top-right-radius: 4px; } */
-/* .msg-group + .msg-group .msg-other { border-top-left-radius: 4px; } */
 
 /* Seen Status */
 .seen-status {
@@ -735,9 +732,11 @@ function loadMessages(chatId) {
             let showTail = false;
 
             if (!isSelf) {
+                // ALWAYS show avatar for other users as requested
+                showAvatar = true; 
+                
                 const nextMsg = messages[index + 1];
                 if (!nextMsg || nextMsg.senderId !== msg.senderId) {
-                    showAvatar = true;
                     showTail = true;
                 }
             } else {
@@ -841,12 +840,9 @@ function loadMessages(chatId) {
             // Avatar Rendering
             let avatarElement = '';
             if (!isSelf) {
-                if (showAvatar) {
-                    const avatarUrl = currentChatUser?.avatar || 'https://via.placeholder.com/150';
-                    avatarElement = `<img src="${avatarUrl}" class="msg-avatar">`;
-                } else {
-                    avatarElement = `<div class="msg-avatar-placeholder"></div>`;
-                }
+                // Now always show avatar for other messages
+                const avatarUrl = currentChatUser?.avatar || 'https://via.placeholder.com/150';
+                avatarElement = `<img src="${avatarUrl}" class="msg-avatar">`;
             }
 
             div.innerHTML = `
