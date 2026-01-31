@@ -41,65 +41,15 @@ i[data-lucide],svg{flex-shrink:0}
 .post-author-name:hover{text-decoration:underline;color:var(--primary)}
 .post-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;font-weight:400}
 .post-body{font-size:15px;line-height:1.6;color:var(--on-surface);margin-bottom:12px;white-space:pre-wrap}
-/* CAPSULE POST ACTIONS */
-.post-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 12px;
-    padding-bottom: 4px;
-}
-.action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 9999px; /* Capsule shape */
-    border: 1px solid var(--outline); /* Default border */
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s;
-    background: transparent;
-    cursor: pointer;
-    height: 34px;
-    white-space: nowrap;
-}
-.action-btn:hover {
-    background-color: var(--hover-bg);
-    border-color: #d1d5db;
-}
-.action-btn.active {
-    background-color: transparent; 
-    border-color: var(--outline);
-}
-/* Like button active state - Only Icon Changes */
-.action-btn.like.active {
-    color: var(--text-secondary); /* Text stays neutral/gray */
-    background-color: transparent; /* Background stays transparent */
-    border-color: var(--outline);
-}
-.action-btn.like.active svg {
-    fill: #ef4444; /* Icon fills red */
-    stroke: none;
-    color: #ef4444;
-}
-/* Bookmark button active state - Only Icon Changes */
-.action-btn.bookmark.active {
-    color: var(--text-secondary); /* Text stays neutral/gray */
-    background-color: transparent;
-    border-color: var(--outline);
-}
-.action-btn.bookmark.active svg {
-    fill: #eab308; /* Icon fills yellow */
-    stroke: none;
-    color: #eab308;
-}
-.action-btn i, .action-btn svg {
-    width: 18px;
-    height: 18px;
-}
+.post-actions {display: flex;align-items: center;gap: 8px;padding-top: 12px;padding-bottom: 4px;}
+.action-btn {display: flex;align-items: center;justify-content: center;gap: 6px;padding: 6px 12px;border-radius: 9999px;border: 1px solid var(--outline);color: var(--text-secondary);font-size: 13px;font-weight: 600;transition: all 0.2s;background: transparent;cursor: pointer;height: 34px;white-space: nowrap;}
+.action-btn:hover {background-color: var(--hover-bg);border-color: #d1d5db;}
+.action-btn.active {background-color: transparent; border-color: var(--outline);}
+.action-btn.like.active {color: var(--text-secondary);background-color: transparent;border-color: var(--outline);}
+.action-btn.like.active svg {fill: #ef4444;stroke: none;color: #ef4444;}
+.action-btn.bookmark.active {color: var(--text-secondary);background-color: transparent;border-color: var(--outline);}
+.action-btn.bookmark.active svg {fill: #eab308;stroke: none;color: #eab308;}
+.action-btn i, .action-btn svg {width: 18px;height: 18px;}
 #compose-modal,#create-menu-modal,#edit-profile-modal,#user-list-modal,#settings-modal,#likes-overlay,#username-modal,#add-link-modal,#promo-modal,#upload-options-modal,#share-modal,#post-options-modal,#notif-options-modal,#qr-overlay,#scanner-overlay,#feed-filter-modal,#privacy-overlay,#profile-filter-modal,#download-select-modal,#adjust-image-modal,#comment-options-modal,#announcement-overlay-modal,#profile-preview-card,#comment-filter-modal{box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid var(--outline)}
 #profile-preview-card { border: none !important; }
 .compose-textarea{width:100%;min-height:120px;font-size:17px;line-height:1.6;color:var(--on-surface);border:none;outline:none;resize:none;background:0 0}
@@ -148,16 +98,7 @@ i[data-lucide],svg{flex-shrink:0}
 .collab-chip{display:inline-flex;align-items:center;background-color:#f3f4f6;padding:4px 10px;border-radius:20px;font-size:13px;margin-right:6px;margin-bottom:6px;color:#1f1f1f;border:1px solid #e5e7eb}
 .post-modal-layout{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;gap:0;background:#fff}
 body.reel-mode #mobile-bottom-nav{display:none!important}
-@media (min-width:768px){
-  /* REDUCED MODAL SIZE FOR BIG SCREENS */
-  .post-modal-layout{flex-direction:row;width:90vw;max-width:950px;height:80vh;gap:0;background:#fff;border-radius:24px;overflow:hidden}
-  .desktop-split-view{display:flex;width:100%;height:100%}
-  .desktop-post-container{flex:1.2;display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--outline);position:relative}
-  .desktop-comments-container{flex:1;display:flex;flex-direction:column;height:100%;background:#fff}
-  .stage-content{width:100%;height:auto;object-fit:contain;border-radius:8px}
-  /* REDUCE FEED IMAGE SIZE ON BIG SCREENS */
-  #feed-container, #saved-container, #events-list { max-width: 600px; margin: 0 auto; }
-}
+@media (min-width:768px){.post-modal-layout{flex-direction:row;width:90vw;max-width:1200px;height:85vh;gap:0;background:#fff;border-radius:24px;overflow:hidden}.desktop-split-view{display:flex;width:100%;height:100%}.desktop-post-container{flex:1.2;display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--outline);position:relative}.desktop-comments-container{flex:1;display:flex;flex-direction:column;height:100%;background:#fff}.stage-content{width:100%;height:auto;object-fit:contain;border-radius:8px}}
 @media (max-width:767px){.post-modal-layout{width:100vw;height:100%;background:#fff}.mobile-overlay-layout{display:flex;flex-direction:column;height:100%}.mobile-fixed-header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--outline);background:#fff;flex-shrink:0;z-index:20}.mobile-scroll-content{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:0}.mobile-fixed-footer{height:auto;padding:12px 16px;border-top:1px solid var(--outline);background:#fff;flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}.discussion-panel{display:none}}
 .discussion-header{padding:12px 16px;border-bottom:1px solid var(--outline);display:flex;align-items:center;justify-content:space-between;background:#fff;z-index:10}
 .discussion-scroll{flex:1;overflow-y:auto;padding:0;background:#fff}
@@ -165,9 +106,15 @@ body.reel-mode #mobile-bottom-nav{display:none!important}
 .chat-input-wrapper{display:flex;align-items:center;background:0 0;padding:8px 0;gap:12px;border-top:1px solid transparent}
 .read-more-btn{color:#606060;font-weight:600;font-size:13px;cursor:pointer;margin-left:4px}.read-more-btn:hover{color:#000;text-decoration:underline}
 .post-carousel{position:relative;width:100%;overflow:hidden;background-color:#f6f7f8;aspect-ratio:4/5;touch-action:pan-y pinch-zoom}
+@media (min-width: 768px) {
+    .post-carousel { aspect-ratio: auto; max-height: 500px; display: flex; align-items: center; justify-content: center; background: #000; }
+    .post-carousel-inner { align-items: center; }
+}
 .post-carousel-inner{display:flex;transition:transform .3s ease-out;height:100%;width:100%}
 .post-carousel-item{min-width:100%;flex:0 0 100%;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:#f6f7f8}
+@media (min-width: 768px) { .post-carousel-item { background: #000; } }
 .post-carousel-item img,.post-carousel-item video{width:100%;height:100%;object-fit:cover}
+@media (min-width: 768px) { .post-carousel-item img, .post-carousel-item video { object-fit: contain; max-height: 500px; width: auto; max-width: 100%; } }
 .carousel-dots-outside{display:flex;justify-content:center;gap:6px;margin-top:10px}
 .carousel-dot{width:6px;height:6px;border-radius:50%;background:#d1d5db;transition:background .2s}.carousel-dot.active{background:#3b82f6}
 .carousel-nav-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;border:none;pointer-events:auto;transition:background .2s}
@@ -187,7 +134,6 @@ body.modal-open #mobile-bottom-nav{display:none!important}
 .toggle-setting-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #f0f0f0}
 .toggle-setting-row:last-child{border-bottom:none}
 .discussion-footer {padding: 12px 16px; border-top: 1px solid var(--outline); background: #fff; z-index: 20;}
-/* SHIMMER LOADING EFFECT - INSTAGRAM STYLE */
 .img-placeholder {
   background: #f6f7f8;
   background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -213,6 +159,41 @@ img { transition: opacity 0.3s ease-out; }
 @keyframes slideInRight { from { transform: translateX(20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 .comment-item { border-bottom: 1px solid var(--outline); }
+/* Reddit-style Media Container */
+.balanced-media-container {
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f6f7f8;
+    border: 1px solid var(--outline);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+@media (min-width: 768px) {
+    .balanced-media-container {
+        background-color: #000;
+        max-height: 512px;
+    }
+    .balanced-media {
+        max-height: 512px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+    }
+}
+@media (max-width: 767px) {
+    .balanced-media-container {
+        aspect-ratio: 4/5;
+    }
+    .balanced-media {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
@@ -429,13 +410,37 @@ window.renderFeed=t=>{
 };
 window.openFeedFilter=()=>{manageHistory('feed-filter-overlay');toggleModalAnim('feed-filter-overlay','feed-filter-modal',!0)};window.closeFeedFilter=()=>toggleModalAnim('feed-filter-overlay','feed-filter-modal',!1);window.switchFeedFilter=f=>{window.activeFeedFilter=f;closeFeedFilter();renderFeed();const m={all:'All Posts',following:'Following',friends:'Friends Only'};showToast(`Filter: ${m[f]}`)};
 let touchStartX=0,touchEndX=0;window.handleTouchStart=e=>touchStartX=e.changedTouches[0].screenX;window.handleTouchEnd=(e,pid,ov)=>{touchEndX=e.changedTouches[0].screenX;const w=e.currentTarget.closest('.post-carousel');if(w&&Math.abs(touchStartX-touchEndX)>50)moveCarousel(w.id,touchStartX>touchEndX?1:-1)};
+
 function createPostElement(p,ctx='feed'){
-const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:'',isOfficial:false,id:p.authorId},st=p.settings||{privacy:'public',showLikes:true,showComments:true},d=document.createElement('article');d.id=`post-card-${ctx}-${p.id}`;d.className="post-card group overflow-hidden fade-in";d.onclick=()=>openPostView(p.id);let mh="",lh="";if(p.media){const ma=Array.isArray(p.media)?p.media:[p.media];if(ma.length===1){const s=ma[0],iv=s.includes('video')||s.includes('.mp4');mh=`<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv?'bg-black flex items-center justify-center':'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv?'':`openLightbox('${s}','image')`}">${iv?`<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>`:`<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`}else{const cid=`carousel-${ctx}-${p.id}`,iid=`inner-${ctx}-${p.id}`,cntId=`counter-${ctx}-${p.id}`;let sl='',dt='';ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.includes('video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="dot-${ctx}-${p.id}-${i}"></div>`});mh=`<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;(window.carouselStates=window.carouselStates||{})[cid]={index:0,total:ma.length}}}
-if(p.likes?.length&&currentUser.following){const f=p.likes.filter(id=>currentUser.following.includes(id)&&id!==currentUser.id),ff=f.length&&users.find(u=>u.id===f[0]);if(ff)lh=`<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length>1?` and ${f.length-1} others`:''}</span></div>`}
-const isLiked=p.likes?.includes(currentUser.id),isSaved=savedPosts.includes(p.id);
-const likeText=(p.likes?.length>0)?p.likes.length:(st.showLikes?'Like':'');
-const commentText=(p.comments?.length>0)?p.comments.length:(st.showComments?'Comment':'');
-d.innerHTML=`<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container img-placeholder w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${a.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>':''}${st.privacy==='private'?'<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>':''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content,`post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><button class="action-btn like js-like-btn-${p.id} ${isLiked?'active':''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart"></i> <span class="js-like-count-${p.id}">${likeText}</span></button><button class="action-btn comment" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments===false?'message-circle-off':'message-circle'}"></i> <span class="js-comment-count-${p.id}">${commentText}</span></button><button class="action-btn share-btn" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2"></i> <span class="hidden sm:inline">Share</span></button><div class="flex-1"></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved?'active':''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark"></i></button></div></div>`;return d}
+    const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:'',isOfficial:false,id:p.authorId},st=p.settings||{privacy:'public',showLikes:true,showComments:true},d=document.createElement('article');
+    d.id=`post-card-${ctx}-${p.id}`;
+    d.className="post-card group overflow-hidden fade-in";
+    d.onclick=()=>openPostView(p.id);
+    let mh="",lh="";
+    
+    // Balanced Media Handling (Reddit Style)
+    if(p.media){
+        const ma=Array.isArray(p.media)?p.media:[p.media];
+        if(ma.length===1){
+            const s=ma[0],iv=s.includes('video')||s.includes('.mp4');
+            // Changed aspect-[4/5] to balanced-media-container
+            mh=`<div class="balanced-media-container" onclick="event.stopPropagation();${iv?'':`openLightbox('${s}','image')`}">${iv?`<video src="${s}" class="balanced-media" controls onclick="event.stopPropagation()"></video>`:`<img src="${s}" class="balanced-media opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`
+        }else{
+            const cid=`carousel-${ctx}-${p.id}`,iid=`inner-${ctx}-${p.id}`,cntId=`counter-${ctx}-${p.id}`;
+            let sl='',dt='';
+            ma.forEach((s,i)=>{sl+=`<div class="post-carousel-item img-placeholder">${(s.includes('video')||s.includes('.mp4'))?`<video src="${s}" controls></video>`:`<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`;dt+=`<div class="carousel-dot ${i===0?'active':''}" id="dot-${ctx}-${p.id}-${i}"></div>`});
+            mh=`<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;
+            (window.carouselStates=window.carouselStates||{})[cid]={index:0,total:ma.length}
+        }
+    }
+
+    if(p.likes?.length&&currentUser.following){const f=p.likes.filter(id=>currentUser.following.includes(id)&&id!==currentUser.id),ff=f.length&&users.find(u=>u.id===f[0]);if(ff)lh=`<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length>1?` and ${f.length-1} others`:''}</span></div>`}
+    const isLiked=p.likes?.includes(currentUser.id),isSaved=savedPosts.includes(p.id);
+    const likeText=(p.likes?.length>0)?p.likes.length:(st.showLikes?'Like':'');
+    const commentText=(p.comments?.length>0)?p.comments.length:(st.showComments?'Comment':'');
+    d.innerHTML=`<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container img-placeholder w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial?'<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>':''}${a.banned?'<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>':''}${st.privacy==='private'?'<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>':''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content,`post-${p.id}`)}</div>${mh}</div>${lh}<div class="post-actions"><button class="action-btn like js-like-btn-${p.id} ${isLiked?'active':''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart"></i> <span class="js-like-count-${p.id}">${likeText}</span></button><button class="action-btn comment" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments===false?'message-circle-off':'message-circle'}"></i> <span class="js-comment-count-${p.id}">${commentText}</span></button><button class="action-btn share-btn" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2"></i> <span class="hidden sm:inline">Share</span></button><div class="flex-1"></div><button class="action-btn bookmark js-save-btn-${p.id} ${isSaved?'active':''}" onclick="event.stopPropagation(); toggleSave('${p.id}')"><i data-lucide="bookmark"></i></button></div></div>`;return d
+}
+
 window.moveCarousel=(cid,dir)=>{const s=window.carouselStates[cid];if(!s)return;let n=s.index+dir;if(n<0)n=0;if(n>=s.total)n=s.total-1;s.index=n;const outer=document.getElementById(cid),inner=outer?outer.querySelector('.post-carousel-inner'):null;if(inner)inner.style.transform=`translateX(-${n*100}%)`;const dc=document.getElementById(cid).nextElementSibling;if(dc)dc.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===n));const ctid=cid.replace('carousel-','counter-'),cnt=document.getElementById(ctid);if(cnt)cnt.innerText=n+1};
 window.switchExploreMainTab=t=>{window.activeExploreTab=t;const m=t==='explore'?'main':t;['main','video','people','tags'].forEach(x=>{const el=document.getElementById(`tab-explore-${x}`),ed=document.getElementById(`tab-explore-${x}-d`);if(el)el.classList.remove('active');if(ed)ed.classList.remove('active')});document.getElementById(`tab-explore-${m}`)?.classList.add('active');document.getElementById(`tab-explore-${m}-d`)?.classList.add('active');window.activeExploreCategory=t==='video'?'All':'For You';handleSearch(document.getElementById('mobile-explore-search').value)};
 window.toggleExploreSearch=()=>{const b=document.getElementById('explore-search-bar');if(b){b.classList.toggle('hidden');if(!b.classList.contains('hidden'))document.getElementById('mobile-explore-search').focus()}};
@@ -457,7 +462,6 @@ window.openLikes = pid => {
   const p = posts.find(x => x.id === pid), c = document.getElementById('likes-list-content');
   const searchInput = document.getElementById('likes-search-input');
   
-  // Clear search on open
   if (searchInput) searchInput.value = '';
 
   if (p.settings?.allowLikeView === false && p.authorId !== currentUser.id) {
@@ -466,10 +470,8 @@ window.openLikes = pid => {
     return;
   }
 
-  // Initial render
   renderLikesList(p.likes || []);
 
-  // Set input handler
   searchInput.oninput = (e) => {
     const term = e.target.value.toLowerCase();
     const allLikes = p.likes || [];
@@ -787,7 +789,12 @@ window.saveProfileChanges=async()=>{
 };
 
 window.saveLink=async()=>{const t=document.getElementById('new-link-title').value.trim(),u=document.getElementById('new-link-url').value.trim();if(!t||!u)return showToast("Fill all fields",true);const l={title:t,url:u,type:'web'};await updateDoc(doc(db,"users",currentUser.id),{links:arrayUnion(l)});(currentUser.links=currentUser.links||[]).push(l);document.getElementById('add-link-modal').classList.add('hidden');document.getElementById('new-link-title').value=document.getElementById('new-link-url').value="";renderProfileContent(currentUser.id,'links');showToast("Link added!")};window.deleteLink=async i=>showAlert("Remove link?",async()=>{await updateDoc(doc(db,"users",currentUser.id),{links:arrayRemove(currentUser.links[i])});currentUser.links.splice(i,1);renderProfileContent(currentUser.id,'links');showToast("Removed")});
-window.openPostView=pid=>{const p=posts.find(x=>x.id===pid);if(!p)return;const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:''},isMe=p.authorId===currentUser.id,isFollowing=currentUser.following.includes(p.authorId);if(!isMe&&a.settings?.privateNetwork&&!isFollowing){showToast("This account is private");return}manageHistory('post-view-overlay');const o=document.getElementById('post-view-overlay'),c=document.getElementById('post-view-container');window.currentViewingPostId=pid;window.isDesktopThreadMode=false;window.currentCommentFilter='latest';window.commentSearchTerm='';window.isCommentSearchOpen=false;o.classList.remove('hidden');o.classList.add('flex');let mhDesktop='',mhMobile='';if(p.media){const ma=Array.isArray(p.media)?p.media:[p.media];if(ma.length===1){const s=ma[0],iv=s.includes('video')||s.endsWith('.mp4')||s.startsWith('data:video');const mhtml=iv?`<video src="${s}" class="stage-content rounded-lg mt-3" controls playsinline></video>`:`<div class="img-placeholder rounded-lg mt-3 overflow-hidden"><img src="${s}" class="stage-content w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div>`;mhDesktop=mhtml;mhMobile=mhtml}else{mhDesktop=createCarouselHTML(ma,'overlay-carousel-desktop',p.id);mhMobile=createCarouselHTML(ma,'overlay-carousel-mobile',p.id)}}
+window.openPostView=pid=>{const p=posts.find(x=>x.id===pid);if(!p)return;const a=users.find(u=>u.id===p.authorId)||{name:'Unknown',avatar:''},isMe=p.authorId===currentUser.id,isFollowing=currentUser.following.includes(p.authorId);if(!isMe&&a.settings?.privateNetwork&&!isFollowing){showToast("This account is private");return}manageHistory('post-view-overlay');const o=document.getElementById('post-view-overlay'),c=document.getElementById('post-view-container');window.currentViewingPostId=pid;window.isDesktopThreadMode=false;window.currentCommentFilter='latest';window.commentSearchTerm='';window.isCommentSearchOpen=false;o.classList.remove('hidden');o.classList.add('flex');let mhDesktop='',mhMobile='';if(p.media){const ma=Array.isArray(p.media)?p.media:[p.media];if(ma.length===1){const s=ma[0],iv=s.includes('video')||s.endsWith('.mp4')||s.startsWith('data:video');
+// Updated desktop modal media view to prevent oversized images
+const mhtmlDesktop = iv ? `<video src="${s}" class="stage-content rounded-lg mt-3" controls playsinline style="max-height: 70vh; width: auto; margin: 0 auto; display: block;"></video>` : `<div class="img-placeholder rounded-lg mt-3 overflow-hidden flex items-center justify-center bg-gray-50 border border-gray-100" style="max-height: 70vh;"><img src="${s}" class="stage-content w-auto h-auto max-h-full max-w-full object-contain opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div>`;
+const mhtmlMobile = iv ? `<video src="${s}" class="stage-content rounded-lg mt-3" controls playsinline></video>` : `<div class="img-placeholder rounded-lg mt-3 overflow-hidden"><img src="${s}" class="stage-content w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div>`;
+mhDesktop=mhtmlDesktop;mhMobile=mhtmlMobile}else{mhDesktop=createCarouselHTML(ma,'overlay-carousel-desktop',p.id);mhMobile=createCarouselHTML(ma,'overlay-carousel-mobile',p.id)}}
+
 const isLiked=p.likes?.includes(currentUser.id),isSaved=savedPosts.includes(p.id),postBodyHtml=window.renderTextWithReadMore(p.content,`post-${p.id}`),allowComments=p.settings?.allowComments!==false,commentInputDesktop=allowComments?`<div class="flex items-center gap-2"><img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0"><input type="text" id="comment-input-desktop" placeholder="Add a comment..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitCommentDesktop();}"><button onclick="submitCommentDesktop()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button></div>`:`<div class="bg-gray-50 text-gray-500 text-sm p-4 text-center italic border-t border-gray-100">Creator turned off commenting.</div>`,commentInputMobile=allowComments?`<div class="flex items-center gap-2"><img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0"><input type="text" id="mobile-comment-input" placeholder="Add a comment..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500"><button onclick="submitCommentMobile()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button></div>`:`<div class="bg-gray-50 text-gray-500 text-sm p-3 text-center italic rounded-xl mt-2">Creator turned off commenting.</div>`;
 const badge = a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : '';
 const filterBtn = `<button onclick="openCommentFilter()" class="icon-btn hover:bg-gray-100"><i data-lucide="list-filter" class="w-5 h-5 text-gray-600"></i></button>`;
