@@ -71,30 +71,26 @@ i[data-lucide],svg{flex-shrink:0}
     border-color: #d1d5db;
 }
 .action-btn.active {
-    background-color: transparent; 
-    border-color: var(--outline);
+    background-color: #eff6ff; 
+    border-color: var(--outline); /* Keep neutral border */
 }
-/* Like button active state - Only Icon Changes */
 .action-btn.like.active {
-    color: var(--text-secondary); /* Text stays neutral/gray */
-    background-color: transparent; /* Background stays transparent */
-    border-color: var(--outline);
+    color: #ef4444; /* Red Text */
+    background-color: #fef2f2; /* Light red background */
+    border-color: var(--outline); /* Neutral border (not red) */
 }
 .action-btn.like.active svg {
-    fill: #ef4444; /* Icon fills red */
+    fill: #ef4444; /* Red Icon Fill */
     stroke: none;
-    color: #ef4444;
 }
-/* Bookmark button active state - Only Icon Changes */
 .action-btn.bookmark.active {
-    color: var(--text-secondary); /* Text stays neutral/gray */
-    background-color: transparent;
-    border-color: var(--outline);
+    color: #eab308; /* Yellow Text */
+    background-color: #fefce8; /* Light yellow background */
+    border-color: var(--outline); /* Neutral border (not yellow) */
 }
 .action-btn.bookmark.active svg {
-    fill: #eab308; /* Icon fills yellow */
+    fill: #eab308; /* Yellow Icon Fill */
     stroke: none;
-    color: #eab308;
 }
 .action-btn i, .action-btn svg {
     width: 18px;
@@ -161,7 +157,7 @@ body.reel-mode #mobile-bottom-nav{display:none!important}
 .post-carousel-item img,.post-carousel-item video{width:100%;height:100%;object-fit:cover}
 .carousel-dots-outside{display:flex;justify-content:center;gap:6px;margin-top:10px}
 .carousel-dot{width:6px;height:6px;border-radius:50%;background:#d1d5db;transition:background .2s}.carousel-dot.active{background:#3b82f6}
-.carousel-nav-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;border:none;pointer-events:auto;transition:background .2s}
+.carousel-nav-btn{position:absolute;top:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;border:none;pointer-events:auto;transition:background .2s}
 .carousel-nav-btn.prev{left:10px}.carousel-nav-btn.next{right:10px}
 #thread-overlay{border-radius:20px 20px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
 #ptr-spinner{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);width:40px;height:40px;background:#fff;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,.1);display:flex;justify-content:center;align-items:center;z-index:15;opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;color:#0b57d0}
@@ -204,6 +200,46 @@ img { transition: opacity 0.3s ease-out; }
 @keyframes slideInRight { from { transform: translateX(20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }
 .comment-item { border-bottom: 1px solid var(--outline); }
+/* Desktop Media Optimization */
+@media (min-width: 768px) {
+  .desktop-post-container .stage-content {
+      width: auto !important;
+      height: auto !important;
+      max-width: 100%;
+      max-height: 60vh; /* Fits within the modal nicely */
+      object-fit: contain !important;
+      margin: 0 auto;
+      display: block;
+  }
+  .desktop-post-container .img-placeholder {
+      width: 100%;
+      height: auto !important;
+      display: flex;
+      justify-content: center;
+      background-color: #f8f9fa;
+  }
+  .desktop-post-container .post-carousel {
+      aspect-ratio: auto !important;
+      height: 60vh !important;
+      width: 100%;
+  }
+  .desktop-post-container .post-carousel-inner {
+      height: 100%;
+  }
+  .desktop-post-container .post-carousel-item {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+  }
+  .desktop-post-container .post-carousel-item img,
+  .desktop-post-container .post-carousel-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain !important;
+  }
+}
 </style>
 </head>
 <body class="h-screen flex overflow-hidden p-0 md:p-3 gap-4 bg-white">
