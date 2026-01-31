@@ -71,26 +71,30 @@ i[data-lucide],svg{flex-shrink:0}
     border-color: #d1d5db;
 }
 .action-btn.active {
-    background-color: #eff6ff; 
-    border-color: var(--outline); /* Keep neutral border */
+    background-color: transparent; 
+    border-color: var(--outline);
 }
+/* Like button active state - Only Icon Changes */
 .action-btn.like.active {
-    color: #ef4444; /* Red Text */
-    background-color: #fef2f2; /* Light red background */
-    border-color: var(--outline); /* Neutral border (not red) */
+    color: var(--text-secondary); /* Text stays neutral/gray */
+    background-color: transparent; /* Background stays transparent */
+    border-color: var(--outline);
 }
 .action-btn.like.active svg {
-    fill: #ef4444; /* Red Icon Fill */
+    fill: #ef4444; /* Icon fills red */
     stroke: none;
+    color: #ef4444;
 }
+/* Bookmark button active state - Only Icon Changes */
 .action-btn.bookmark.active {
-    color: #eab308; /* Yellow Text */
-    background-color: #fefce8; /* Light yellow background */
-    border-color: var(--outline); /* Neutral border (not yellow) */
+    color: var(--text-secondary); /* Text stays neutral/gray */
+    background-color: transparent;
+    border-color: var(--outline);
 }
 .action-btn.bookmark.active svg {
-    fill: #eab308; /* Yellow Icon Fill */
+    fill: #eab308; /* Icon fills yellow */
     stroke: none;
+    color: #eab308;
 }
 .action-btn i, .action-btn svg {
     width: 18px;
