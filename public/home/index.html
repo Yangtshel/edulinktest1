@@ -2268,6 +2268,19 @@
     <input type="file" id="media-input" class="hidden" accept="image/*,video/*" onchange="handleFileSelect(event)">
     <input type="file" id="grid-upload-input" class="hidden" accept="image/*,video/*"
         onchange="onGridFileSelect(event)">
+    <div id="mobile-image-viewer-overlay"
+        class="fixed inset-0 z-[150] bg-black hidden flex-col opacity-0 transition-opacity duration-300">
+        <div
+            class="h-16 flex items-center justify-between px-4 bg-black/50 backdrop-blur-md absolute top-0 w-full z-10">
+            <div class="flex items-center gap-3"><img id="miv-avatar" src=""
+                    class="w-8 h-8 rounded-full border border-gray-700 object-cover"><span id="miv-name"
+                    class="font-bold text-white text-sm">User</span></div><button onclick="closeMobileImageViewer()"
+                class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors backdrop-blur-md"><i
+                    data-lucide="x" class="w-6 h-6 text-white"></i></button>
+        </div>
+        <div class="flex-1 flex items-center justify-center overflow-hidden p-0 relative w-full h-full"><img
+                id="miv-image" src="" class="w-full h-full object-contain"></div>
+    </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"; import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, addDoc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; import { getStorage, ref, uploadString, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
         const firebaseConfig = { apiKey: "AIzaSyAJH79UQl0rc96Qug0DKLevO4ZI_sn8Kno", authDomain: "edulinki.firebaseapp.com", projectId: "edulinki", storageBucket: "edulinki.firebasestorage.app", messagingSenderId: "248886466474", appId: "1:248886466474:web:160043201a6b28bafbbdd3", measurementId: "G-MQBH12VL7N" };
@@ -2376,7 +2389,268 @@
         window.saveProfileChanges = async () => { const n = document.getElementById('edit-name').value.trim(); const bio = document.getElementById('edit-bio').value; const un = document.getElementById('edit-username').value.trim().toLowerCase(); if (!n) return showToast("Name required", true); const ONE_WEEK = 604800000; const now = Date.now(); const nameChanged = n !== currentUser.name; const userChanged = un !== currentUser.username; if (nameChanged) { const lastNameChange = currentUser.lastNameChange?.toDate?.()?.getTime() || 0; if (now - lastNameChange < ONE_WEEK) return showToast("Name change limit reached", true) } if (userChanged) { const lastUserChange = currentUser.lastUsernameChange?.toDate?.()?.getTime() || 0; if (now - lastUserChange < ONE_WEEK) return showToast("Username limit reached", true); if (un.length < 3 || un.length > 20 || !/^[a-z0-9_.]+$/.test(un)) return showToast("Invalid username", true); const q = query(collection(db, "users"), where("username", "==", un)); const snap = await getDocs(q); if (!snap.empty && snap.docs[0].id !== currentUser.id) return showToast("Username taken", true) } const progOverlay = document.getElementById('action-progress-overlay'); const progBar = document.getElementById('action-progress-bar'); progOverlay.classList.remove('hidden'); progOverlay.classList.add('flex'); let pr = 0; const int = setInterval(() => { if (pr < 90) { pr += Math.random() * 5; progBar.style.width = `${Math.min(pr, 90)}%` } }, 100); try { let av = currentUser.avatar, bu = currentUser.banner; if (currentAvatarBlob) av = await uploadToImgHippo(currentAvatarBlob); if (currentBannerBlob) bu = await uploadToImgHippo(currentBannerBlob); const updateData = { name: n, bio: bio, avatar: av, banner: bu, bannerPos: currentBannerPos, username: un }; if (nameChanged) updateData.lastNameChange = serverTimestamp(); if (userChanged) updateData.lastUsernameChange = serverTimestamp(); await updateDoc(doc(db, "users", currentUser.id), updateData); Object.assign(currentUser, { name: n, bio: bio, avatar: av, banner: bu, bannerPos: currentBannerPos, username: un, lastNameChange: nameChanged ? { toDate: () => new Date() } : currentUser.lastNameChange, lastUsernameChange: userChanged ? { toDate: () => new Date() } : currentUser.lastUsernameChange }); currentAvatarBlob = currentBannerBlob = null; updateUserInterface(); clearInterval(int); progBar.style.width = '100%'; await new Promise(r => setTimeout(r, 500)); progOverlay.classList.add('hidden'); progOverlay.classList.remove('flex'); progBar.style.width = '0%'; closeEditProfile(); showProfile(currentUser.id, window.currentProfileTab); showToast("Profile Updated") } catch (e) { console.error(e); clearInterval(int); progOverlay.classList.add('hidden'); progOverlay.classList.remove('flex'); showToast("Update failed", true) } };
         window.openClaimOverlay = () => { manageHistory('claim-link-overlay'); const input = document.getElementById('claim-link-input'); input.value = window.currentClaimLink || ''; toggleModalAnim('claim-link-overlay', 'claim-link-modal', true); setTimeout(() => input.focus(), 100) }; window.closeClaimOverlay = () => toggleModalAnim('claim-link-overlay', 'claim-link-modal', false);
         window.saveClaimLink = () => { const input = document.getElementById('claim-link-input'), url = input.value.trim(); if (url && !url.startsWith('http://') && !url.startsWith('https://')) return showToast("Invalid URL", true); window.currentClaimLink = url || null; const ind = document.getElementById('claim-status-indicator'); if (ind) { if (url) { ind.innerText = 'On'; ind.classList.remove('text-gray-400'); ind.classList.add('text-green-600') } else { ind.innerText = 'Off'; ind.classList.remove('text-green-600'); ind.classList.add('text-gray-400') } } showToast(url ? "Link added" : "Link removed"); closeClaimOverlay() };
-        window.openPostView = pid => {
+        window.openPostView = async pid => {
+            const p = posts.find(x => x.id === pid); if (!p) return;
+            const a = users.find(x => x.id === p.authorId) || { name: 'Unknown', avatar: '', username: 'unknown' };
+            const isLiked = p.likes.includes(currentUser.id);
+            const isSaved = currentUser.saved.includes(p.id);
+            const t = formatDate(p.timestamp);
+            const badge = a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 text-blue-500 fill-blue-500 text-white ml-1"></i>' : '';
+            const isFollowing = currentUser.following.includes(p.authorId);
+
+            manageHistory('post-view-overlay');
+            const o = document.getElementById('post-view-overlay');
+            window.currentViewingPostId = pid;
+            window.isDesktopThreadMode = false;
+            window.currentCommentFilter = 'latest';
+            window.commentSearchTerm = '';
+            window.isCommentSearchOpen = false;
+            o.classList.remove('hidden');
+            o.classList.add('flex');
+
+            const cHtml = p.content ? `<div class="text-[15px] text-[#1f1f1f] mb-4 whitespace-pre-wrap leading-relaxed js-post-body-${p.id}">${formatContent(p.content)}</div>` : '';
+
+            let mediaHtml = '';
+            if (p.media) {
+                if (Array.isArray(p.media)) {
+                    // Mobile Image Handling with MobileImageViewer
+                    const mImgs = p.media.map((s, i) => {
+                        if (s.includes('.mp4') || s.includes('data:video'))
+                            return `<div class="w-full shrink-0 snap-center flex items-center justify-center bg-black relative"><video src="${s}" controls class="max-h-[50vh] w-auto max-w-full rounded-lg"></video></div>`;
+                        return `<div class="w-full shrink-0 snap-center flex items-center justify-center bg-black relative" onclick="openMobileImageViewer('${s}', '${p.authorId}')"><img src="${s}" class="max-h-[50vh] w-auto max-w-full object-contain rounded-lg"></div>`;
+                    }).join('');
+                    const dImgs = p.media.map(s => {
+                        if (s.includes('.mp4') || s.includes('data:video'))
+                            return `<video src="${s}" controls class="w-full rounded-xl border border-gray-100"></video>`;
+                        return `<img src="${s}" onclick="openLightbox('${s}')" class="w-full rounded-xl border border-gray-100 cursor-pointer hover:opacity-95 transition-opacity">`;
+                    }).join('');
+
+                    mediaHtml = `
+                    <div class="md:hidden w-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-2 mb-4">
+                        ${mImgs}
+                    </div>
+                    <div class="hidden md:flex flex-col gap-2 mb-4">
+                        ${dImgs}
+                    </div>`;
+                } else if (p.media.includes('.mp4') || p.media.includes('data:video')) {
+                    mediaHtml = `<div class="w-full bg-black rounded-xl overflow-hidden mb-4"><video src="${p.media}" controls class="w-full max-h-[500px]"></video></div>`;
+                } else {
+                    mediaHtml = `
+                    <div class="md:hidden w-full bg-black flex items-center justify-center rounded-xl overflow-hidden mb-4" onclick="openMobileImageViewer('${p.media}', '${p.authorId}')">
+                        <img src="${p.media}" class="w-full max-h-[500px] object-contain">
+                    </div>
+                    <div class="hidden md:block w-full rounded-xl overflow-hidden mb-4 cursor-pointer" onclick="openLightbox('${p.media}')">
+                        <img src="${p.media}" class="w-full h-auto object-cover border border-gray-100 hover:opacity-95 transition-opacity">
+                    </div>`;
+                }
+            }
+
+            // Capsule Button Styles
+            const capsuleClass = "flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors group cursor-pointer w-auto justify-center select-none";
+            const iconClass = "w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors";
+            const mobileCapsuleClass = "flex items-center justify-center gap-2 px-0 py-2 w-12 h-12 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors group cursor-pointer md:w-auto md:px-4 md:h-10 md:rounded-xl select-none";
+
+            // Save vs Claim Button
+            let desktopAction = '', mobileAction = '';
+            if (p.claimLink) {
+                const cb = `
+                <div onclick="window.open('${p.claimLink}', '_blank')" class="${capsuleClass}">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-[#0b57d0]"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">Claim</span>
+                </div>`;
+                const mobCb = `
+                <div onclick="window.open('${p.claimLink}', '_blank')" class="${mobileCapsuleClass}">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-[#0b57d0]"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">Claim</span>
+                </div>`;
+                desktopAction = cb;
+                mobileAction = mobCb;
+            } else {
+                desktopAction = `
+                <div id="post-view-save-btn" onclick="toggleSave('${p.id}')" class="${capsuleClass}">
+                    <i data-lucide="bookmark" class="w-5 h-5 ${isSaved ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'} transition-transform group-hover:scale-110"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">Save</span>
+                </div>`;
+                mobileAction = `
+                <div onclick="toggleSave('${p.id}')" id="mobile-overlay-save-btn-${p.id}" class="${mobileCapsuleClass}">
+                    <i data-lucide="bookmark" class="w-5 h-5 ${isSaved ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'} transition-transform group-hover:scale-110"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">Save</span>
+                </div>`;
+            }
+
+            // Actions Bar HTML
+            const actionsHtml = `
+            <div class="flex items-center justify-between mt-4 md:justify-start md:gap-3 px-4 md:px-0">
+                <div onclick="toggleLike('${p.id}')" class="${mobileCapsuleClass}">
+                    <i id="overlay-like-icon-${p.id}" data-lucide="heart" class="w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'} transition-transform group-hover:scale-110"></i>
+                    <span id="overlay-like-count-${p.id}" class="font-bold text-gray-700 text-sm hidden md:block">${p.likes.length || 'Like'}</span>
+                </div>
+                <div onclick="document.getElementById('mobile-post-comment-input').focus()" class="${mobileCapsuleClass}">
+                    <i data-lucide="message-circle" class="${iconClass}"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">${p.comments.length || 'Comment'}</span>
+                </div>
+                <div onclick="openShareMenu('${p.id}')" class="${mobileCapsuleClass}">
+                    <i data-lucide="share-2" class="${iconClass}"></i>
+                    <span class="font-bold text-gray-700 text-sm hidden md:block">Share</span>
+                </div>
+                ${mobileAction}
+            </div>`;
+
+            const desktopActionsHtml = `
+            <div class="flex items-center gap-3 border-t border-gray-100 pt-3 select-none">
+                 <div onclick="toggleLike('${p.id}')" class="${capsuleClass}">
+                    <i id="overlay-like-icon-d-${p.id}" data-lucide="heart" class="w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'} transition-transform group-hover:scale-110"></i>
+                    <span id="overlay-like-count-d-${p.id}" class="font-bold text-gray-700 text-sm">${p.likes.length || 'Like'}</span>
+                </div>
+                <div onclick="document.getElementById('post-view-comment-input').focus()" class="${capsuleClass}">
+                    <i data-lucide="message-circle" class="${iconClass}"></i>
+                    <span class="font-bold text-gray-700 text-sm">${p.comments.length || 'Comment'}</span>
+                </div>
+                <div onclick="openShareMenu('${p.id}')" class="${capsuleClass}">
+                    <i data-lucide="share-2" class="${iconClass}"></i>
+                    <span class="font-bold text-gray-700 text-sm">Share</span>
+                </div>
+                ${desktopAction}
+            </div>`;
+
+
+            const desktopHTML = `
+            <div class="desktop-split-view hidden md:flex">
+                <div class="desktop-post-container">
+                    <div class="h-16 px-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="closePostView();showProfile('${a.id}')">
+                            <img src="${a.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover">
+                            <div>
+                                <div class="font-bold text-gray-900 text-sm flex items-center">${a.name}${badge}</div>
+                                <div class="text-xs text-gray-500">@${a.username || 'user'}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                             <button onclick="showPostOptions(event, '${p.id}', '${p.authorId}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                                <i data-lucide="more-horizontal" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                            <button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                                <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white">
+                        ${cHtml}
+                        ${mediaHtml}
+                        <div class="text-xs text-gray-500 mb-4">${t}</div>
+                        ${desktopActionsHtml}
+                    </div>
+                    
+                    <div class="p-4 bg-gray-50 border-t border-gray-100">
+                        <div class="flex gap-3">
+                            <img src="${currentUser.avatar}" class="w-8 h-8 rounded-full border border-gray-200 object-cover bg-white">
+                            <div class="flex-1 relative">
+                                <input type="text" id="post-view-comment-input" placeholder="Add a comment..." 
+                                    class="w-full bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                                    onkeydown="if(event.key==='Enter'){handleCommentSubmit('${p.id}', this.value); this.value=''}">
+                                <button onclick="const i=document.getElementById('post-view-comment-input');handleCommentSubmit('${p.id}', i.value);i.value=''" 
+                                    class="absolute right-2 top-1.5 text-blue-600 font-bold text-xs p-1 hover:bg-blue-50 rounded-md transition-colors">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="desktop-comments-container flex-1 bg-gray-50 border-l border-gray-100 overflow-hidden flex flex-col">
+                    <div id="post-view-comments-header" class="h-16 flex items-center justify-between px-4 border-b border-gray-100 bg-white z-10">
+                         <div id="comment-header-default" class="flex items-center justify-between w-full">
+                            <span class="font-bold text-lg text-gray-900">Comments (${p.comments.length})</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleCommentSearch()" class="icon-btn hover:bg-gray-100"><i data-lucide="search" class="w-5 h-5 text-gray-600"></i></button>
+                                <button onclick="openCommentFilter()" class="icon-btn hover:bg-gray-100"><i data-lucide="list-filter" class="w-5 h-5 text-gray-600"></i></button>
+                            </div>
+                        </div>
+                        <div id="comment-header-search" class="hidden w-full flex items-center gap-2">
+                            <div class="relative flex-1">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                                <input type="text" id="comment-search-input-desktop" oninput="handleCommentSearch(this.value)" class="w-full bg-gray-100 rounded-full py-2 pl-9 pr-4 text-sm outline-none" placeholder="Search comments...">
+                            </div>
+                            <button onclick="toggleCommentSearch()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button>
+                        </div>
+                    </div>
+                    <div id="desktop-comments-list" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+                </div>
+            </div>`;
+
+            const mobileHTML = `
+            <div class="mobile-overlay-layout md:hidden">
+                <div class="mobile-fixed-header">
+                    <span class="font-bold text-lg text-gray-900">Post</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="showPostOptions(event, '${p.id}', '${p.authorId}')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i data-lucide="more-horizontal" class="w-5 h-5 text-gray-600"></i>
+                        </button>
+                        <button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mobile-scroll-content">
+                    <div class="p-4 pb-2">
+                        <div class="flex items-center gap-3 mb-3" onclick="closePostView();showProfile('${a.id}')">
+                            <img src="${a.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover">
+                            <div class="flex-1">
+                                <div class="font-bold text-gray-900 text-sm flex items-center gap-1">${a.name}${badge}</div>
+                                <div class="text-xs text-gray-500">@${a.username || 'user'} • ${t}</div>
+                            </div>
+                            <button onclick="event.stopPropagation(); toggleFollow('${p.authorId}', this)" 
+                                class="bg-gray-900 text-white px-3 py-1.5 rounded-full text-xs font-bold ${currentUser.id === p.authorId || isFollowing ? 'hidden' : ''}">Follow</button>
+                        </div>
+                        ${cHtml}
+                    </div>
+                    
+                    ${mediaHtml}
+                    
+                    <!-- Mobile Actions (Capsules) -->
+                    <div class="px-4 pb-4">
+                        ${actionsHtml}
+                    </div>
+                    
+                    <div class="bg-gray-50 min-h-[500px] rounded-t-[20px] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pt-2 border-t border-gray-100">
+                         <div id="mobile-comment-header-default" class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                             <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-900 text-sm">Comments (${p.comments.length})</span>
+                             </div>
+                             <div class="flex items-center gap-2">
+                                <button onclick="toggleCommentSearch()" class="icon-btn w-8 h-8 bg-gray-100 hover:bg-gray-200"><i data-lucide="search" class="w-4 h-4 text-gray-600"></i></button>
+                                <button onclick="openCommentFilter()" class="text-xs text-gray-500 font-bold flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg"><i data-lucide="list-filter" class="w-3 h-3"></i> Sort</button>
+                             </div>
+                        </div>
+                        <div id="mobile-comment-header-search" class="hidden px-4 py-2 border-b border-gray-100 flex items-center gap-2">
+                             <div class="relative flex-1">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                                <input type="text" id="comment-search-input-mobile" oninput="handleCommentSearch(this.value)" class="w-full bg-gray-100 rounded-full py-2 pl-9 pr-4 text-sm outline-none" placeholder="Search...">
+                            </div>
+                            <button onclick="toggleCommentSearch()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button>
+                        </div>
+
+                        <div id="mobile-comments-list" class="p-0 pb-24"></div>
+                    </div>
+                </div>
+                
+                <div class="mobile-comment-input">
+                    <img src="${currentUser.avatar}" class="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 object-cover shrink-0">
+                    <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 border border-transparent focus-within:bg-white focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+                        <input type="text" id="mobile-post-comment-input" placeholder="Add a comment..." 
+                            class="flex-1 bg-transparent border-none outline-none text-sm placeholder-gray-500 text-gray-900"
+                            onkeydown="if(event.key==='Enter'){handleCommentSubmit('${p.id}', this.value); this.value=''}">
+                        <button onclick="const i=document.getElementById('mobile-post-comment-input');handleCommentSubmit('${p.id}', i.value);i.value=''" 
+                            class="ml-2 text-blue-600 font-bold text-xs">Post</button>
+                    </div>
+                </div>
+            </div>`;
+
+            document.getElementById('post-view-container').innerHTML = desktopHTML + mobileHTML;
+            renderCommentsInModal(pid);
+            refreshIcons();
+        };
+
+        window._openPostViewOld = pid => {
             const p = posts.find(x => x.id === pid); if (!p) return; const a = users.find(u => u.id === p.authorId) || { name: 'Unknown', avatar: '' }, isMe = p.authorId === currentUser.id, isFollowing = currentUser.following.includes(p.authorId); if (!isMe && a.settings?.privateNetwork && !isFollowing) { showToast("This account is private"); return } manageHistory('post-view-overlay'); const o = document.getElementById('post-view-overlay'), c = document.getElementById('post-view-container'); window.currentViewingPostId = pid; window.isDesktopThreadMode = false; window.currentCommentFilter = 'latest'; window.commentSearchTerm = ''; window.isCommentSearchOpen = false; o.classList.remove('hidden'); o.classList.add('flex'); let mhDesktop = '', mhMobile = ''; if (p.media) { const ma = Array.isArray(p.media) ? p.media : [p.media]; if (ma.length === 1) { const s = ma[0], iv = s.includes('video') || s.endsWith('.mp4') || s.startsWith('data:video'); const mhtml = iv ? `<video src="${s}" class="stage-content rounded-lg mt-3" controls playsinline></video>` : `<div class="img-placeholder rounded-lg mt-3 overflow-hidden"><img src="${s}" class="stage-content w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div>`; mhDesktop = mhtml; mhMobile = mhtml } else { mhDesktop = createCarouselHTML(ma, 'overlay-carousel-desktop', p.id); mhMobile = createCarouselHTML(ma, 'overlay-carousel-mobile', p.id) } } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id), postBodyHtml = window.renderTextWithReadMore(p.content, `post-${p.id}`), allowComments = p.settings?.allowComments !== false, commentInputDesktop = allowComments ? `<div class="flex items-center gap-2"><img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0"><input type="text" id="comment-input-desktop" placeholder="Add a comment..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitCommentDesktop();}"><button onclick="submitCommentDesktop()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button></div>` : `<div class="bg-gray-50 text-gray-500 text-sm p-4 text-center italic border-t border-gray-100">Creator turned off commenting.</div>`, commentInputMobile = allowComments ? `<div class="flex items-center gap-2"><img src="${currentUser.avatar}" class="w-8 h-8 rounded-full bg-gray-200 object-cover shrink-0"><input type="text" id="mobile-comment-input" placeholder="Add a comment..." class="flex-1 bg-[#f2f2f2] rounded-[24px] px-4 py-2.5 text-sm outline-none text-gray-900 placeholder-gray-500"><button onclick="submitCommentMobile()" class="w-10 h-10 bg-[#065fd4] rounded-full flex items-center justify-center text-white shrink-0 hover:bg-blue-700 transition-colors shadow-sm"><i data-lucide="arrow-up" class="w-5 h-5"></i></button></div>` : `<div class="bg-gray-50 text-gray-500 text-sm p-3 text-center italic rounded-xl mt-2">Creator turned off commenting.</div>`; const badge = a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''; const filterBtn = `<button onclick="openCommentFilter()" class="icon-btn hover:bg-gray-100"><i data-lucide="list-filter" class="w-5 h-5 text-gray-600"></i></button>`; const filterLabel = window.currentCommentFilter.charAt(0).toUpperCase() + window.currentCommentFilter.slice(1); const headerHtml = `<div class="px-4 py-3 bg-white sticky top-0 z-10 border-t border-b border-gray-300 transition-all"><div id="mobile-comment-header-default" class="flex items-center justify-between"><h3 class="font-bold text-gray-900 text-[15px]">Comments</h3><div class="flex items-center gap-2"><button onclick="toggleCommentSearch()" class="icon-btn w-8 h-8 bg-gray-50 hover:bg-gray-100"><i data-lucide="search" class="w-4 h-4 text-gray-600"></i></button><button onclick="openCommentFilter()" class="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors"><span id="current-filter-label">${filterLabel}</span> <i data-lucide="list-filter" class="w-4 h-4"></i></button></div></div><div id="mobile-comment-header-search" class="hidden flex items-center gap-2 w-full"><div class="relative flex-1"><i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i><input type="text" id="comment-search-input-mobile" oninput="handleCommentSearch(this.value)" class="w-full bg-gray-100 rounded-full py-2 pl-9 pr-4 text-sm outline-none" placeholder="Search..."></div><button onclick="toggleCommentSearch()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div></div>`;
             let desktopAction = '', mobileAction = ''; if (p.claimLink) { const cb = `<i onclick="window.open('${p.claimLink}', '_blank')" data-lucide="shopping-bag" class="w-7 h-7 cursor-pointer text-[#0b57d0] transition-transform hover:scale-110"></i>`; desktopAction = cb; mobileAction = cb } else { desktopAction = `<i id="post-view-save-btn" onclick="toggleSave('${p.id}')" data-lucide="bookmark" class="w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${isSaved ? 'fill-yellow-500 text-yellow-500' : 'text-gray-700'}"></i>`; mobileAction = `<i onclick="toggleSave('${p.id}')" id="mobile-overlay-save-btn-${p.id}" data-lucide="bookmark" class="w-7 h-7 cursor-pointer ${isSaved ? 'fill-yellow-500 text-yellow-500' : 'text-gray-700'}"></i>` }
             const desktopHTML = `<div class="desktop-split-view hidden md:flex"><div class="desktop-post-container"><div class="h-16 px-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10"><div class="flex items-center gap-3 cursor-pointer" onclick="closePostView();showProfile('${a.id}')"><img src="${a.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover"><div><div class="font-bold text-gray-900 text-sm flex items-center">${a.name}${badge}</div><div class="text-xs text-gray-500">@${a.username || 'user'}</div></div></div><div class="flex items-center gap-2"><button onclick="showPostOptions(event, '${p.id}', '${p.authorId}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i data-lucide="more-horizontal" class="w-5 h-5 text-gray-600"></i></button><button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div></div><div class="flex-1 overflow-y-auto p-4"><div class="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap mb-4 js-post-body-${p.id}">${postBodyHtml}</div>${mhDesktop}</div><div class="h-auto p-4 border-t border-gray-100 bg-white z-10"><div class="flex items-center justify-between mb-2"><div class="flex gap-4"><i id="post-view-like-btn" onclick="toggleLike('${p.id}')" data-lucide="heart" class="w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-700'}"></i><i onclick="${allowComments ? 'document.getElementById(\'comment-input-desktop\').focus()' : ''}" data-lucide="message-circle" class="w-7 h-7 cursor-pointer ${allowComments ? 'text-gray-700' : 'text-gray-300 cursor-not-allowed'} transition-transform hover:scale-110"></i><i onclick="sharePost('${p.id}')" data-lucide="redo-2" class="w-7 h-7 cursor-pointer text-gray-700 transition-transform hover:scale-110"></i></div>${desktopAction}</div><div class="font-bold text-sm text-gray-900 cursor-pointer hover:underline" onclick="openLikes('${p.id}')" id="post-view-likes-count">${(p.likes?.length > 0) ? p.likes.length + ' likes' : '0 likes'}</div><div class="text-xs text-gray-500 mt-1">${formatDate(p.timestamp)}</div></div></div><div class="desktop-comments-container"><div id="post-view-comments-header" class="h-16 flex items-center justify-between px-4 border-b border-gray-100 bg-white z-10"><div id="comment-header-default" class="flex items-center justify-between w-full"><span class="font-bold text-lg text-gray-900">Comments</span><div class="flex items-center gap-2"><button onclick="toggleCommentSearch()" class="icon-btn hover:bg-gray-100"><i data-lucide="search" class="w-5 h-5 text-gray-600"></i></button>${filterBtn}</div></div><div id="comment-header-search" class="hidden w-full flex items-center gap-2"><div class="relative flex-1"><i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i><input type="text" id="comment-search-input-desktop" oninput="handleCommentSearch(this.value)" class="w-full bg-gray-100 rounded-full py-2 pl-9 pr-4 text-sm outline-none" placeholder="Search comments..."></div><button onclick="toggleCommentSearch()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div></div><div id="post-view-comments" class="flex-1 overflow-y-auto p-0"></div><div class="p-4 border-t border-gray-100">${commentInputDesktop}</div></div></div>`; const mobileHTML = `<div class="mobile-overlay-layout md:hidden"><div class="mobile-fixed-header"><span class="font-bold text-lg text-gray-900">Post</span><div class="flex items-center gap-2"><button onclick="showPostOptions(event, '${p.id}', '${p.authorId}')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i data-lucide="more-horizontal" class="w-5 h-5 text-gray-600"></i></button><button onclick="closePostView()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i data-lucide="x" class="w-5 h-5 text-gray-600"></i></button></div></div><div class="mobile-scroll-content"><div class="flex items-center gap-3 p-4 pb-2"><img src="${a.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover cursor-pointer" onclick="event.stopPropagation();openProfilePreview('${a.id}')"><div onclick="closePostView();showProfile('${a.id}')"><div class="font-bold text-gray-900 text-sm flex items-center">${a.name}${badge}</div><div class="text-xs text-gray-500">@${a.username || 'user'}</div></div></div><div class="px-4 py-2 text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap js-post-body-${p.id}">${postBodyHtml}</div><div class="px-4 pb-4">${mhMobile}</div><div class="px-4 py-2 font-bold text-sm text-gray-900 mb-2" id="mobile-overlay-like-count-${p.id}">${(p.likes?.length > 0) ? p.likes.length + ' likes' : '0 likes'}</div>${headerHtml}<div id="mobile-post-comments" class="flex-1 p-0 pb-4"></div></div><div class="mobile-fixed-footer"><div class="flex items-center justify-between mb-3"><div class="flex gap-6"><i onclick="toggleLike('${p.id}')" id="mobile-overlay-like-btn-${p.id}" data-lucide="heart" class="w-7 h-7 cursor-pointer ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-700'}"></i><i onclick="${allowComments ? 'document.getElementById(\'mobile-comment-input\').focus()' : ''}" data-lucide="message-circle" class="w-7 h-7 cursor-pointer ${allowComments ? 'text-gray-700' : 'text-gray-300 cursor-not-allowed'}"></i><i onclick="sharePost('${p.id}')" data-lucide="redo-2" class="w-7 h-7 cursor-pointer text-gray-700"></i></div>${mobileAction}</div>${commentInputMobile}</div></div>`; c.innerHTML = desktopHTML + mobileHTML; renderCommentsInModal(pid); refreshIcons()
@@ -2446,6 +2720,25 @@
         window.publishPost = async () => { const tr = document.getElementById('compose-text').value.trim(), hasImages = window.composeImages.some(x => x !== null); if (!tr.trim() && !hasImages) return showToast("Empty!", !0); if (tr.trim().split(/\s+/).length > 500) return showToast("Post too long (max 500 words)", !0); const po = document.getElementById('compose-progress-overlay'), pb = document.getElementById('post-progress-bar'); po.classList.remove('hidden'); po.classList.add('flex'); let pr = 0; const int = setInterval(() => { if (pr < 90) { pr += Math.random() * 15; pb.style.width = `${Math.min(pr, 90)}%` } }, 300); const priv = document.getElementById('post-setting-privacy').checked, sl = document.getElementById('post-setting-likes').checked, sc = document.getElementById('post-setting-comments').checked, alv = document.getElementById('post-setting-like-view').checked, ac = document.getElementById('post-setting-allow-comments').checked; try { let mu = []; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], blob = window.composeImageBlobs[i]; if (url) { if (blob) { try { mu.push(await uploadToImgHippo(blob)) } catch (e) { const mr = ref(storage, `posts/${currentUser.id}/${Date.now()}_${i}_${blob.name}`); await uploadBytes(mr, blob); mu.push(await getDownloadURL(mr)) } } else mu.push(url) } } const mp = mu.length === 1 ? mu[0] : (mu.length > 0 ? mu : null), mm = tr.match(/@(\w+)/g), mids = []; if (mm) { mm.forEach(m => { const uname = m.substring(1).toLowerCase(), found = users.find(u => (u.username || "").toLowerCase() === uname); if (found) mids.push(found.id) }) } const pd = { authorId: currentUser.id, content: tr, media: mp, timestamp: serverTimestamp(), likes: [], comments: [], collaborators: window.selectedCollaborators || [], mentions: mids, claimLink: window.currentClaimLink || null, settings: { privacy: priv ? 'private' : 'public', showLikes: sl, showComments: sc, allowLikeView: alv, allowComments: ac } }; let pid = null; if (window.editingPostId) { await updateDoc(doc(db, "posts", window.editingPostId), { content: tr, media: mp, settings: pd.settings, claimLink: window.currentClaimLink || null }); pid = window.editingPostId; showToast("Updated!") } else { const r = await addDoc(collection(db, "posts"), pd); pid = r.id; showToast("Posted!"); if (window.selectedCollaborators?.length) window.selectedCollaborators.forEach(c => sendNotification(c.id, 'collab_request', 'invited to collaborate', pid)) } if (mids.length > 0) mids.forEach(uid => { if (uid !== currentUser.id) sendNotification(uid, 'mention', 'mentioned you in a post', pid) }); clearInterval(int); pb.style.width = '100%'; await new Promise(r => setTimeout(r, 500)); po.classList.add('hidden'); po.classList.remove('flex'); pb.style.width = '0%'; closeCompose() } catch (e) { console.error(e); clearInterval(int); po.classList.add('hidden'); po.classList.remove('flex'); showToast("Error", !0) } };
         window.showToast = (m, e = false) => { const t = document.getElementById('toast'), tm = document.getElementById('toast-msg'), i = document.getElementById('toast-icon'); tm.innerText = m; if (e) { t.style.backgroundColor = '#d93025'; i.setAttribute('data-lucide', 'alert-circle'); i.classList.remove('text-[#c4eed0]'); i.classList.add('text-white') } else { t.style.backgroundColor = '#303134'; i.setAttribute('data-lucide', 'check-circle-2'); i.classList.add('text-[#c4eed0]'); i.classList.remove('text-white') } refreshIcons(); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000) };
         window.openLightbox = (s, t = 'image') => { const w = document.getElementById('lightbox-wrapper'), l = document.getElementById('lightbox'); if (t === 'video' || s.includes('.mp4') || s.includes('data:video')) w.innerHTML = `<video src="${s}" controls autoplay class="max-w-full max-h-[90vh] rounded-lg shadow-2xl"></video>`; else w.innerHTML = `<img src="${s}" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain">`; l.classList.add('active'); l.classList.remove('pointer-events-none', 'opacity-0') }; window.closeLightbox = () => { const l = document.getElementById('lightbox'); l.classList.remove('active'); l.classList.add('pointer-events-none', 'opacity-0'); const v = l.querySelector('video'); if (v) v.pause() };
+        window.openMobileImageViewer = (url, authorId) => {
+            const u = users.find(x => x.id === authorId) || { name: 'Unknown', avatar: '' };
+            document.getElementById('miv-avatar').src = u.avatar;
+            document.getElementById('miv-name').innerText = u.name;
+            document.getElementById('miv-image').src = url;
+            const o = document.getElementById('mobile-image-viewer-overlay');
+            o.classList.remove('hidden');
+            // Force reflow
+            void o.offsetWidth;
+            o.classList.remove('opacity-0');
+        };
+        window.closeMobileImageViewer = () => {
+            const o = document.getElementById('mobile-image-viewer-overlay');
+            o.classList.add('opacity-0');
+            setTimeout(() => {
+                o.classList.add('hidden');
+                document.getElementById('miv-image').src = '';
+            }, 300);
+        };
         window.openQR = uid => { manageHistory('qr-overlay'); const id = uid || currentUser.id, u = users.find(x => x.id === id) || currentUser, url = `${window.location.origin}${window.location.pathname}?uid=${id}`, qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`; document.getElementById('qr-image').src = qrUrl; const disp = u.username ? `@${u.username}` : u.name; document.getElementById('qr-display-name').innerText = disp; document.getElementById('qr-owner-avatar').src = u.avatar; document.getElementById('qr-hidden-url').value = url; const o = document.getElementById('qr-overlay'), m = document.getElementById('qr-modal'); m.style.transform = ''; m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); o.classList.remove('hidden'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) };
         window.copyQRLink = () => { const u = document.getElementById('qr-hidden-url').value; if (u) navigator.clipboard.writeText(u).then(() => showToast("Link copied!")) }; window.closeQR = () => { const o = document.getElementById('qr-overlay'), m = document.getElementById('qr-modal'); o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); setTimeout(() => o.classList.add('hidden'), 200) };
         window.openScanner = () => { const o = document.getElementById('scanner-overlay'); o.classList.remove('hidden'); o.classList.add('flex'); if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => { console.error(e); showToast("Camera error", !0); closeScanner() }) }; window.closeScanner = () => { if (html5QrCode) { html5QrCode.stop().then(() => { const o = document.getElementById('scanner-overlay'); o.classList.add('hidden'); o.classList.remove('flex') }).catch(console.error) } else { const o = document.getElementById('scanner-overlay'); o.classList.add('hidden'); o.classList.remove('flex') } };
