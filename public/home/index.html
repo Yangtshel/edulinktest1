@@ -2512,6 +2512,88 @@
         window.openUserList = (type, uid) => { manageHistory('user-list-overlay'); const u = users.find(x => x.id === uid); if (!u) return; const list = type === 'following' ? u.following : u.followers, title = type === 'following' ? 'Following' : 'Followers', c = document.getElementById('user-list-content'); document.getElementById('user-list-title').innerText = title; c.innerHTML = ''; if (!list || list.length === 0) c.innerHTML = '<div class="text-center text-gray-400 py-8">No users found.</div>'; else list.forEach(id => { const fu = users.find(x => x.id === id); if (fu) { const d = document.createElement('div'); d.className = "flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer"; d.onclick = () => { closeUserList(); showProfile(fu.id) }; const isF = currentUser.following.includes(fu.id), isMe = fu.id === currentUser.id; let btn = ''; if (!isMe) { const cls = isF ? "bg-gray-100 text-gray-900" : "bg-black text-white", txt = isF ? "Following" : "Follow"; btn = `<button id="ul-btn-${fu.id}" onclick="event.stopPropagation(); toggleFollow('${fu.id}')" class="text-xs font-bold px-3 py-1.5 rounded-full border border-gray-200 transition-colors ${cls}">${txt}</button>` } d.innerHTML = `<div class="flex items-center gap-3 overflow-hidden"><img src="${fu.avatar}" class="w-10 h-10 rounded-full border border-gray-100 object-cover shrink-0 bg-gray-50"><div class="min-w-0"><div class="font-bold text-sm text-gray-900 truncate">${fu.name} ${fu.isOfficial ? '<i data-lucide="badge-check" class="w-3 h-3 inline text-blue-500"></i>' : ''}</div><div class="text-xs text-gray-500 truncate">@${fu.username || 'user'}</div></div></div>${btn}`; c.appendChild(d) } }); refreshIcons(); const o = document.getElementById('user-list-overlay'), m = document.getElementById('user-list-modal'); m.style.transform = ''; m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); o.classList.remove('hidden'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) };
         window.closeUserList = () => { const o = document.getElementById('user-list-overlay'), m = document.getElementById('user-list-modal'); o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); setTimeout(() => o.classList.add('hidden'), 200) };
         if (typeof setupSwipeClose === 'function') { setupSwipeClose('share-modal', 'share-overlay', window.closeShareMenu); setupSwipeClose('edit-profile-modal', 'edit-profile-overlay', window.closeEditProfile); setupSwipeClose('likes-modal', 'likes-overlay', window.closeLikes); setupSwipeClose('post-options-modal', 'post-options-overlay', window.hidePostMenu); setupSwipeClose('notif-options-modal', 'notif-options-overlay', window.closeNotifOptions); setupSwipeClose('qr-modal', 'qr-overlay', window.closeQR); setupSwipeClose('user-list-modal', 'user-list-overlay', window.closeUserList); setupSwipeClose('feed-filter-modal', 'feed-filter-overlay', window.closeFeedFilter); setupSwipeClose('download-select-modal', 'download-select-overlay', window.closeDownloadSelect) }
+        let mentionHighlightIndex = -1;
+        window.handleMentionInput = (inputId, suggestionsId) => {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+            if (!input || !suggestions) return;
+            const value = input.value;
+            const cursorPos = input.selectionStart;
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const atMatch = textBeforeCursor.match(/@(\w*)$/);
+            if (atMatch) {
+                const query = atMatch[1].toLowerCase();
+                const filteredUsers = users.filter(u => {
+                    const username = (u.username || '').toLowerCase();
+                    const name = u.name.toLowerCase();
+                    return username.includes(query) || name.toLowerCase().includes(query);
+                }).slice(0, 8);
+                if (filteredUsers.length > 0) {
+                    suggestions.innerHTML = filteredUsers.map((u, idx) => `
+                        <div class="mention-item ${idx === 0 ? 'highlighted' : ''}" data-username="${u.username || 'user'}" onclick="selectMention('${inputId}', '${suggestionsId}', '${u.username || 'user'}')">
+                            <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-200">
+                            <div class="flex-1 min-w-0">
+                                <div class="font-bold text-sm text-gray-900 truncate">${u.name} ${u.isOfficial ? '<i data-lucide="badge-check" class="w-3 h-3 inline official-badge"></i>' : ''}</div>
+                                <div class="text-xs text-gray-500 truncate">@${u.username || 'user'}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    suggestions.classList.remove('hidden');
+                    mentionHighlightIndex = 0;
+                    refreshIcons();
+                } else {
+                    suggestions.classList.add('hidden');
+                }
+            } else {
+                suggestions.classList.add('hidden');
+                mentionHighlightIndex = -1;
+            }
+        };
+        window.handleMentionKeydown = (event, inputId, suggestionsId) => {
+            const suggestions = document.getElementById(suggestionsId);
+            if (!suggestions || suggestions.classList.contains('hidden')) return;
+            const items = suggestions.querySelectorAll('.mention-item');
+            if (items.length === 0) return;
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                mentionHighlightIndex = (mentionHighlightIndex + 1) % items.length;
+                items.forEach((item, idx) => {
+                    item.classList.toggle('highlighted', idx === mentionHighlightIndex);
+                });
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                mentionHighlightIndex = mentionHighlightIndex <= 0 ? items.length - 1 : mentionHighlightIndex - 1;
+                items.forEach((item, idx) => {
+                    item.classList.toggle('highlighted', idx === mentionHighlightIndex);
+                });
+            } else if (event.key === 'Enter' && mentionHighlightIndex >= 0 && mentionHighlightIndex < items.length) {
+                event.preventDefault();
+                const username = items[mentionHighlightIndex].getAttribute('data-username');
+                selectMention(inputId, suggestionsId, username);
+            } else if (event.key === 'Escape') {
+                suggestions.classList.add('hidden');
+                mentionHighlightIndex = -1;
+            }
+        };
+        window.selectMention = (inputId, suggestionsId, username) => {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+            if (!input) return;
+            const value = input.value;
+            const cursorPos = input.selectionStart;
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const textAfterCursor = value.substring(cursorPos);
+            const atMatch = textBeforeCursor.match(/@(\w*)$/);
+            if (atMatch) {
+                const beforeAt = textBeforeCursor.substring(0, textBeforeCursor.length - atMatch[0].length);
+                input.value = beforeAt + '@' + username + ' ' + textAfterCursor;
+                const newCursorPos = beforeAt.length + username.length + 2;
+                input.setSelectionRange(newCursorPos, newCursorPos);
+                input.focus();
+            }
+            suggestions.classList.add('hidden');
+            mentionHighlightIndex = -1;
+        };
         const up = new URLSearchParams(window.location.search), dl = up.get('uid'); if (dl) window.pendingProfileUid = dl; refreshIcons();
     </script>
 </body>
