@@ -41,8 +41,9 @@ body.chat-active .chat-window { transform: translateX(0); }
 .msg-container.other { justify-content: flex-start; }
 
 /* System Message (Call Logs) */
-.msg-system { width: 100%; display: flex; justify-content: center; margin: 12px 0; }
-.msg-system-pill { display: flex; items-align: center; gap: 6px; font-size: 12px; color: #8e8e8e; font-weight: 500; background: #fafafa; padding: 6px 14px; border-radius: 999px; border: 1px solid #efefef; }
+.msg-system { width: 100%; display: flex; justify-content: center; margin: 16px 0; }
+.msg-system-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #8e8e8e; font-weight: 500; background: #fafafa; padding: 8px 16px; border-radius: 999px; border: 1px solid #efefef; max-width: 80%; }
+.msg-system-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
 
 /* Highlight Animation for Scroll */
 @keyframes highlightMsg { 0% { background-color: rgba(0, 149, 246, 0.1); } 100% { background-color: transparent; } }
@@ -149,11 +150,39 @@ body.chat-active .chat-window { transform: translateX(0); }
 .like-animation { animation: popLike 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes popLike { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
-/* Video Call Styles */
-#video-call-overlay { background: #1c1c1c; }
+/* Video Call Container Styles */
+#video-call-overlay { 
+    background: rgba(0,0,0,0.85); 
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-call-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #1c1c1c;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Desktop: Make it look like a phone/app container */
+@media (min-width: 768px) {
+    .video-call-container {
+        max-width: 380px;
+        height: 750px;
+        max-height: 90vh;
+        border-radius: 32px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
 .video-control-btn {
     backdrop-filter: blur(20px);
-    background: rgba(30, 30, 30, 0.7);
+    background: rgba(40, 40, 40, 0.6);
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
     border: 1px solid rgba(255,255,255,0.1);
 }
@@ -165,7 +194,7 @@ body.chat-active .chat-window { transform: translateX(0); }
 .local-video-container {
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .pulse-ring { animation: pulse-ring 2s infinite; }
@@ -176,18 +205,35 @@ body.chat-active .chat-window { transform: translateX(0); }
 }
 
 /* Incoming Call Styles */
-#incoming-call-modal {
+#incoming-call-overlay {
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.incoming-call-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
+    overflow: hidden;
+}
+@media (min-width: 768px) {
+    .incoming-call-card {
+        max-width: 380px;
+        height: 600px;
+        max-height: 80vh;
+        border-radius: 32px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
 }
 .incoming-backdrop {
-    background: rgba(0,0,0,0.75);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
     backdrop-filter: blur(20px);
 }
-.call-btn-action {
-    transition: transform 0.1s;
-}
+.call-btn-action { transition: transform 0.1s; }
 .call-btn-action:active { transform: scale(0.95); }
 
 </style>
@@ -294,82 +340,86 @@ body.chat-active .chat-window { transform: translateX(0); }
 </div>
 
 <!-- VIDEO CALL OVERLAY -->
-<div id="video-call-overlay" class="fixed inset-0 z-[100] hidden flex-col justify-between overflow-hidden bg-zinc-900">
-    <!-- Remote Video (Full Screen) -->
-    <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0 bg-zinc-900"></video>
-    
-    <!-- Top Bar -->
-    <div class="relative z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent pt-12">
-        <button onclick="togglePiP()" class="text-white opacity-80 hover:opacity-100">
-            <i data-lucide="minimize-2" class="w-7 h-7"></i>
-        </button>
-        <div class="flex flex-col items-center">
-            <div class="flex items-center gap-2">
-                <span id="vc-remote-name" class="text-white font-bold text-lg drop-shadow-md">User</span>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-white/50"></i>
+<div id="video-call-overlay" class="fixed inset-0 z-[100] hidden">
+    <div class="video-call-container">
+        <!-- Remote Video (Full Screen in Container) -->
+        <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0 bg-zinc-900"></video>
+        
+        <!-- Top Bar -->
+        <div class="relative z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent pt-12">
+            <button onclick="togglePiP()" class="text-white opacity-80 hover:opacity-100">
+                <i data-lucide="minimize-2" class="w-7 h-7"></i>
+            </button>
+            <div class="flex flex-col items-center">
+                <div class="flex items-center gap-2">
+                    <span id="vc-remote-name" class="text-white font-bold text-lg drop-shadow-md">User</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-white/50"></i>
+                </div>
+                <span id="vc-timer" class="text-white/70 text-sm font-medium drop-shadow-md mt-0.5">00:00</span>
             </div>
-            <span id="vc-timer" class="text-white/70 text-sm font-medium drop-shadow-md mt-0.5">00:00</span>
+            <div class="w-7"></div> <!-- Spacer -->
         </div>
-        <div class="w-7"></div> <!-- Spacer -->
-    </div>
 
-    <!-- Center Status (Connecting...) -->
-    <div id="vc-status-msg" class="absolute inset-0 flex flex-col items-center justify-center z-0 pointer-events-none">
-        <div class="relative">
-             <div class="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
-             <img id="vc-avatar-large" src="" class="w-28 h-28 rounded-full border border-white/10 mb-6 object-cover relative z-10 shadow-2xl">
+        <!-- Center Status (Connecting...) -->
+        <div id="vc-status-msg" class="absolute inset-0 flex flex-col items-center justify-center z-0 pointer-events-none">
+            <div class="relative">
+                <div class="absolute inset-0 bg-white/10 rounded-full animate-ping"></div>
+                <img id="vc-avatar-large" src="" class="w-28 h-28 rounded-full border border-white/10 mb-6 object-cover relative z-10 shadow-2xl">
+            </div>
+            <div class="text-white text-xl font-medium" id="vc-status-text">Contacting...</div>
         </div>
-        <div class="text-white text-xl font-medium" id="vc-status-text">Contacting...</div>
-    </div>
 
-    <!-- Local Video (PiP) -->
-    <div class="absolute top-24 right-4 w-28 h-40 md:w-36 md:h-52 bg-zinc-800 rounded-xl overflow-hidden z-20 local-video-container border border-white/10 shadow-2xl">
-        <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
-    </div>
+        <!-- Local Video (PiP) -->
+        <div class="absolute top-24 right-4 w-28 h-40 bg-zinc-800 rounded-xl overflow-hidden z-20 local-video-container border border-white/10 shadow-2xl">
+            <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+        </div>
 
-    <!-- Bottom Controls -->
-    <div class="relative z-10 px-8 pb-12 pt-8 flex justify-center items-center gap-6 bg-gradient-to-t from-black/80 to-transparent">
-        <button id="btn-toggle-cam" onclick="toggleCamera()" class="video-control-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
-            <i data-lucide="video" class="w-6 h-6"></i>
-        </button>
-        <button id="btn-toggle-mic" onclick="toggleMic()" class="video-control-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
-            <i data-lucide="mic" class="w-6 h-6"></i>
-        </button>
-        <button onclick="endVideoCall()" class="video-control-btn end-call w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
-            <i data-lucide="phone-off" class="w-7 h-7 fill-white"></i>
-        </button>
+        <!-- Bottom Controls -->
+        <div class="absolute bottom-0 w-full z-10 px-8 pb-12 pt-20 flex justify-center items-center gap-8 bg-gradient-to-t from-black/80 to-transparent">
+            <button id="btn-toggle-cam" onclick="toggleCamera()" class="video-control-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
+                <i data-lucide="video" class="w-6 h-6"></i>
+            </button>
+            <button id="btn-toggle-mic" onclick="toggleMic()" class="video-control-btn w-14 h-14 rounded-full flex items-center justify-center text-white">
+                <i data-lucide="mic" class="w-6 h-6"></i>
+            </button>
+            <button onclick="endVideoCall()" class="video-control-btn end-call w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+                <i data-lucide="phone-off" class="w-7 h-7 fill-white"></i>
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- INCOMING CALL MODAL -->
-<div id="incoming-call-modal" class="fixed inset-0 z-[110] hidden flex-col">
-    <!-- Blurry Backdrop -->
-    <div class="absolute inset-0 incoming-backdrop z-0"></div>
-    
-    <div class="relative z-10 flex flex-col h-full justify-between py-20 items-center">
-        <div class="flex flex-col items-center gap-4 mt-10">
-            <div class="relative">
-                <div class="absolute inset-0 bg-white/20 rounded-full pulse-ring"></div>
-                <img id="incoming-avatar" src="" class="w-32 h-32 rounded-full border-2 border-white/20 object-cover relative z-10 shadow-2xl">
+<div id="incoming-call-overlay" class="fixed inset-0 z-[110] hidden">
+    <div class="incoming-call-card" id="incoming-call-card">
+        <!-- Blurry Backdrop inside card -->
+        <div class="absolute inset-0 incoming-backdrop z-0"></div>
+        
+        <div class="relative z-10 flex flex-col h-full justify-between py-20 items-center">
+            <div class="flex flex-col items-center gap-4 mt-10">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-white/20 rounded-full pulse-ring"></div>
+                    <img id="incoming-avatar" src="" class="w-32 h-32 rounded-full border-2 border-white/20 object-cover relative z-10 shadow-2xl">
+                </div>
+                <div class="text-center mt-2">
+                    <h2 id="incoming-name" class="text-white text-2xl font-bold mb-1 tracking-wide">User</h2>
+                    <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Instagram Video Call</p>
+                </div>
             </div>
-            <div class="text-center mt-2">
-                <h2 id="incoming-name" class="text-white text-2xl font-bold mb-1 tracking-wide">User</h2>
-                <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Instagram Video Call</p>
-            </div>
-        </div>
 
-        <div class="flex w-full px-12 justify-between max-w-sm">
-            <div class="flex flex-col items-center gap-3">
-                <button onclick="rejectIncomingCall()" class="call-btn-action w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center shadow-xl text-white">
-                    <i data-lucide="phone-off" class="w-8 h-8 fill-current"></i>
-                </button>
-                <span class="text-white/90 text-xs font-semibold">Decline</span>
-            </div>
-            <div class="flex flex-col items-center gap-3">
-                <button onclick="acceptIncomingCall()" class="call-btn-action w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center shadow-xl text-white">
-                    <i data-lucide="video" class="w-8 h-8 fill-current"></i>
-                </button>
-                <span class="text-white/90 text-xs font-semibold">Answer</span>
+            <div class="flex w-full px-12 justify-between max-w-sm">
+                <div class="flex flex-col items-center gap-3">
+                    <button onclick="rejectIncomingCall()" class="call-btn-action w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center shadow-xl text-white">
+                        <i data-lucide="phone-off" class="w-8 h-8 fill-current"></i>
+                    </button>
+                    <span class="text-white/90 text-xs font-semibold">Decline</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <button onclick="acceptIncomingCall()" class="call-btn-action w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center shadow-xl text-white">
+                        <i data-lucide="video" class="w-8 h-8 fill-current"></i>
+                    </button>
+                    <span class="text-white/90 text-xs font-semibold">Answer</span>
+                </div>
             </div>
         </div>
     </div>
@@ -510,6 +560,7 @@ let unsubscribeCall = null;
 let incomingCallData = null; // Stores data for the modal
 let isMicMuted = false;
 let isCamOff = false;
+let callTimeout = null; // For 15s missed call logic
 
 // --- SOUNDS ---
 const ringtone = new Audio("https://upload.wikimedia.org/wikipedia/commons/e/e6/Phone_ringing_sound_effect.ogg");
@@ -591,6 +642,7 @@ function loadConversations() {
             // Customize preview if last message was a call log
             if (lastMsg.startsWith("Video chat ended")) lastMsg = "Video call ended";
             if (lastMsg.startsWith("Missed video call")) lastMsg = "Missed video call";
+            if (lastMsg === "Call declined") lastMsg = "Call declined";
             
             let statusHtml = '';
             if (isUnread) {
@@ -863,13 +915,21 @@ function loadMessages(chatId) {
 
 function generateMessageHTML(msg, isSelf, showAvatar, showTail, isEmojiOnly, effectivelyHasTail) {
     if (msg.type === 'call_log') {
-        const isMissed = msg.status === 'missed' || msg.status === 'declined';
-        const icon = isMissed ? 'phone-missed' : 'video';
-        const text = isMissed ? (msg.status === 'declined' ? 'Call declined' : 'Missed video call') : `Video chat ended • ${msg.duration || '00:00'}`;
+        const isMissed = msg.status === 'missed' || msg.status === 'declined' || msg.status === 'canceled';
+        const iconName = isMissed ? 'phone-missed' : 'video';
+        const colorClass = isMissed ? 'text-red-500' : 'text-gray-500';
+        
+        let text = msg.content;
+        if (msg.status === 'ended') {
+            text = `Video chat ended • ${msg.duration || '00:00'}`;
+        }
+        
         return `
             <div class="msg-system">
                 <div class="msg-system-pill">
-                    <i data-lucide="${icon}" class="w-4 h-4 ${isMissed ? 'text-red-500' : 'text-gray-500'}"></i>
+                    <div class="msg-system-icon ${colorClass}">
+                         <i data-lucide="${iconName}" class="w-4 h-4"></i>
+                    </div>
                     <span>${text}</span>
                 </div>
             </div>
@@ -989,7 +1049,7 @@ function listenForGlobalIncomingCalls() {
                 
                 // INCOMING CALL
                 if (data.callState && data.callState.status === 'ringing' && data.callState.calleeId === currentUser.id) {
-                    if (!document.getElementById('incoming-call-modal').classList.contains('hidden')) return; 
+                    if (!document.getElementById('incoming-call-overlay').classList.contains('hidden')) return; 
                     
                     const callerId = data.callState.callerId;
                     let callerName = "User";
@@ -1007,11 +1067,10 @@ function listenForGlobalIncomingCalls() {
                 }
                 
                 // CALL CANCELED BY CALLER (Missed Call)
-                if (incomingCallData && incomingCallData.chatId === change.doc.id && (!data.callState || data.callState.status === 'canceled')) {
+                if (incomingCallData && incomingCallData.chatId === change.doc.id && (!data.callState || data.callState.status === 'canceled' || data.callState.status === 'ended')) {
                     ringtone.pause();
                     ringtone.currentTime = 0;
-                    document.getElementById('incoming-call-modal').classList.add('hidden');
-                    document.getElementById('incoming-call-modal').classList.remove('flex');
+                    document.getElementById('incoming-call-overlay').classList.add('hidden');
                     incomingCallData = null;
                 }
 
@@ -1034,18 +1093,20 @@ window.startVideoCallInitiation = async () => {
     
     // 1. UI Setup
     document.getElementById('video-call-overlay').classList.remove('hidden');
-    document.getElementById('video-call-overlay').classList.add('flex');
     document.getElementById('vc-remote-name').innerText = currentChatUser.name;
     document.getElementById('vc-avatar-large').src = currentChatUser.avatar;
     document.getElementById('vc-status-text').innerText = "Calling...";
     document.getElementById('vc-status-msg').classList.remove('hidden');
     
-    // Play Ringback (simulated by same ringtone for now, usually different)
-    // ringtone.play().catch(e => {}); 
-
     activeCallChatId = currentChatId;
     const callId = doc(collection(db, `chats/${currentChatId}/calls`)).id; // Generate ID
     activeCallId = callId;
+
+    // Start 15s timeout for missed call
+    if (callTimeout) clearTimeout(callTimeout);
+    callTimeout = setTimeout(() => {
+        endVideoCall(false, 'timeout');
+    }, 15000);
 
     // 2. Init Local Stream
     try {
@@ -1054,6 +1115,7 @@ window.startVideoCallInitiation = async () => {
     } catch (e) {
         alert("Could not access camera/microphone.");
         document.getElementById('video-call-overlay').classList.add('hidden');
+        if(callTimeout) clearTimeout(callTimeout);
         return;
     }
 
@@ -1112,10 +1174,12 @@ window.startVideoCallInitiation = async () => {
     unsubscribeCall = onSnapshot(callDocRef, (snapshot) => {
         const data = snapshot.data();
         if (!peerConnection.currentRemoteDescription && data?.answer) {
+            // Answered! Clear timeout
+            if (callTimeout) clearTimeout(callTimeout);
+            
             const answerDescription = new RTCSessionDescription(data.answer);
             peerConnection.setRemoteDescription(answerDescription);
             document.getElementById('vc-status-text').innerText = "Connecting...";
-            // ringtone.pause();
         }
     });
 
@@ -1135,9 +1199,10 @@ function showIncomingCallModal(name, avatar, chatId, callId) {
     incomingCallData = { chatId, callId };
     document.getElementById('incoming-name').innerText = name;
     document.getElementById('incoming-avatar').src = avatar;
-    document.getElementById('incoming-call-modal').style.backgroundImage = `url(${avatar})`;
-    document.getElementById('incoming-call-modal').classList.remove('hidden');
-    document.getElementById('incoming-call-modal').classList.add('flex');
+    const card = document.getElementById('incoming-call-card');
+    card.style.backgroundImage = `url(${avatar})`;
+    
+    document.getElementById('incoming-call-overlay').classList.remove('hidden');
 }
 
 window.acceptIncomingCall = async () => {
@@ -1148,12 +1213,10 @@ window.acceptIncomingCall = async () => {
     activeCallChatId = chatId;
     activeCallId = callId;
     
-    document.getElementById('incoming-call-modal').classList.add('hidden');
-    document.getElementById('incoming-call-modal').classList.remove('flex');
+    document.getElementById('incoming-call-overlay').classList.add('hidden');
     
     // UI Setup
     document.getElementById('video-call-overlay').classList.remove('hidden');
-    document.getElementById('video-call-overlay').classList.add('flex');
     document.getElementById('vc-remote-name').innerText = document.getElementById('incoming-name').innerText;
     document.getElementById('vc-avatar-large').src = document.getElementById('incoming-avatar').src;
     document.getElementById('vc-status-text').innerText = "Connecting...";
@@ -1224,8 +1287,7 @@ window.rejectIncomingCall = async () => {
     ringtone.currentTime = 0;
     
     const { chatId, callId } = incomingCallData;
-    document.getElementById('incoming-call-modal').classList.add('hidden');
-    document.getElementById('incoming-call-modal').classList.remove('flex');
+    document.getElementById('incoming-call-overlay').classList.add('hidden');
     
     // Update DB
     try {
@@ -1252,6 +1314,7 @@ window.rejectIncomingCall = async () => {
 window.endVideoCall = async (isRemote = false, reason = null) => {
     ringtone.pause();
     ringtone.currentTime = 0;
+    if (callTimeout) clearTimeout(callTimeout);
 
     // Stop tracks
     if (localStream) {
@@ -1262,7 +1325,6 @@ window.endVideoCall = async (isRemote = false, reason = null) => {
     }
     
     document.getElementById('video-call-overlay').classList.add('hidden');
-    document.getElementById('video-call-overlay').classList.remove('flex');
     
     const duration = document.getElementById('vc-timer').innerText;
     stopCallTimer();
@@ -1270,37 +1332,62 @@ window.endVideoCall = async (isRemote = false, reason = null) => {
     if (!isRemote && activeCallChatId && activeCallId) {
         const isRinging = document.getElementById('vc-status-msg').classList.contains('hidden') === false;
         
-        // If I cancel while ringing, it's a "Missed call" for them
-        // If I end while connected, it's "Video chat ended"
+        // Determine Status based on reason or state
+        // If timeout: missed
+        // If ringing (manual cancel): canceled
+        // If connected: ended
         
-        let status = isRinging ? 'canceled' : 'ended';
-        let logMsg = isRinging ? "Missed video call" : `Video chat ended • ${duration}`;
-        let logStatus = isRinging ? 'missed' : 'ended';
+        let status = 'ended';
+        let logMsg = `Video chat ended • ${duration}`;
+        let logStatus = 'ended';
+
+        if (reason === 'timeout') {
+            status = 'missed';
+            logMsg = "Missed video call";
+            logStatus = 'missed';
+        } else if (isRinging) {
+            status = 'canceled';
+            logMsg = "Call canceled";
+            logStatus = 'canceled';
+        }
 
         try {
             await updateDoc(doc(db, `chats/${activeCallChatId}/calls`, activeCallId), { status: status });
             await updateDoc(doc(db, "chats", activeCallChatId), { callState: null });
             
-            // Write System Message
-             await addDoc(collection(db, `chats/${activeCallChatId}/messages`), {
-                 senderId: currentUser.id, 
-                 content: logMsg, 
-                 timestamp: serverTimestamp(), 
-                 type: 'call_log',
-                 status: logStatus,
-                 duration: isRinging ? null : duration
-             });
-             
-             await updateDoc(doc(db, "chats", activeCallChatId), { 
-                lastMessage: logMsg, 
-                lastMessageTimestamp: serverTimestamp()
-             });
+            // Write System Message if connected or missed (don't always spam cancel)
+            if (status !== 'canceled' || reason === 'timeout') {
+                 await addDoc(collection(db, `chats/${activeCallChatId}/messages`), {
+                     senderId: currentUser.id, 
+                     content: logMsg, 
+                     timestamp: serverTimestamp(), 
+                     type: 'call_log',
+                     status: logStatus,
+                     duration: (status === 'ended') ? duration : null
+                 });
+                 
+                 await updateDoc(doc(db, "chats", activeCallChatId), { 
+                    lastMessage: logMsg, 
+                    lastMessageTimestamp: serverTimestamp()
+                 });
+            } else {
+                 // For canceled, just update last message text but maybe no log inside chat to keep it clean, 
+                 // or just log it. Let's log it.
+                 /*
+                 await addDoc(collection(db, `chats/${activeCallChatId}/messages`), {
+                     senderId: currentUser.id, 
+                     content: logMsg, 
+                     timestamp: serverTimestamp(), 
+                     type: 'call_log',
+                     status: 'canceled'
+                 });
+                 */
+                 // User asked "make the miss call to be only after 15 seconds", implying immediate cancel shouldn't be missed.
+                 // So we don't log 'missed' here. We just close.
+            }
 
         } catch(e) {}
-    } else if (isRemote && reason === 'declined') {
-        // Just UI cleanup, log was written by decliner usually, or we can handle here. 
-        // Logic above handles decliner writing the log.
-    }
+    } 
 
     // Reset UI
     document.getElementById('remote-video').srcObject = null;
