@@ -403,9 +403,15 @@ body.chat-active .chat-window { transform: translateX(0); }
 
         <!-- Top Bar -->
         <div class="relative z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/70 to-transparent pt-8 vc-top-bar">
-            <button onclick="toggleMinimize()" class="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all">
-                <i data-lucide="minus" class="w-6 h-6"></i>
-            </button>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleMinimize()" class="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all">
+                    <i data-lucide="minus" class="w-6 h-6"></i>
+                </button>
+                <!-- Native PiP Button -->
+                <button onclick="toggleNativePiP()" id="btn-native-pip" class="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all">
+                    <i data-lucide="pip" class="w-6 h-6"></i>
+                </button>
+            </div>
             <div class="flex flex-col items-center">
                 <div class="flex items-center gap-2">
                     <span id="vc-remote-name" class="text-white font-bold text-lg drop-shadow-md tracking-wide">User</span>
@@ -413,7 +419,7 @@ body.chat-active .chat-window { transform: translateX(0); }
                 </div>
                 <span id="vc-timer" class="text-white/70 text-sm font-medium drop-shadow-md mt-0.5 bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">00:00</span>
             </div>
-            <div class="w-10"></div> <!-- Spacer -->
+            <div class="w-20"></div> <!-- Spacer -->
         </div>
 
         <!-- Center Status (Connecting...) -->
@@ -1197,6 +1203,22 @@ window.toggleMinimize = () => {
     }
 };
 
+// NEW FUNCTION: Native Picture-in-Picture
+window.toggleNativePiP = async () => {
+    const video = document.getElementById('remote-video');
+    try {
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+        } else if (document.pictureInPictureEnabled) {
+            await video.requestPictureInPicture();
+        } else {
+            alert("Picture-in-Picture is not supported by your browser.");
+        }
+    } catch (error) {
+        console.error("PiP failed:", error);
+    }
+};
+
 window.startVideoCallInitiation = async () => {
     if(!currentChatId || !currentChatUser) return;
     
@@ -1442,11 +1464,17 @@ function getReadableDuration(totalSeconds) {
 }
 
 window.endVideoCall = async (isRemote = false, reason = null) => {
+    // CAPTURE STATE BEFORE RESET
+    const durationReadable = getReadableDuration(callSeconds);
+    const chatId = activeCallChatId;
+    const callId = activeCallId;
+    const isRinging = document.getElementById('vc-status-msg').classList.contains('hidden') === false;
+
+    // UI & STATE RESET
     ringtone.pause();
     ringtone.currentTime = 0;
     if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
 
-    // Stop tracks
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
     }
@@ -1454,44 +1482,54 @@ window.endVideoCall = async (isRemote = false, reason = null) => {
         peerConnection.close();
     }
     
-    // Play Hangup sound
+    // Exit PiP if active
+    if (document.pictureInPictureElement) {
+        document.exitPictureInPicture().catch(()=>{});
+    }
+    
     hangupSound.play().catch(e => {});
 
     document.getElementById('video-call-overlay').classList.add('hidden');
     document.getElementById('video-call-overlay').classList.remove('flex');
-    document.getElementById('video-call-overlay').classList.remove('minimized'); // Reset minimize state
-    document.querySelector('.vc-container').style.transform = ''; // Reset drag pos
+    document.getElementById('video-call-overlay').classList.remove('minimized'); 
+    document.querySelector('.vc-container').style.transform = ''; 
     
-    const durationReadable = getReadableDuration(callSeconds);
     stopCallTimer();
     
-    // If I am ending it (not remote), I need to update DB
-    if (!isRemote && activeCallChatId && activeCallId) {
-        const isRinging = document.getElementById('vc-status-msg').classList.contains('hidden') === false;
-        
-        // Logic for log message
+    // Reset global vars
+    document.getElementById('remote-video').srcObject = null;
+    document.getElementById('local-video').srcObject = null;
+    document.getElementById('vc-status-msg').classList.remove('hidden'); 
+    peerConnection = null;
+    localStream = null;
+    activeCallId = null;
+    activeCallChatId = null;
+    if(unsubscribeCall) unsubscribeCall();
+
+    // LOGGING LOGIC
+    if (!isRemote && chatId && callId) {
         let status = 'ended';
         let logMsg = `Video chat ended • ${durationReadable}`;
         let logStatus = 'ended';
 
         if (reason === 'no_answer') {
-            // 15s timeout
             status = 'canceled';
             logMsg = "Missed video call";
             logStatus = 'missed';
         } else if (isRinging) {
-            // Canceled manually before answer
             status = 'canceled';
             logMsg = "Missed video call";
             logStatus = 'missed';
         }
 
         try {
-            await updateDoc(doc(db, `chats/${activeCallChatId}/calls`, activeCallId), { status: status });
-            await updateDoc(doc(db, "chats", activeCallChatId), { callState: null });
+            // Update Call Doc
+            await updateDoc(doc(db, `chats/${chatId}/calls`, callId), { status: status });
+            // Update Chat State (remove ringing flag)
+            await updateDoc(doc(db, "chats", chatId), { callState: null });
             
-            // Write System Message
-             await addDoc(collection(db, `chats/${activeCallChatId}/messages`), {
+            // Insert System Message
+             await addDoc(collection(db, `chats/${chatId}/messages`), {
                  senderId: currentUser.id, 
                  content: logMsg, 
                  timestamp: serverTimestamp(), 
@@ -1500,23 +1538,16 @@ window.endVideoCall = async (isRemote = false, reason = null) => {
                  duration: isRinging ? null : durationReadable
              });
              
-             await updateDoc(doc(db, "chats", activeCallChatId), { 
+             // Update Last Message Preview
+             await updateDoc(doc(db, "chats", chatId), { 
                 lastMessage: logMsg, 
                 lastMessageTimestamp: serverTimestamp()
              });
 
-        } catch(e) {}
+        } catch(e) {
+            console.error("Error logging call end:", e);
+        }
     } 
-
-    // Reset UI
-    document.getElementById('remote-video').srcObject = null;
-    document.getElementById('local-video').srcObject = null;
-    document.getElementById('vc-status-msg').classList.remove('hidden'); // Reset for next time
-    peerConnection = null;
-    localStream = null;
-    activeCallId = null;
-    activeCallChatId = null;
-    if(unsubscribeCall) unsubscribeCall();
 };
 
 window.toggleMic = () => {
