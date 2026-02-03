@@ -620,7 +620,8 @@ let callTimeoutTimer = null; // For the 15s Missed Call logic
 const ringtone = new Audio("https://alright-red-gyhy7mxafp.edgeone.app/FaceTime_calling_sound_effect_(fixed)_128k.mp3");
 ringtone.loop = true;
 const hangupSound = new Audio("https://actions.google.com/sounds/v1/alarms/phone_hang_up.ogg");
-const interactionSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg"); // New sound for minimize/maximize
+const interactionSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+const messageSound = new Audio("https://brainy-gray-yzknk6yg2d.edgeone.app/sound-7.mp3");
 
 const servers = {
     iceServers: [
@@ -637,6 +638,11 @@ onAuthStateChanged(auth, async (u) => {
     const userDoc = await getDoc(doc(db, "users", u.uid));
     currentUser = { id: u.uid, ...userDoc.data() };
     document.getElementById('current-username').innerText = currentUser.username || currentUser.name;
+    
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+
     loadConversations();
     listenForGlobalIncomingCalls(); // Start listening for calls
     lucide.createIcons();
@@ -857,8 +863,28 @@ function loadMessages(chatId) {
     if (unsubscribeMessages) unsubscribeMessages();
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("timestamp", "asc"));
     const container = document.getElementById('messages-container');
+    let isFirstLoad = true;
 
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        // Handle Notifications
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+                const msg = change.doc.data();
+                if (!isFirstLoad && msg.senderId !== currentUser.id) {
+                    messageSound.currentTime = 0;
+                    messageSound.play().catch(()=>{});
+                    
+                    if (document.hidden && Notification.permission === "granted") {
+                        new Notification("New Message", { 
+                            body: msg.type === 'image' ? 'Sent a photo' : (msg.content || 'Sent a message'), 
+                            icon: 'https://i.imghippo.com/files/vgr8207c.png' 
+                        });
+                    }
+                }
+            }
+        });
+        isFirstLoad = false;
+
         const messages = [];
         let cutoffTime = 0;
         if (currentChatData && currentChatData.clearedAt && currentChatData.clearedAt[currentUser.id]) {
@@ -1118,6 +1144,13 @@ function listenForGlobalIncomingCalls() {
                     // PLAY RINGTONE
                     ringtone.currentTime = 0;
                     ringtone.play().catch(e => console.log("Audio play failed interaction required"));
+                    
+                    if (document.hidden && Notification.permission === "granted") {
+                        new Notification("Incoming Video Call", { 
+                            body: `${callerName} is calling...`, 
+                            icon: callerAvatar 
+                        });
+                    }
                     
                     showIncomingCallModal(callerName, callerAvatar, change.doc.id, data.callState.callId);
                 }
