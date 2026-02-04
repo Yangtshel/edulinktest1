@@ -248,7 +248,7 @@
         }
 
         .post-card:hover {
-            background-color: #fdfdfd;
+            background-color: var(--surface);
             cursor: pointer;
             transform: none
         }
@@ -2559,7 +2559,44 @@
         };
 
         window.renderTextWithReadMore = (text, id, limit = 180) => { if (!text) return ''; const isExpanded = window.expandedTexts.has(id); if (text.length <= limit) return formatContent(text); const display = isExpanded ? formatContent(text) : formatContent(text.substring(0, limit)) + '...'; return `${display}<span class="read-more-btn" onclick="event.stopPropagation(); toggleTextExpansion('${id}')">${isExpanded ? 'less' : 'more'}</span>` };
-        window.toggleTextExpansion = id => { if (window.expandedTexts.has(id)) window.expandedTexts.delete(id); else window.expandedTexts.add(id); if (id.startsWith('post-')) { const pid = id.replace('post-', ''), p = posts.find(x => x.id === pid); if (p) document.querySelectorAll(`.js-post-body-${pid}`).forEach(el => el.innerHTML = window.renderTextWithReadMore(p.content, id)) } else if (id.startsWith('comment-')) { const cid = id.replace('comment-', ''); let foundC = null; for (const p of posts) if (p.comments) { foundC = p.comments.find(c => c.id === cid); if (foundC) break } if (foundC) document.querySelectorAll(`.js-comment-body-${cid}`).forEach(el => el.innerHTML = window.renderTextWithReadMore(foundC.content, id)) } };
+        window.toggleTextExpansion = id => {
+            const isExpanding = !window.expandedTexts.has(id);
+            let scrollPos = 0, elToScroll = null, container = null;
+
+            if (!isExpanding) {
+                if (id.startsWith('post-')) {
+                    const pid = id.replace('post-', '');
+                    elToScroll = document.getElementById(`post-card-feed-${pid}`) || document.getElementById(`post-card-explore-${pid}`);
+                } else if (id.startsWith('comment-')) {
+                    const cid = id.replace('comment-', '');
+                    elToScroll = document.getElementById(`comment-${cid}`);
+                }
+                if (elToScroll) {
+                    scrollPos = elToScroll.getBoundingClientRect().top;
+                    container = elToScroll.closest('.app-panel') || window;
+                }
+            }
+
+            if (window.expandedTexts.has(id)) window.expandedTexts.delete(id);
+            else window.expandedTexts.add(id);
+
+            if (id.startsWith('post-')) {
+                const pid = id.replace('post-', ''), p = posts.find(x => x.id === pid);
+                if (p) document.querySelectorAll(`.js-post-body-${pid}`).forEach(el => el.innerHTML = window.renderTextWithReadMore(p.content, id));
+            } else if (id.startsWith('comment-')) {
+                const cid = id.replace('comment-', '');
+                let foundC = null;
+                for (const p of posts) if (p.comments) { foundC = p.comments.find(c => c.id === cid); if (foundC) break }
+                if (foundC) document.querySelectorAll(`.js-comment-body-${cid}`).forEach(el => el.innerHTML = window.renderTextWithReadMore(foundC.content, id));
+            }
+
+            if (!isExpanding && elToScroll && container) {
+                const newPos = elToScroll.getBoundingClientRect().top;
+                const diff = newPos - scrollPos;
+                if (container === window) window.scrollBy(0, diff);
+                else container.scrollBy(0, diff);
+            }
+        };
         window.searchTag = t => { closePostView(); switchView('explore'); document.getElementById('mobile-explore-search').value = document.getElementById('global-search').value = `#${t}`; handleSearch(`#${t}`) };
         window.manageHistory = m => window.history.pushState({ modal: m }, "");
         window.syncURLState = () => {
@@ -2703,7 +2740,7 @@
                                     ${qualityUsers.length > 5 ? `<div class="flex items-center justify-center h-9 w-9 rounded-full ring-2 ring-white bg-gray-100 text-[11px] font-bold text-gray-500">+${qualityUsers.length - 5}</div>` : ''}
                                 </div>
                             </div>
-                            <div class="px-4 py-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between group cursor-pointer hover:bg-gray-100 transition-colors" onclick="switchExploreMainTab('people')">
+                            <div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors" onclick="switchExploreMainTab('people')">
                                 <span class="text-[13px] font-bold text-gray-500">See more creators like this</span>
                                 <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
                             </div>
