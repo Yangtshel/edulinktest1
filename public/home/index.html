@@ -2161,42 +2161,52 @@
                 <div id="compose-step-1" class="p-4 h-full flex flex-col">
                     <div class="grid grid-cols-2 gap-4" id="media-grid-container"></div>
                 </div>
-                <div id="compose-step-2" class="p-4 hidden">
-                    <div class="flex gap-3 mb-4 items-center"><img id="compose-avatar" src=""
+                <div id="compose-step-2" class="p-4 hidden h-full flex flex-col overflow-hidden">
+                    <div class="flex gap-3 mb-4 items-center shrink-0">
+                        <img id="compose-avatar" src=""
                             class="w-10 h-10 rounded-full border border-gray-100 bg-gray-50 object-cover">
                         <div>
                             <div id="compose-name" class="text-[15px] font-bold text-[#1f1f1f]">User</div>
                         </div>
                     </div>
-                    <div class="relative flex flex-col min-h-[150px]">
-                        <div id="compose-toolbar" class="flex flex-wrap gap-2 mb-2 border-b border-gray-100 pb-2">
-                            <button onclick="execComposeCommand('bold')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
-                                title="Bold"><i data-lucide="bold" class="w-4 h-4"></i></button>
-                            <button onclick="execComposeCommand('italic')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
-                                title="Italic"><i data-lucide="italic" class="w-4 h-4"></i></button>
-                            <button onclick="execComposeCommand('formatBlock', 'H1')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-xs"
-                                title="Heading 1">H1</button>
-                            <button onclick="execComposeCommand('formatBlock', 'H2')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-xs"
-                                title="Heading 2">H2</button>
-                            <button onclick="execComposeCommand('insertUnorderedList')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
-                                title="Bullet List"><i data-lucide="list" class="w-4 h-4"></i></button>
-                            <button onclick="execComposeCommand('insertOrderedList')"
-                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
-                                title="Numbered List"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+
+                    <div class="flex flex-1 gap-4 overflow-hidden border border-gray-100 rounded-2xl p-4 bg-gray-50/30">
+                        <div id="compose-media-preview-container"
+                            class="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden bg-gray-100 shrink-0 shadow-sm border border-gray-200">
+                            <div id="compose-media-preview" class="w-full h-full"></div>
                         </div>
-                        <div id="compose-text" contenteditable="true" placeholder="What's on your mind?"
-                            class="w-full h-auto min-h-[150px] text-lg outline-none bg-transparent empty:before:content-[attr(placeholder)] empty:before:text-gray-400"
-                            oninput="checkWordCountRich(this)" onpaste="handleComposePaste(event)"></div>
-                        <div id="word-count-display"
-                            class="absolute bottom-2 right-2 text-xs text-gray-400 font-medium pointer-events-none">
-                            0/500 words</div>
+                        <div
+                            class="flex-1 flex flex-col relative overflow-hidden bg-white rounded-xl p-3 border border-gray-100">
+                            <div id="compose-toolbar"
+                                class="flex flex-wrap gap-1 mb-2 border-b border-gray-50 pb-2 shrink-0">
+                                <button onclick="execComposeCommand('bold')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                    title="Bold"><i data-lucide="bold" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="execComposeCommand('italic')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                    title="Italic"><i data-lucide="italic" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="execComposeCommand('formatBlock', 'H1')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-[10px]"
+                                    title="Heading 1">H1</button>
+                                <button onclick="execComposeCommand('formatBlock', 'H2')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-[10px]"
+                                    title="Heading 2">H2</button>
+                                <button onclick="execComposeCommand('insertUnorderedList')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                    title="Bullet List"><i data-lucide="list" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="execComposeCommand('insertOrderedList')"
+                                    class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                    title="Numbered List"><i data-lucide="list-ordered"
+                                        class="w-3.5 h-3.5"></i></button>
+                            </div>
+                            <div id="compose-text" contenteditable="true" placeholder="Write a caption..."
+                                class="w-full flex-1 text-[15px] outline-none bg-transparent overflow-y-auto empty:before:content-[attr(placeholder)] empty:before:text-gray-400"
+                                oninput="checkWordCountRich(this)" onpaste="handleComposePaste(event)"></div>
+                            <div id="word-count-display" class="text-right text-[10px] text-gray-400 font-medium mt-1">
+                                0/500 words</div>
+                        </div>
                     </div>
-                    <div id="collab-chips-container" class="flex flex-wrap mb-2"></div>
+                    <div id="collab-chips-container" class="flex flex-wrap gap-2 mt-4"></div>
                 </div>
             </div>
             <div class="bg-white border-t border-gray-100 z-10">
@@ -2506,8 +2516,7 @@
         const formatContent = t => {
             if (!t) return '';
             let res = t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-            res = res.replace(/&lt;(b|i|u|h1|h2|h3|ul|ol|li|blockquote|hr|strong|em|br|p|div|span)&gt;/gi, '<$1>')
-                .replace(/&lt;\/(b|i|u|h1|h2|h3|ul|ol|li|blockquote|hr|strong|em|p|div|span)&gt;/gi, '</$1>')
+            res = res.replace(/&lt;(\/?)(b|i|u|h1|h2|h3|ul|ol|li|blockquote|hr|strong|em|br|p|div|span)(?:\s+[^&>]*?)?&gt;/gi, '<$1$2>')
                 .replace(/&amp;nbsp;/g, '&nbsp;');
             return res
                 .replace(/@(\w+)/g, (m, u) => {
@@ -2697,7 +2706,7 @@
         window.handleEventCoverSelect = e => { const f = e.target.files[0]; if (f) { currentEventCoverBlob = f; const r = new FileReader(); r.onload = x => { window.currentEventCover = x.target.result; document.getElementById('event-cover-preview').src = window.currentEventCover; document.getElementById('event-cover-preview-container').classList.remove('hidden'); document.getElementById('add-cover-btn').classList.add('hidden') }; r.readAsDataURL(f) } }; window.removeEventCover = () => { window.currentEventCover = null; currentEventCoverBlob = null; document.getElementById('event-cover-preview').src = ""; document.getElementById('event-cover-preview-container').classList.add('hidden'); document.getElementById('add-cover-btn').classList.remove('hidden'); document.getElementById('event-cover-input').value = "" }; window.publishEvent = () => { showToast("Coming soon!", !1); closeEventComposer() };
         window.showPostOptions = (e, pid, aid) => { e.stopPropagation(); manageHistory('post-options-overlay'); const o = document.getElementById('post-options-overlay'), m = document.getElementById('post-options-modal'), c = document.getElementById('post-options-content'), me = aid === currentUser.id, adm = currentUser.email === 'edulinkbht@gmail.com', p = posts.find(x => x.id === pid); const postTime = p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp); const canEdit = me && (Date.now() - postTime.getTime() < 604800000); let h = ''; if (me) { if (canEdit) h += `<button onclick="editPost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="edit-2" class="w-5 h-5"></i> Edit Post</button>`; } if (me || adm) h += `<button onclick="deletePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="trash-2" class="w-5 h-5"></i> Delete Post</button>`; if (!me) { const s = savedPosts.includes(pid); h += `<button onclick="toggleSave('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="bookmark" class="w-5 h-5 ${s ? 'fill-yellow-500 text-yellow-500' : ''}"></i> ${s ? 'Unsave' : 'Save'} Post</button>`; h += `<button onclick="showToast('Reported'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="flag" class="w-5 h-5"></i> Report Post</button>` } h += `<button onclick="sharePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="link" class="w-5 h-5"></i> Copy Link</button>`; c.innerHTML = h; refreshIcons(); m.style.transform = ''; m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); o.classList.remove('hidden'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) };
         window.hidePostMenu = () => { const o = document.getElementById('post-options-overlay'), m = document.getElementById('post-options-modal'); o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); setTimeout(() => o.classList.add('hidden'), 200) };
-        window.editPost = pid => { const p = posts.find(x => x.id === pid); if (!p) return; document.getElementById('compose-text').innerHTML = p.content; window.editingPostId = pid; document.getElementById('compose-header-title').innerText = "Edit Post"; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; if (p.media) { const m = Array.isArray(p.media) ? p.media : [p.media]; m.forEach((url, i) => { if (i < 4) window.composeImages[i] = url }) } renderMediaGrid(); window.composeStep = 1; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-footer-settings').classList.add('hidden'); const hasImage = window.composeImages.some(x => x !== null), btn = document.getElementById('compose-action-btn'); btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction; openCompose(!0) }; window.deletePost = async pid => { showAlert("Delete post?", async () => { await deleteDoc(doc(db, "posts", pid)); showToast("Deleted") }) };
+        window.editPost = pid => { const p = posts.find(x => x.id === pid); if (!p) return; document.getElementById('compose-text').innerHTML = p.content; window.editingPostId = pid; document.getElementById('compose-header-title').innerText = "Edit Post"; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; if (p.media) { const m = Array.isArray(p.media) ? p.media : [p.media]; m.forEach((url, i) => { if (i < 4) window.composeImages[i] = url }) } renderMediaGrid(); window.composeStep = 1; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-footer-settings').classList.add('hidden'); const hasImage = window.composeImages.some(x => x !== null), btn = document.getElementById('compose-action-btn'); btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeNext; openCompose(!0) }; window.deletePost = async pid => { showAlert("Delete post?", async () => { await deleteDoc(doc(db, "posts", pid)); showToast("Deleted") }) };
         window.openCompose = (isEdit = false) => {
             manageHistory('compose-overlay'); closeCreateMenu(); document.getElementById('compose-overlay').classList.remove('opacity-0', 'pointer-events-none'); const modal = document.getElementById('compose-modal'); modal.classList.remove('scale-95'); modal.classList.remove('translate-y-full');
             if (modal) {
@@ -2705,37 +2714,52 @@
                 modal.ondragleave = () => modal.classList.remove('drag-over');
                 modal.ondrop = e => { e.preventDefault(); modal.classList.remove('drag-over'); const files = e.dataTransfer.files; if (files.length) handleDroppedFiles(files) };
             }
-            if (!isEdit) { window.composeStep = 1; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; window.selectedCollaborators = []; window.editingPostId = null; window.currentClaimLink = null; document.getElementById('claim-link-input').value = ''; const ci = document.getElementById('claim-status-indicator'); if (ci) { ci.innerText = 'Off'; ci.classList.remove('text-green-600'); ci.classList.add('text-gray-400') } document.getElementById('compose-text').innerHTML = ""; document.getElementById('word-count-display').innerText = "0/500 words"; document.getElementById('compose-header-title').innerText = "Create Post"; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-action-btn').innerText = "Skip"; renderMediaGrid(); renderCollabChips() }
+            if (!isEdit) { window.composeStep = 1; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; window.selectedCollaborators = []; window.editingPostId = null; window.currentClaimLink = null; document.getElementById('claim-link-input').value = ''; const ci = document.getElementById('claim-status-indicator'); if (ci) { ci.innerText = 'Off'; ci.classList.remove('text-green-600'); ci.classList.add('text-gray-400') } document.getElementById('compose-text').innerHTML = ""; document.getElementById('word-count-display').innerText = "0/500 words"; document.getElementById('compose-header-title').innerText = "Create Post"; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-action-btn').innerText = "Skip"; document.getElementById('compose-footer-settings').classList.add('hidden'); document.getElementById('compose-media-preview-container').classList.add('hidden'); renderMediaGrid(); renderCollabChips() }
         };
         window.execComposeCommand = (cmd, val = null) => { document.getElementById('compose-text').focus(); document.execCommand(cmd, false, val); refreshIcons(); };
         window.handleComposePaste = (e) => {
             e.preventDefault();
             const html = e.clipboardData.getData('text/html');
             const text = e.clipboardData.getData('text/plain');
+            const composeTextEl = document.getElementById('compose-text');
+
             if (html) {
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
-                const clean = (parent) => {
-                    const allowed = ['B', 'I', 'U', 'H1', 'H2', 'H3', 'P', 'BR', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'HR', 'SPAN', 'DIV', 'STRONG', 'EM'];
-                    const nodes = Array.from(parent.childNodes);
-                    nodes.forEach(node => {
-                        if (node.nodeType === 1) {
-                            if (allowed.includes(node.tagName)) {
-                                while (node.attributes.length > 0) node.removeAttribute(node.attributes[0].name);
-                                clean(node);
-                            } else {
-                                const tn = document.createTextNode(node.textContent);
-                                node.parentNode.replaceChild(tn, node);
+
+                const cleanNode = (node) => {
+                    const allowedTags = ['B', 'I', 'U', 'H1', 'H2', 'H3', 'P', 'BR', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'HR', 'SPAN', 'DIV', 'STRONG', 'EM'];
+                    if (node.nodeType === 1) { // Element node
+                        const tagName = node.tagName.toUpperCase();
+                        if (!allowedTags.includes(tagName)) {
+                            // Replace disallowed tags with their children
+                            while (node.firstChild) {
+                                node.parentNode.insertBefore(node.firstChild, node);
+                            }
+                            const parent = node.parentNode;
+                            parent.removeChild(node);
+                            return; // Node removed, children are now siblings and will be processed
+                        } else {
+                            // Remove all attributes from allowed tags
+                            while (node.attributes.length > 0) {
+                                node.removeAttribute(node.attributes[0].name);
                             }
                         }
-                    });
+                    }
+                    // Recursively clean children
+                    const children = Array.from(node.childNodes);
+                    children.forEach(cleanNode);
                 };
-                clean(temp);
+
+                cleanNode(temp);
+
+                // Insert cleaned HTML
                 document.execCommand('insertHTML', false, temp.innerHTML);
             } else {
+                // Fallback to plain text if no HTML or if HTML cleaning is not desired for some reason
                 document.execCommand('insertText', false, text);
             }
-            window.checkWordCountRich(document.getElementById('compose-text'));
+            window.checkWordCountRich(composeTextEl);
         };
         window.checkWordCountRich = el => { const text = el.innerText || ""; const w = text.trim().split(/\s+/).filter(x => x).length; document.getElementById('word-count-display').innerText = `${w}/500 words` };
         window.handleDroppedFiles = files => {
@@ -2764,7 +2788,7 @@
         window.closeCompose = () => { document.getElementById('compose-overlay').classList.add('opacity-0', 'pointer-events-none'); const modal = document.getElementById('compose-modal'); modal.classList.add('scale-95'); modal.classList.add('translate-y-full'); setTimeout(() => { window.editingPostId = null; document.getElementById('compose-text').innerHTML = ""; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null] }, 200) };
         window.toggleComposeSettings = () => { const a = document.getElementById('compose-settings-area'), ar = document.getElementById('compose-settings-arrow'); a.classList.toggle('hidden'); ar.style.transform = a.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)' };
         window.openUploadOptions = () => document.getElementById('upload-options-modal').classList.remove('hidden'); window.triggerUpload = m => { window.uploadMode = m; document.getElementById('upload-options-modal').classList.add('hidden'); const i = document.getElementById('media-input'); if (m === 'multiple') i.setAttribute('multiple', ''); else i.removeAttribute('multiple'); i.click() }; window.handleFileSelect = e => { const f = e.target.files; if (f.length > 0) { window.currentMediaBlob = []; window.currentMedia = []; const c = document.getElementById('media-preview-container'), inr = document.getElementById('preview-inner'); c.classList.remove('hidden'); inr.innerHTML = ''; const ps = Array.from(f).map(file => { window.currentMediaBlob.push(file); return new Promise(r => { const d = new FileReader(); d.onload = ev => { window.currentMedia.push(ev.target.result); const iv = file.type.startsWith('video'), el = document.createElement(iv ? 'video' : 'img'); el.src = ev.target.result; el.className = "h-20 w-20 object-cover rounded-md border border-gray-200 shrink-0"; inr.appendChild(el); r() }; d.readAsDataURL(file) }) }); Promise.all(ps).then(() => showToast(`${f.length} file(s) ready`)) } }; window.removeMedia = () => { window.currentMedia = []; window.currentMediaBlob = []; document.getElementById('media-preview-container').classList.add('hidden'); document.getElementById('media-input').value = "" };
-        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
+        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeNext } refreshIcons() };
         window.openImageAdjust = i => {
             const url = window.composeImages[i]; if (!url || url.includes('video') || url.endsWith('.mp4')) return; window.adjustingImageIndex = i; window.adjustZoom = 1; window.adjustX = 0; window.adjustY = 0; manageHistory('adjust-image-overlay'); const o = document.getElementById('adjust-image-overlay'), img = document.getElementById('adjust-image-target'); img.src = url; img.style.transform = `translate(0px, 0px) scale(1)`; document.getElementById('adjust-zoom-range').value = 1; o.classList.remove('hidden'); setTimeout(() => o.classList.remove('opacity-0'), 20);
             const wrap = document.getElementById('adjust-image-wrapper');
@@ -2790,8 +2814,51 @@
             canvas.toBlob(b => { window.composeImageBlobs[i] = b; const u = URL.createObjectURL(b); window.composeImages[i] = u; renderMediaGrid(); closeImageAdjust() }, 'image/jpeg', 0.95);
         };
         window.handleGridUpload = i => { window.currentUploadIndex = i; document.getElementById('grid-upload-input').click() }; window.onGridFileSelect = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { window.composeImages[window.currentUploadIndex] = ev.target.result; window.composeImageBlobs[window.currentUploadIndex] = f; renderMediaGrid() }; r.readAsDataURL(f); document.getElementById('grid-upload-input').value = "" }; window.removeGridImage = i => { window.composeImages[i] = null; window.composeImageBlobs[i] = null; const v = window.composeImages.filter(x => x !== null), vb = window.composeImageBlobs.filter(x => x !== null); window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; v.forEach((val, idx) => window.composeImages[idx] = val); vb.forEach((val, idx) => window.composeImageBlobs[idx] = val); renderMediaGrid() };
-        window.handleComposeAction = () => { if (window.composeStep === 1) goToStep2(); else publishPost() }; window.goToStep2 = () => { window.composeStep = 2; document.getElementById('compose-step-1').classList.add('hidden'); document.getElementById('compose-step-2').classList.remove('hidden'); document.getElementById('compose-footer-settings').classList.remove('hidden'); document.getElementById('compose-action-btn').innerText = "Post"; document.getElementById('compose-action-btn').onclick = window.publishPost };
-        window.handleComposeBack = () => { if (window.composeStep === 2) { window.composeStep = 1; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-footer-settings').classList.add('hidden'); document.getElementById('compose-header-title').innerText = "Create Post"; const hasImage = window.composeImages.some(x => x !== null), btn = document.getElementById('compose-action-btn'); btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } else attemptCloseCompose() };
+        window.handleComposeNext = () => {
+            const hasImages = window.composeImages.some(x => x !== null);
+            if (!hasImages) {
+                window.composeStep = 2;
+                document.getElementById('compose-step-1').classList.add('hidden');
+                document.getElementById('compose-step-2').classList.remove('hidden');
+                document.getElementById('compose-media-preview-container').classList.add('hidden');
+                document.getElementById('compose-footer-settings').classList.remove('hidden');
+                document.getElementById('compose-action-btn').innerText = "Post";
+                document.getElementById('compose-header-title').innerText = "New Post";
+                refreshIcons();
+                return;
+            }
+            window.composeStep = 2;
+            document.getElementById('compose-step-1').classList.add('hidden');
+            document.getElementById('compose-step-2').classList.remove('hidden');
+            document.getElementById('compose-media-preview-container').classList.remove('hidden');
+            document.getElementById('compose-footer-settings').classList.remove('hidden');
+            document.getElementById('compose-action-btn').innerText = "Post";
+            document.getElementById('compose-header-title').innerText = "New Post";
+            const firstMedia = window.composeImages.find(x => x !== null);
+            const previewEl = document.getElementById('compose-media-preview');
+            if (firstMedia) {
+                if (firstMedia.includes('video') || firstMedia.includes('.mp4')) {
+                    previewEl.innerHTML = `<video src="${firstMedia}" class="w-full h-full object-cover"></video>`;
+                } else {
+                    previewEl.innerHTML = `<img src="${firstMedia}" class="w-full h-full object-cover">`;
+                }
+            }
+            refreshIcons();
+        };
+        window.handleComposeBack = () => {
+            if (window.composeStep === 2) {
+                window.composeStep = 1;
+                document.getElementById('compose-step-2').classList.add('hidden');
+                document.getElementById('compose-step-1').classList.remove('hidden');
+                document.getElementById('compose-footer-settings').classList.add('hidden');
+                document.getElementById('compose-media-preview-container').classList.add('hidden');
+                const hasImages = window.composeImages.some(x => x !== null);
+                document.getElementById('compose-action-btn').innerText = hasImages ? "Next" : "Skip";
+                document.getElementById('compose-header-title').innerText = "Create Post";
+                return;
+            }
+            attemptCloseCompose();
+        };
         async function uploadToImgHippo(f) { const d = new FormData(); d.append('api_key', 'd28bf3c492ad07b53dc4e3f9ce99b072'); d.append('file', f); try { const r = await fetch('https://api.imghippo.com/v1/upload', { method: 'POST', body: d }), j = await r.json(); if (j.success) return j.data.url; else throw new Error('Upload failed') } catch (e) { throw e } }
         window.publishPost = async () => { const tr = document.getElementById('compose-text').innerHTML.trim(), textRaw = document.getElementById('compose-text').innerText.trim(), hasImages = window.composeImages.some(x => x !== null); if (!textRaw && !hasImages) return showToast("Empty!", !0); if (textRaw.split(/\s+/).length > 500) return showToast("Post too long (max 500 words)", !0); const po = document.getElementById('compose-progress-overlay'), pb = document.getElementById('post-progress-bar'); po.classList.remove('hidden'); po.classList.add('flex'); let pr = 0; const int = setInterval(() => { if (pr < 90) { pr += Math.random() * 15; pb.style.width = `${Math.min(pr, 90)}%` } }, 300); const priv = document.getElementById('post-setting-privacy').checked, sl = document.getElementById('post-setting-likes').checked, sc = document.getElementById('post-setting-comments').checked, alv = document.getElementById('post-setting-like-view').checked, ac = document.getElementById('post-setting-allow-comments').checked; try { let mu = []; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], blob = window.composeImageBlobs[i]; if (url) { if (blob) { try { mu.push(await uploadToImgHippo(blob)) } catch (e) { const mr = ref(storage, `posts/${currentUser.id}/${Date.now()}_${i}_${blob.name}`); await uploadBytes(mr, blob); mu.push(await getDownloadURL(mr)) } } else mu.push(url) } } const mp = mu.length === 1 ? mu[0] : (mu.length > 0 ? mu : null), mm = textRaw.match(/@(\w+)/g), mids = []; if (mm) { mm.forEach(m => { const uname = m.substring(1).toLowerCase(), found = users.find(u => (u.username || "").toLowerCase() === uname); if (found) mids.push(found.id) }) } const pd = { authorId: currentUser.id, content: tr, media: mp, timestamp: serverTimestamp(), likes: [], comments: [], collaborators: window.selectedCollaborators || [], mentions: mids, claimLink: window.currentClaimLink || null, settings: { privacy: priv ? 'private' : 'public', showLikes: sl, showComments: sc, allowLikeView: alv, allowComments: ac } }; let pid = null; if (window.editingPostId) { await updateDoc(doc(db, "posts", window.editingPostId), { content: tr, media: mp, settings: pd.settings, claimLink: window.currentClaimLink || null }); pid = window.editingPostId; showToast("Updated!") } else { const r = await addDoc(collection(db, "posts"), pd); pid = r.id; showToast("Posted!"); if (window.selectedCollaborators?.length) window.selectedCollaborators.forEach(c => sendNotification(c.id, 'collab_request', 'invited to collaborate', pid)) } if (mids.length > 0) mids.forEach(uid => { if (uid !== currentUser.id) sendNotification(uid, 'mention', 'mentioned you in a post', pid) }); clearInterval(int); pb.style.width = '100%'; await new Promise(r => setTimeout(r, 500)); po.classList.add('hidden'); po.classList.remove('flex'); pb.style.width = '0%'; closeCompose() } catch (e) { console.error(e); clearInterval(int); po.classList.add('hidden'); po.classList.remove('flex'); showToast("Error", !0) } };
         window.showToast = (m, e = false) => { const t = document.getElementById('toast'), tm = document.getElementById('toast-msg'), i = document.getElementById('toast-icon'); tm.innerText = m; if (e) { t.style.backgroundColor = '#d93025'; i.setAttribute('data-lucide', 'alert-circle'); i.classList.remove('text-[#c4eed0]'); i.classList.add('text-white') } else { t.style.backgroundColor = '#303134'; i.setAttribute('data-lucide', 'check-circle-2'); i.classList.add('text-[#c4eed0]'); i.classList.remove('text-white') } refreshIcons(); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000) };
