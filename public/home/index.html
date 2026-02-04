@@ -2472,39 +2472,43 @@
         window.profileSort = 'latest'; window.isDesktopThreadMode = false;
         window.currentDownloadImages = []; window.selectedDownloadIndices = new Set();
         window.currentCommentFilter = 'latest'; window.sessionSeenPosts = new Set();
-        window.trackInteraction = async (pid, type, weight = 1) => { if (!currentUser) return; const r = doc(db, "users", currentUser.id), p = posts.find(x => x.id === pid); if (!p) return; const s = currentUser.interests || {}; s.authors = s.authors || {}; s.tags = s.tags || {}; s.disliked = s.disliked || []; if (type === 'not_interested') { if (!s.disliked.includes(pid)) s.disliked.push(pid); weight = -20 } if (p.authorId) s.authors[p.authorId] = (s.authors[p.authorId] || 0) + weight; const tags = p.content.match(/#(\w+)/g); if (tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); s.tags[tn] = (s.tags[tn] || 0) + weight }); await updateDoc(r, { interests: s }); currentUser.interests = s; if (type === 'not_interested') { renderFeed(); showToast("We'll show you less of this") } else if (type === 'show_more') showToast("We'll show you more of this") };
+        window.trackInteraction = async (pid, type, weight = 1) => { if (!currentUser) return; const r = doc(db, "users", currentUser.id), p = posts.find(x => x.id === pid); if (!p) return; const s = currentUser.interests || {}; s.authors = s.authors || {}; s.tags = s.tags || {}; s.disliked = s.disliked || []; if (type === 'not_interested') { if (!s.disliked.includes(pid)) s.disliked.push(pid); weight = -50 } if (p.authorId) s.authors[p.authorId] = (s.authors[p.authorId] || 0) + weight; const tags = p.content.match(/#(\w+)/g); if (tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); s.tags[tn] = (s.tags[tn] || 0) + weight }); await updateDoc(r, { interests: s }); currentUser.interests = s; if (type === 'not_interested') { renderFeed(); showToast("We'll show you less of this") } else if (type === 'show_more') showToast("We'll show you more of this") };
         const getPostScore = (p, includeVariety = false) => {
             if (!currentUser) return 0;
             const s = currentUser.interests || {};
-            if (s.disliked && s.disliked.includes(p.id)) return -1000;
-            if (window.sessionSeenPosts.has(p.id)) return -500; // Penalize seen posts
+            if (s.disliked && s.disliked.includes(p.id)) return -2000;
+            if (window.sessionSeenPosts.has(p.id)) return -500;
 
             const ts = p.timestamp?.toDate ? p.timestamp.toDate().getTime() : new Date(p.timestamp || 0).getTime();
             const hoursOld = (Date.now() - ts) / 3600000;
 
-            // 1. Relationship Score (0.3 weight) - scaled to 0-100
+            // 1. Relationship Score (0.35 weight)
             const rawRel = (p.authorId && s.authors && s.authors[p.authorId]) ? s.authors[p.authorId] : 0;
-            const relationship = Math.min(100, rawRel * 10);
+            const relationship = Math.min(100, rawRel * 12);
 
-            // 2. Interest Score (0.4 weight) - scaled to 0-100
+            // 2. Interest Score (0.45 weight) - Stronger focus on tags
             let rawInterest = 0;
             const tags = p.content.match(/#(\w+)/g);
             if (tags && s.tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); if (s.tags[tn]) rawInterest += s.tags[tn] });
-            const interest = Math.min(100, rawInterest * 8);
+            const interest = Math.min(100, rawInterest * 10);
 
-            // 3. Recency Score (0.1 weight) - 1/hoursOld logic
+            // 3. Recency Score (0.1 weight)
             const recency = Math.min(100, (1 / (hoursOld + 1)) * 1000);
 
-            // 4. Engagement Prediction (0.2 weight) - based on post popularity
+            // 4. Engagement Prediction (0.1 weight)
             const likesCount = p.likes?.length || 0;
             const commentsCount = p.comments?.length || 0;
-            const engagement = Math.min(100, (likesCount * 5) + (commentsCount * 10));
+            const engagement = Math.min(100, (likesCount * 3) + (commentsCount * 6));
 
             // THE MASTER FORMULA
-            let finalScore = (relationship * 0.3) + (interest * 0.4) + (recency * 0.1) + (engagement * 0.2);
+            let finalScore = (relationship * 0.35) + (interest * 0.45) + (recency * 0.1) + (engagement * 0.1);
 
-            // Variety / Randomness (add +/- 5%)
-            if (includeVariety) finalScore *= (0.95 + Math.random() * 0.1);
+            // Variety / Randomness (Unique Salt per user)
+            if (includeVariety) {
+                const userSeed = (currentUser.id.charCodeAt(0) + currentUser.id.charCodeAt(currentUser.id.length - 1)) % 100;
+                const varietyFactor = (0.9 + (userSeed / 1000) + Math.random() * 0.1);
+                finalScore *= varietyFactor;
+            }
 
             return finalScore;
         };
@@ -2563,18 +2567,17 @@
             const isExpanding = !window.expandedTexts.has(id);
             let scrollPos = 0, elToScroll = null, container = null;
 
-            if (!isExpanding) {
-                if (id.startsWith('post-')) {
-                    const pid = id.replace('post-', '');
-                    elToScroll = document.getElementById(`post-card-feed-${pid}`) || document.getElementById(`post-card-explore-${pid}`);
-                } else if (id.startsWith('comment-')) {
-                    const cid = id.replace('comment-', '');
-                    elToScroll = document.getElementById(`comment-${cid}`);
-                }
-                if (elToScroll) {
-                    scrollPos = elToScroll.getBoundingClientRect().top;
-                    container = elToScroll.closest('.app-panel') || window;
-                }
+            if (id.startsWith('post-')) {
+                const pid = id.replace('post-', '');
+                elToScroll = document.getElementById(`post-card-feed-${pid}`) || document.getElementById(`post-card-explore-${pid}`);
+            } else if (id.startsWith('comment-')) {
+                const cid = id.replace('comment-', '');
+                elToScroll = document.getElementById(`comment-${cid}`);
+            }
+
+            if (elToScroll) {
+                scrollPos = elToScroll.getBoundingClientRect().top;
+                container = elToScroll.closest('.app-panel') || window;
             }
 
             if (window.expandedTexts.has(id)) window.expandedTexts.delete(id);
@@ -2591,10 +2594,16 @@
             }
 
             if (!isExpanding && elToScroll && container) {
-                const newPos = elToScroll.getBoundingClientRect().top;
-                const diff = newPos - scrollPos;
-                if (container === window) window.scrollBy(0, diff);
-                else container.scrollBy(0, diff);
+                const newRect = elToScroll.getBoundingClientRect();
+                const headerHeight = 70; // Approximation of header
+
+                // If the card top is now above the viewport or changed drastically, snap to it
+                if (scrollPos < 0) {
+                    const scrollOffset = (container === window) ? window.scrollY : container.scrollTop;
+                    const adjustment = newRect.top - scrollPos;
+                    if (container === window) window.scrollBy(0, adjustment);
+                    else container.scrollBy(0, adjustment);
+                }
             }
         };
         window.searchTag = t => { closePostView(); switchView('explore'); document.getElementById('mobile-explore-search').value = document.getElementById('global-search').value = `#${t}`; handleSearch(`#${t}`) };
