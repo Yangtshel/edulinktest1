@@ -2496,7 +2496,11 @@
         const formatDate = t => { if (!t) return ''; const d = t.toDate ? t.toDate() : new Date(t); if (isNaN(d.getTime())) return ''; const now = new Date(), s = (now - d) / 1000; if (s < 60) return 'Now'; if (s < 3600) return Math.floor(s / 60) + 'm ago'; if (s < 86400) return Math.floor(s / 3600) + 'h ago'; if (s < 604800) return Math.floor(s / 86400) + 'd ago'; return d.toLocaleDateString() };
         const formatContent = t => {
             if (!t) return '';
-            return t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+            let res = t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+            res = res.replace(/&lt;(b|i|u|h1|strong|em|br|p|div|span)&gt;/gi, '<$1>')
+                .replace(/&lt;\/(b|i|u|h1|strong|em|p|div|span)&gt;/gi, '</$1>')
+                .replace(/&amp;nbsp;/g, '&nbsp;');
+            return res
                 .replace(/@(\w+)/g, (m, u) => {
                     const f = users.find(x => (x.username || '').toLowerCase() === u.toLowerCase());
                     return `<span class="text-blue-600 font-bold ${f ? 'cursor-pointer hover:underline" onclick="event.stopPropagation(); showProfile(\'' + f.id + '\')' : ''}">@${u}</span>`
