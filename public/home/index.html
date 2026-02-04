@@ -2168,6 +2168,17 @@
                             <div id="compose-name" class="text-[15px] font-bold text-[#1f1f1f]">User</div>
                         </div>
                     </div>
+                    <div class="formatting-toolbar">
+                        <button class="format-btn" onclick="insertFormatting('bold')" title="Bold (Ctrl+B)">
+                            <i data-lucide="bold"></i>
+                        </button>
+                        <button class="format-btn" onclick="insertFormatting('light')" title="Light">
+                            <i data-lucide="type"></i>
+                        </button>
+                        <button class="format-btn" onclick="insertFormatting('heading')" title="Heading">
+                            <i data-lucide="heading"></i>
+                        </button>
+                    </div>
                     <div class="relative"><textarea id="compose-text" placeholder="What's on your mind?"
                             class="w-full min-h-[150px] text-lg resize-none border-none outline-none bg-transparent placeholder-gray-400"
                             oninput="checkWordCount(this)"></textarea>
@@ -2485,6 +2496,9 @@
         const formatContent = t => {
             if (!t) return '';
             return t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/_(.*?)_/g, '<span class="post-body-light">$1</span>')
+                .replace(/^### (.*$)/gm, '<h3 class="post-body-heading">$1</h3>')
                 .replace(/@(\w+)/g, (m, u) => {
                     const f = users.find(x => (x.username || '').toLowerCase() === u.toLowerCase());
                     return `<span class="text-blue-600 font-bold ${f ? 'cursor-pointer hover:underline" onclick="event.stopPropagation(); showProfile(\'' + f.id + '\')' : ''}">@${u}</span>`
@@ -2492,6 +2506,41 @@
                 .replace(/#(\w+)/g, '<span class="text-blue-600 font-bold cursor-pointer hover:underline" onclick="event.stopPropagation(); searchTag(\'$1\')">#$1</span>')
                 .replace(/\n/g, '<br>')
                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 hover:underline" onclick="event.stopPropagation(); event.preventDefault(); confirmAndOpenLink(\'$1\')">$1</a>');
+        };
+
+        window.insertFormatting = (style) => {
+            const textarea = document.getElementById('compose-text');
+            if (!textarea) return;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            let replacement = '';
+            let cursorOffset = 0;
+
+            switch (style) {
+                case 'bold':
+                    replacement = `**${selectedText}**`;
+                    cursorOffset = selectedText ? 0 : 2;
+                    break;
+                case 'light':
+                    replacement = `_${selectedText}_`;
+                    cursorOffset = selectedText ? 0 : 1;
+                    break;
+                case 'heading':
+                    // Check if it's already a heading or needs a newline
+                    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+                    const isStartOfLine = start === 0 || text[start - 1] === '\n';
+                    replacement = (isStartOfLine ? '' : '\n') + `### ${selectedText}`;
+                    cursorOffset = selectedText ? 0 : 0;
+                    break;
+            }
+
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+            const newPos = start + (selectedText ? replacement.length : cursorOffset);
+            textarea.setSelectionRange(newPos, newPos);
+            checkWordCount(textarea);
         };
 
         window.fetchLinkPreview = async (url) => {
