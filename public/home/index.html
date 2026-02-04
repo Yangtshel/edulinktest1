@@ -2311,8 +2311,9 @@
         <main id="main-panel" class="flex-1 app-panel min-w-0 relative">
             <header id="main-header"
                 class="h-16 md:h-20 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 absolute top-0 w-full bg-white/95 md:bg-white/90 backdrop-blur-md border-b border-[#f0f0f0] transition-transform duration-300">
-                <div class="md:hidden flex items-center gap-3 cursor-pointer" onclick="switchView('feed')"><img
-                        src="https://i.imghippo.com/files/fRGt5603uII.png" class="w-8 h-8 object-contain">
+                <div class="md:hidden flex items-center gap-3 cursor-pointer"
+                    onclick="switchView('feed'); renderFeed();"><img src="https://i.imghippo.com/files/fRGt5603uII.png"
+                        class="w-8 h-8 object-contain">
                     <h1 class="text-lg font-bold text-[#1f1f1f] tracking-tight">EduLink</h1>
                 </div>
                 <div class="flex-1 max-w-[600px] relative group hidden md:block"><i data-lucide="search"
@@ -2461,7 +2462,7 @@
         window.profileSort = 'latest'; window.isDesktopThreadMode = false;
         window.currentDownloadImages = []; window.selectedDownloadIndices = new Set();
         window.currentCommentFilter = 'latest'; window.sessionSeenPosts = new Set();
-        window.trackInteraction = async (pid, type, weight = 1) => { if (!currentUser) return; const r = doc(db, "users", currentUser.id), p = posts.find(x => x.id === pid); if (!p) return; const s = currentUser.interests || {}; s.authors = s.authors || {}; s.tags = s.tags || {}; s.disliked = s.disliked || []; if (type === 'not_interested') { if (!s.disliked.includes(pid)) s.disliked.push(pid); weight = -50 } if (p.authorId) s.authors[p.authorId] = (s.authors[p.authorId] || 0) + weight; const tags = p.content.match(/#(\w+)/g); if (tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); s.tags[tn] = (s.tags[tn] || 0) + weight }); await updateDoc(r, { interests: s }); currentUser.interests = s; if (type === 'not_interested') { renderFeed(); showToast("We'll show you less of this") } else if (type === 'show_more') showToast("We'll show you more of this") };
+        window.trackInteraction = async (pid, type, weight = 1) => { if (!currentUser) return; const r = doc(db, "users", currentUser.id), p = posts.find(x => x.id === pid); if (!p) return; const s = currentUser.interests || {}; s.authors = s.authors || {}; s.tags = s.tags || {}; s.disliked = s.disliked || []; if (type === 'not_interested') { if (!s.disliked.includes(pid)) s.disliked.push(pid); weight = -50 } if (p.authorId) s.authors[p.authorId] = (s.authors[p.authorId] || 0) + weight; const tags = p.content.match(/#(\w+)/g); if (tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); s.tags[tn] = (s.tags[tn] || 0) + weight }); await updateDoc(r, { interests: s }); currentUser.interests = s; renderFeed(); if (type === 'not_interested') { showToast("We'll show you less of this") } else if (type === 'show_more') showToast("We'll show you more of this") };
         const getPostScore = (p, refreshSalt = 0.5) => {
             if (!currentUser) return 0;
             const s = currentUser.interests || {};
@@ -2677,8 +2678,9 @@
             });
 
             if (window.activeFeedFilter === 'all') {
-                const salt = Math.random() + Date.now() % 1000;
-                filtered.sort((a, b) => getPostScore(b, salt) - getPostScore(a, salt));
+                // Aggressive randomization for true "refresh" feel
+                filtered = filtered.sort(() => Math.random() - 0.5);
+                filtered.sort((a, b) => getPostScore(b, Math.random()) - getPostScore(a, Math.random()));
             }
 
             if (filtered.length === 0) {
