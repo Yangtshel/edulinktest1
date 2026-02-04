@@ -867,16 +867,41 @@
         }
 
         .drag-over {
-            border: 2px dashed #065fd4 !important;
-            background-color: rgba(6, 95, 212, 0.05) !important;
+            border-color: #0b57d0 !important;
+        }
+
+        .drag-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 87, 208, 0.05);
+            backdrop-blur: 2px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            border: 3px dashed #0b57d0;
+            border-radius: 24px;
+            margin: 8px;
+        }
+
+        .drag-over .drag-overlay {
+            display: flex;
         }
 
         .drag-over .media-grid-plus {
-            display: none;
+            opacity: 0;
         }
 
         .drag-over .media-grid-download {
-            display: block !important;
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
+
+        .media-grid-plus,
+        .media-grid-download {
+            transition: all 0.2s ease;
         }
 
         /* Post Skeleton Loader */
@@ -956,6 +981,38 @@
 
             100% {
                 opacity: 1;
+            }
+        }
+
+        .img-placeholder {
+            background-color: #f1f5f9 !important;
+            animation: pulse-skeleton 1.5s infinite ease-in-out;
+        }
+
+        .img-placeholder img,
+        .img-placeholder video {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .img-loaded img,
+        .img-loaded video {
+            opacity: 1 !important;
+        }
+
+        .progressive-load {
+            animation: slideUpFade 0.6s ease-out forwards;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
@@ -2231,6 +2288,12 @@
         <div id="compose-modal"
             class="bg-white w-full h-full md:h-auto md:w-[95%] md:max-w-[620px] rounded-none md:rounded-[24px] shadow-2xl relative transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-200 flex flex-col overflow-hidden"
             onclick="event.stopPropagation()">
+            <div class="drag-overlay">
+                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
+                    <i data-lucide="download" class="w-10 h-10 text-[#0b57d0] animate-bounce"></i>
+                </div>
+                <p class="text-[#0b57d0] font-bold text-xl uppercase tracking-tighter">Drop files to add</p>
+            </div>
             <div id="compose-progress-overlay"
                 class="absolute inset-0 bg-white/90 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center">
                 <div class="w-64 h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
@@ -2670,13 +2733,18 @@
             }
             setTimeout(() => {
                 c.innerHTML = "";
-                const filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms }); if (filtered.length === 0) { let msg = "No posts found"; let sub = "Try adjusting filters"; let icon = "inbox"; if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet or they haven't posted."; icon = "user-plus" } else if (window.activeFeedFilter === 'friends') { msg = "No posts from friends"; sub = "Your friends haven't posted anything yet."; icon = "users" } else if (window.activeFeedFilter === 'all') { msg = "Welcome to EduLink"; sub = "Be the first to share something!"; icon = "pen-tool" } c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"><i data-lucide="${icon}" class="w-8 h-8"></i></div><h3 class="text-gray-900 font-bold text-lg">${msg}</h3><p class="text-gray-500 text-sm mt-1 max-w-xs">${sub}</p></div>` } else { filtered.forEach((p, i) => { const el = createPostElement(p, 'feed'); el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; el.style.transition = 'all 0.4s ease'; c.appendChild(el); setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)' }, i * 50) }) } refreshIcons();
+                const filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms }); if (filtered.length === 0) { let msg = "No posts found"; let sub = "Try adjusting filters"; let icon = "inbox"; if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet or they haven't posted."; icon = "user-plus" } else if (window.activeFeedFilter === 'friends') { msg = "No posts from friends"; sub = "Your friends haven't posted anything yet."; icon = "users" } else if (window.activeFeedFilter === 'all') { msg = "Welcome to EduLink"; sub = "Be the first to share something!"; icon = "pen-tool" } c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"><i data-lucide="${icon}" class="w-8 h-8"></i></div><h3 class="text-gray-900 font-bold text-lg">${msg}</h3><p class="text-gray-500 text-sm mt-1 max-w-xs">${sub}</p></div>` } else { filtered.forEach((p, i) => { const el = createPostElement(p, 'feed'); el.classList.add('progressive-load'); c.appendChild(el); el.style.animationDelay = `${i * 0.1}s` }) } refreshIcons();
             }, t ? 0 : 400);
         };
         window.openFeedFilter = () => { manageHistory('feed-filter-overlay'); toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !0) }; window.closeFeedFilter = () => toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !1); window.switchFeedFilter = f => { window.activeFeedFilter = f; closeFeedFilter(); renderFeed(); const m = { all: 'All Posts', following: 'Following', friends: 'Friends Only' }; showToast(`Filter: ${m[f]}`) };
         let touchStartX = 0, touchEndX = 0; window.handleTouchStart = e => touchStartX = e.changedTouches[0].screenX; window.handleTouchEnd = (e, pid, ov) => { touchEndX = e.changedTouches[0].screenX; const w = e.currentTarget.closest('.post-carousel'); if (w && Math.abs(touchStartX - touchEndX) > 50) moveCarousel(w.id, touchStartX > touchEndX ? 1 : -1) };
         function createPostElement(p, ctx = 'feed') {
-            const a = users.find(u => u.id === p.authorId) || { name: 'Unknown', avatar: '', isOfficial: false, id: p.authorId }, st = p.settings || { privacy: 'public', showLikes: true, showComments: true }, d = document.createElement('article'); d.id = `post-card-${ctx}-${p.id}`; d.className = "post-card group overflow-hidden fade-in"; d.onclick = () => openPostView(p.id); let mh = "", lh = ""; if (p.media) { const ma = Array.isArray(p.media) ? p.media : [p.media]; if (ma.length === 1) { const s = ma[0], iv = s.includes('video') || s.includes('.mp4'); mh = `<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv ? 'bg-black flex items-center justify-center' : 'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv ? '' : `openLightbox('${s}','image')`}">${iv ? `<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>` : `<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>` } else { const cid = `carousel-${ctx}-${p.id}`, iid = `inner-${ctx}-${p.id}`, cntId = `counter-${ctx}-${p.id}`; let sl = '', dt = ''; ma.forEach((s, i) => { sl += `<div class="post-carousel-item img-placeholder">${(s.includes('video') || s.includes('.mp4')) ? `<video src="${s}" controls></video>` : `<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`; dt += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" id="dot-${ctx}-${p.id}-${i}"></div>` }); mh = `<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`; (window.carouselStates = window.carouselStates || {})[cid] = { index: 0, total: ma.length } } } if (p.likes?.length && currentUser.following) { const f = p.likes.filter(id => currentUser.following.includes(id) && id !== currentUser.id), ff = f.length && users.find(u => u.id === f[0]); if (ff) lh = `<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length > 1 ? ` and ${f.length - 1} others` : ''}</span></div>` } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
+            const a = users.find(u => u.id === p.authorId) || { name: 'Unknown', avatar: '', isOfficial: false, id: p.authorId }, st = p.settings || { privacy: 'public', showLikes: true, showComments: true }, d = document.createElement('article'); d.id = `post-card-${ctx}-${p.id}`; d.className = "post-card group overflow-hidden fade-in"; d.onclick = () => openPostView(p.id); let mh = "", lh = ""; if (p.media) {
+                const ma = Array.isArray(p.media) ? p.media : [p.media]; if (ma.length === 1) { const s = ma[0], iv = s.includes('video') || s.includes('.mp4'); mh = `<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv ? 'bg-black flex items-center justify-center' : 'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv ? '' : `openLightbox('${s}','image')`}">${iv ? `<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()" onloadstart="this.parentElement.style.animation='none';this.parentElement.classList.add('img-loaded')"></video>` : `<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none';this.parentElement.classList.add('img-loaded')">`}</div>` } else {
+                    const cid = `carousel-${ctx}-${p.id}`, iid = `inner-${ctx}-${p.id}`, cntId = `counter-${ctx}-${p.id}`; let sl = '', dt = ''; ma.forEach((s, i) => { sl += `<div class="post-carousel-item img-placeholder">${(s.includes('video') || s.includes('.mp4')) ? `<video src="${s}" controls onloadstart="this.parentElement.style.animation='none';this.parentElement.classList.add('img-loaded')"></video>` : `<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none';this.parentElement.classList.add('img-loaded')">`}</div>`; dt += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" id="dot-${ctx}-${p.id}-${i}"></div>` });
+                    mh = `<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`; (window.carouselStates = window.carouselStates || {})[cid] = { index: 0, total: ma.length }
+                }
+            } if (p.likes?.length && currentUser.following) { const f = p.likes.filter(id => currentUser.following.includes(id) && id !== currentUser.id), ff = f.length && users.find(u => u.id === f[0]); if (ff) lh = `<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length > 1 ? ` and ${f.length - 1} others` : ''}</span></div>` } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
             let rightActionBtn = '';
             if (p.claimLink) {
                 rightActionBtn = `<button class="action-btn text-[#0b57d0] border-blue-100 bg-blue-50 hover:bg-blue-100" onclick="event.stopPropagation(); confirmAndOpenLink('${p.claimLink}')"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Claim</button>`;
@@ -2820,7 +2888,7 @@
         window.closeCompose = () => { document.getElementById('compose-overlay').classList.add('opacity-0', 'pointer-events-none'); const modal = document.getElementById('compose-modal'); modal.classList.add('scale-95'); modal.classList.add('translate-y-full'); setTimeout(() => { window.editingPostId = null; document.getElementById('compose-text').value = ""; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null] }, 200) };
         window.toggleComposeSettings = () => { const a = document.getElementById('compose-settings-area'), ar = document.getElementById('compose-settings-arrow'); a.classList.toggle('hidden'); ar.style.transform = a.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)' };
         window.openUploadOptions = () => document.getElementById('upload-options-modal').classList.remove('hidden'); window.triggerUpload = m => { window.uploadMode = m; document.getElementById('upload-options-modal').classList.add('hidden'); const i = document.getElementById('media-input'); if (m === 'multiple') i.setAttribute('multiple', ''); else i.removeAttribute('multiple'); i.click() }; window.handleFileSelect = e => { const f = e.target.files; if (f.length > 0) { window.currentMediaBlob = []; window.currentMedia = []; const c = document.getElementById('media-preview-container'), inr = document.getElementById('preview-inner'); c.classList.remove('hidden'); inr.innerHTML = ''; const ps = Array.from(f).map(file => { window.currentMediaBlob.push(file); return new Promise(r => { const d = new FileReader(); d.onload = ev => { window.currentMedia.push(ev.target.result); const iv = file.type.startsWith('video'), el = document.createElement(iv ? 'video' : 'img'); el.src = ev.target.result; el.className = "h-20 w-20 object-cover rounded-md border border-gray-200 shrink-0"; inr.appendChild(el); r() }; d.readAsDataURL(file) }) }); Promise.all(ps).then(() => showToast(`${f.length} file(s) ready`)) } }; window.removeMedia = () => { window.currentMedia = []; window.currentMediaBlob = []; document.getElementById('media-preview-container').classList.add('hidden'); document.getElementById('media-input').value = "" };
-        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400 media-grid-plus"></i><i data-lucide="download" class="w-8 h-8 text-blue-600 media-grid-download hidden animate-bounce"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
+        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<div class="relative w-8 h-8 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8 text-gray-400 media-grid-plus absolute"></i><i data-lucide="download" class="w-8 h-8 text-[#0b57d0] media-grid-download absolute opacity-0"></i></div>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
         window.openImageAdjust = i => {
             const url = window.composeImages[i]; if (!url || url.includes('video') || url.endsWith('.mp4')) return; window.adjustingImageIndex = i; window.adjustZoom = 1; window.adjustX = 0; window.adjustY = 0; manageHistory('adjust-image-overlay'); const o = document.getElementById('adjust-image-overlay'), img = document.getElementById('adjust-image-target'); img.src = url; img.style.transform = `translate(0px, 0px) scale(1)`; document.getElementById('adjust-zoom-range').value = 1; o.classList.remove('hidden'); setTimeout(() => o.classList.remove('opacity-0'), 20);
             const wrap = document.getElementById('adjust-image-wrapper');
