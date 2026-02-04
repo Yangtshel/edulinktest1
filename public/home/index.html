@@ -2169,7 +2169,7 @@
                         </div>
                     </div>
                     <div class="relative flex flex-col min-h-[150px]">
-                        <div id="compose-toolbar" class="flex gap-2 mb-2 border-b border-gray-100 pb-2">
+                        <div id="compose-toolbar" class="flex flex-wrap gap-2 mb-2 border-b border-gray-100 pb-2">
                             <button onclick="execComposeCommand('bold')"
                                 class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
                                 title="Bold"><i data-lucide="bold" class="w-4 h-4"></i></button>
@@ -2179,10 +2179,19 @@
                             <button onclick="execComposeCommand('formatBlock', 'H1')"
                                 class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-xs"
                                 title="Heading 1">H1</button>
+                            <button onclick="execComposeCommand('formatBlock', 'H2')"
+                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors font-bold text-xs"
+                                title="Heading 2">H2</button>
+                            <button onclick="execComposeCommand('insertUnorderedList')"
+                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                title="Bullet List"><i data-lucide="list" class="w-4 h-4"></i></button>
+                            <button onclick="execComposeCommand('insertOrderedList')"
+                                class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+                                title="Numbered List"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
                         </div>
                         <div id="compose-text" contenteditable="true" placeholder="What's on your mind?"
-                            class="w-full flex-1 text-lg outline-none bg-transparent empty:before:content-[attr(placeholder)] empty:before:text-gray-400"
-                            oninput="checkWordCountRich(this)"></div>
+                            class="w-full h-auto min-h-[150px] text-lg outline-none bg-transparent empty:before:content-[attr(placeholder)] empty:before:text-gray-400"
+                            oninput="checkWordCountRich(this)" onpaste="handleComposePaste(event)"></div>
                         <div id="word-count-display"
                             class="absolute bottom-2 right-2 text-xs text-gray-400 font-medium pointer-events-none">
                             0/500 words</div>
@@ -2497,8 +2506,8 @@
         const formatContent = t => {
             if (!t) return '';
             let res = t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-            res = res.replace(/&lt;(b|i|u|h1|strong|em|br|p|div|span)&gt;/gi, '<$1>')
-                .replace(/&lt;\/(b|i|u|h1|strong|em|p|div|span)&gt;/gi, '</$1>')
+            res = res.replace(/&lt;(b|i|u|h1|h2|h3|ul|ol|li|blockquote|hr|strong|em|br|p|div|span)&gt;/gi, '<$1>')
+                .replace(/&lt;\/(b|i|u|h1|h2|h3|ul|ol|li|blockquote|hr|strong|em|p|div|span)&gt;/gi, '</$1>')
                 .replace(/&amp;nbsp;/g, '&nbsp;');
             return res
                 .replace(/@(\w+)/g, (m, u) => {
@@ -2699,6 +2708,35 @@
             if (!isEdit) { window.composeStep = 1; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; window.selectedCollaborators = []; window.editingPostId = null; window.currentClaimLink = null; document.getElementById('claim-link-input').value = ''; const ci = document.getElementById('claim-status-indicator'); if (ci) { ci.innerText = 'Off'; ci.classList.remove('text-green-600'); ci.classList.add('text-gray-400') } document.getElementById('compose-text').innerHTML = ""; document.getElementById('word-count-display').innerText = "0/500 words"; document.getElementById('compose-header-title').innerText = "Create Post"; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-action-btn').innerText = "Skip"; renderMediaGrid(); renderCollabChips() }
         };
         window.execComposeCommand = (cmd, val = null) => { document.getElementById('compose-text').focus(); document.execCommand(cmd, false, val); refreshIcons(); };
+        window.handleComposePaste = (e) => {
+            e.preventDefault();
+            const html = e.clipboardData.getData('text/html');
+            const text = e.clipboardData.getData('text/plain');
+            if (html) {
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+                const clean = (parent) => {
+                    const allowed = ['B', 'I', 'U', 'H1', 'H2', 'H3', 'P', 'BR', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'HR', 'SPAN', 'DIV', 'STRONG', 'EM'];
+                    const nodes = Array.from(parent.childNodes);
+                    nodes.forEach(node => {
+                        if (node.nodeType === 1) {
+                            if (allowed.includes(node.tagName)) {
+                                while (node.attributes.length > 0) node.removeAttribute(node.attributes[0].name);
+                                clean(node);
+                            } else {
+                                const tn = document.createTextNode(node.textContent);
+                                node.parentNode.replaceChild(tn, node);
+                            }
+                        }
+                    });
+                };
+                clean(temp);
+                document.execCommand('insertHTML', false, temp.innerHTML);
+            } else {
+                document.execCommand('insertText', false, text);
+            }
+            window.checkWordCountRich(document.getElementById('compose-text'));
+        };
         window.checkWordCountRich = el => { const text = el.innerText || ""; const w = text.trim().split(/\s+/).filter(x => x).length; document.getElementById('word-count-display').innerText = `${w}/500 words` };
         window.handleDroppedFiles = files => {
             const count = Math.min(files.length, 4);
