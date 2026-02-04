@@ -871,6 +871,94 @@
             background-color: rgba(6, 95, 212, 0.05) !important;
         }
 
+        .drag-over .media-grid-plus {
+            display: none;
+        }
+
+        .drag-over .media-grid-download {
+            display: block !important;
+        }
+
+        /* Post Skeleton Loader */
+        .post-skeleton {
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            animation: pulse-skeleton 1.5s infinite ease-in-out;
+        }
+
+        .post-skeleton-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .post-skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f1f5f9;
+        }
+
+        .post-skeleton-meta {
+            flex: 1;
+        }
+
+        .post-skeleton-name {
+            width: 40%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .post-skeleton-time {
+            width: 20%;
+            height: 10px;
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .post-skeleton-content {
+            margin-bottom: 16px;
+        }
+
+        .post-skeleton-line {
+            width: 100%;
+            height: 10px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .post-skeleton-line.short {
+            width: 60%;
+        }
+
+        .post-skeleton-media {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: #f1f5f9;
+            border-radius: 12px;
+        }
+
+        @keyframes pulse-skeleton {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
         border-color: #d1d5db;
         background: #f9fafb;
         transform: translateY(-1px);
@@ -2559,7 +2647,32 @@
         window.switchView = async (v, direction = 'none') => { ['feed', 'events', 'saved', 'network', 'profile', 'explore', 'notifications'].forEach(n => { const e = document.getElementById(`view-${n}`); if (e) e.classList.add('hidden', 'slide-in-right', 'slide-in-left') }); const tp = document.getElementById('trending-panel'), mh = document.getElementById('main-header'), mbn = document.getElementById('mobile-bottom-nav'), mnh = document.getElementById('mobile-notifications-header'); window.currentViewName = v; if (mh) { mh.classList.remove('hidden'); mh.style.transform = 'translateY(0)' } if (mbn) mbn.classList.remove('hidden'); if (mnh) mnh.classList.add('hidden', 'flex'); if (v === 'profile' && mh) mh.classList.add('hidden'); if (window.innerWidth < 768) { if (v === 'notifications') { if (mh) mh.classList.add('hidden'); if (mnh) mnh.classList.remove('hidden'), mnh.classList.add('flex') } else if (v === 'explore' && mh) mh.classList.add('hidden') } if (window.innerWidth >= 1280) tp.classList.remove('hidden'), tp.classList.add('xl:flex'); if (v !== 'ai') { const el = document.getElementById(`view-${v}`); if (el) { el.classList.remove('hidden'); if (direction === 'left') el.classList.add('slide-in-left'); if (direction === 'right') el.classList.add('slide-in-right') } } document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(e => e.classList.remove('active')); const nav = document.getElementById(`nav-${v}`), mnav = document.querySelectorAll('.mobile-nav-item'); if (nav) nav.classList.add('active'); if (v === 'feed') { mnav[0]?.classList.add('active'); if (document.getElementById('feed-container').children.length === 0) renderFeed() } else if (v === 'explore') { mnav[1]?.classList.add('active'); switchExploreMainTab('explore') } else if (v === 'network') { if (nav) nav.classList.add('active'); if (document.getElementById('network-content').children.length === 0) renderNetwork() } else if (v === 'notifications') { if (nav) nav.classList.add('active'); mnav[3]?.classList.add('active'); renderNotifications(); const un = notifications.filter(n => !n.read); if (un.length > 0) { const b = writeBatch(db); un.forEach(n => b.update(doc(db, "notifications", n.id), { read: !0 })); await b.commit() } } else if (v === 'saved') { if (nav) nav.classList.add('active'); if (document.getElementById('saved-container').children.length === 0) renderSaved() } else if (v === 'profile') { mnav[4]?.classList.add('active') } setTimeout(() => refreshIcons(), 10) };
         window.switchNetworkTab = t => { activeNetworkTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(`net-tab-${t}`)?.classList.add('active'); renderNetwork() };
         window.renderNetwork = () => { const c = document.getElementById('network-content'), isP = activeNetworkTab === 'people'; c.innerHTML = ""; if (isP) { const f = users.filter(u => currentUser.following.includes(u.id)); if (!f.length) c.innerHTML = '<div class="flex flex-col items-center justify-center py-10 opacity-60"><p>You aren\'t following anyone yet.</p></div>'; else { const g = document.createElement('div'); g.className = "grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0"; f.forEach(u => { const d = document.createElement('div'); d.className = "bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer"; d.onclick = () => showProfile(u.id); d.innerHTML = `<div class="img-placeholder w-12 h-12 rounded-full border border-gray-100 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${u.id}')"></div><div><h4 class="font-bold text-gray-900 flex items-center gap-1">${u.name} ${u.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${u.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>' : ''}</h4><p class="text-xs text-gray-500 line-clamp-1">${u.bio}</p></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="ml-auto text-xs border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Unfollow</button>`; g.appendChild(d) }); c.appendChild(g) } } else { const fp = posts.filter(p => currentUser.following.includes(p.authorId) && canSeePost(p)); if (!fp.length) c.innerHTML = '<div class="text-center py-10 text-gray-400">No posts.</div>'; else { const pc = document.createElement('div'); pc.className = "space-y-4 px-4 md:px-0"; fp.forEach(p => pc.appendChild(createPostElement(p, 'network'))); c.appendChild(pc) } } refreshIcons() };
-        window.renderFeed = t => { const c = document.getElementById('feed-container'); c.innerHTML = ""; const filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms }); if (filtered.length === 0) { let msg = "No posts found"; let sub = "Try adjusting filters"; let icon = "inbox"; if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet or they haven't posted."; icon = "user-plus" } else if (window.activeFeedFilter === 'friends') { msg = "No posts from friends"; sub = "Your friends haven't posted anything yet."; icon = "users" } else if (window.activeFeedFilter === 'all') { msg = "Welcome to EduLink"; sub = "Be the first to share something!"; icon = "pen-tool" } c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"><i data-lucide="${icon}" class="w-8 h-8"></i></div><h3 class="text-gray-900 font-bold text-lg">${msg}</h3><p class="text-gray-500 text-sm mt-1 max-w-xs">${sub}</p></div>` } else { filtered.forEach(p => c.appendChild(createPostElement(p, 'feed'))) } refreshIcons() };
+        window.renderFeed = t => {
+            const c = document.getElementById('feed-container');
+            if (!t && c.children.length === 0) {
+                c.innerHTML = Array(3).fill(0).map(() => `
+                    <div class="post-skeleton">
+                        <div class="post-skeleton-header">
+                            <div class="post-skeleton-avatar"></div>
+                            <div class="post-skeleton-meta">
+                                <div class="post-skeleton-name"></div>
+                                <div class="post-skeleton-time"></div>
+                            </div>
+                        </div>
+                        <div class="post-skeleton-content">
+                            <div class="post-skeleton-line"></div>
+                            <div class="post-skeleton-line"></div>
+                            <div class="post-skeleton-line short"></div>
+                        </div>
+                        <div class="post-skeleton-media"></div>
+                    </div>
+                `).join('');
+            }
+            setTimeout(() => {
+                c.innerHTML = "";
+                const filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms }); if (filtered.length === 0) { let msg = "No posts found"; let sub = "Try adjusting filters"; let icon = "inbox"; if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet or they haven't posted."; icon = "user-plus" } else if (window.activeFeedFilter === 'friends') { msg = "No posts from friends"; sub = "Your friends haven't posted anything yet."; icon = "users" } else if (window.activeFeedFilter === 'all') { msg = "Welcome to EduLink"; sub = "Be the first to share something!"; icon = "pen-tool" } c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"><i data-lucide="${icon}" class="w-8 h-8"></i></div><h3 class="text-gray-900 font-bold text-lg">${msg}</h3><p class="text-gray-500 text-sm mt-1 max-w-xs">${sub}</p></div>` } else { filtered.forEach((p, i) => { const el = createPostElement(p, 'feed'); el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; el.style.transition = 'all 0.4s ease'; c.appendChild(el); setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)' }, i * 50) }) } refreshIcons();
+            }, t ? 0 : 400);
+        };
         window.openFeedFilter = () => { manageHistory('feed-filter-overlay'); toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !0) }; window.closeFeedFilter = () => toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !1); window.switchFeedFilter = f => { window.activeFeedFilter = f; closeFeedFilter(); renderFeed(); const m = { all: 'All Posts', following: 'Following', friends: 'Friends Only' }; showToast(`Filter: ${m[f]}`) };
         let touchStartX = 0, touchEndX = 0; window.handleTouchStart = e => touchStartX = e.changedTouches[0].screenX; window.handleTouchEnd = (e, pid, ov) => { touchEndX = e.changedTouches[0].screenX; const w = e.currentTarget.closest('.post-carousel'); if (w && Math.abs(touchStartX - touchEndX) > 50) moveCarousel(w.id, touchStartX > touchEndX ? 1 : -1) };
         function createPostElement(p, ctx = 'feed') {
@@ -2707,7 +2820,7 @@
         window.closeCompose = () => { document.getElementById('compose-overlay').classList.add('opacity-0', 'pointer-events-none'); const modal = document.getElementById('compose-modal'); modal.classList.add('scale-95'); modal.classList.add('translate-y-full'); setTimeout(() => { window.editingPostId = null; document.getElementById('compose-text').value = ""; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null] }, 200) };
         window.toggleComposeSettings = () => { const a = document.getElementById('compose-settings-area'), ar = document.getElementById('compose-settings-arrow'); a.classList.toggle('hidden'); ar.style.transform = a.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)' };
         window.openUploadOptions = () => document.getElementById('upload-options-modal').classList.remove('hidden'); window.triggerUpload = m => { window.uploadMode = m; document.getElementById('upload-options-modal').classList.add('hidden'); const i = document.getElementById('media-input'); if (m === 'multiple') i.setAttribute('multiple', ''); else i.removeAttribute('multiple'); i.click() }; window.handleFileSelect = e => { const f = e.target.files; if (f.length > 0) { window.currentMediaBlob = []; window.currentMedia = []; const c = document.getElementById('media-preview-container'), inr = document.getElementById('preview-inner'); c.classList.remove('hidden'); inr.innerHTML = ''; const ps = Array.from(f).map(file => { window.currentMediaBlob.push(file); return new Promise(r => { const d = new FileReader(); d.onload = ev => { window.currentMedia.push(ev.target.result); const iv = file.type.startsWith('video'), el = document.createElement(iv ? 'video' : 'img'); el.src = ev.target.result; el.className = "h-20 w-20 object-cover rounded-md border border-gray-200 shrink-0"; inr.appendChild(el); r() }; d.readAsDataURL(file) }) }); Promise.all(ps).then(() => showToast(`${f.length} file(s) ready`)) } }; window.removeMedia = () => { window.currentMedia = []; window.currentMediaBlob = []; document.getElementById('media-preview-container').classList.add('hidden'); document.getElementById('media-input').value = "" };
-        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
+        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400 media-grid-plus"></i><i data-lucide="download" class="w-8 h-8 text-blue-600 media-grid-download hidden animate-bounce"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
         window.openImageAdjust = i => {
             const url = window.composeImages[i]; if (!url || url.includes('video') || url.endsWith('.mp4')) return; window.adjustingImageIndex = i; window.adjustZoom = 1; window.adjustX = 0; window.adjustY = 0; manageHistory('adjust-image-overlay'); const o = document.getElementById('adjust-image-overlay'), img = document.getElementById('adjust-image-target'); img.src = url; img.style.transform = `translate(0px, 0px) scale(1)`; document.getElementById('adjust-zoom-range').value = 1; o.classList.remove('hidden'); setTimeout(() => o.classList.remove('opacity-0'), 20);
             const wrap = document.getElementById('adjust-image-wrapper');
