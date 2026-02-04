@@ -2621,15 +2621,38 @@
             } else {
                 filtered.forEach((p, index) => {
                     c.appendChild(createPostElement(p, 'feed'));
-                    // Add to seen posts as user scrolls (simplified here as "seen on render")
+
+                    // Mark as seen in session
                     window.sessionSeenPosts.add(p.id);
 
-                    // Injection logic: Sponsored / Spotlight every 5 posts
-                    if ((index + 1) % 5 === 0) {
-                        const spot = document.createElement('div');
-                        spot.className = "p-4 mx-4 my-2 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-between group cursor-pointer hover:shadow-sm transition-all";
-                        spot.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><i data-lucide="sparkles" class="w-5 h-5"></i></div><div><div class="text-xs font-bold text-blue-600 uppercase tracking-wider">Community Spotlight</div><div class="text-[14px] font-bold text-gray-900">Discover top EduLink creators</div></div></div><i data-lucide="chevron-right" class="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform"></i>`;
-                        spot.onclick = () => switchExploreMainTab('people');
+                    // Injection logic: Post-like Spotlight
+                    // Wait until 7th post, then show every 12 posts
+                    const spotIndex = index + 1;
+                    if (spotIndex === 7 || (spotIndex > 7 && (spotIndex - 7) % 12 === 0)) {
+                        const spot = document.createElement('article');
+                        spot.className = "post-card bg-white overflow-hidden mb-4";
+                        spot.innerHTML = `
+                            <div class="p-4 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-[15px] font-bold text-gray-900 line-height-1">Community Spotlight</div>
+                                    <div class="text-[13px] text-gray-500 line-height-1 mt-0.5">Suggestions based on your interests</div>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-4">
+                                <p class="text-[15px] text-gray-800 leading-relaxed mb-4">Discover influential educators and top-performing creators on EduLink. Connect with people who share your passion for learning.</p>
+                                <div class="flex -space-x-3 overflow-hidden mb-1">
+                                    ${users.slice(0, 5).map(u => `<img class="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="${u.avatar}" alt="${u.name}">`).join('')}
+                                    <div class="flex items-center justify-center h-9 w-9 rounded-full ring-2 ring-white bg-gray-100 text-[11px] font-bold text-gray-500">+${Math.max(0, users.length - 5)}</div>
+                                </div>
+                            </div>
+                            <div class="px-4 py-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between group cursor-pointer hover:bg-gray-100 transition-colors" onclick="switchExploreMainTab('people')">
+                                <span class="text-[13px] font-bold text-blue-600">See more creators like this</span>
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        `;
                         c.appendChild(spot);
                     }
                 });
