@@ -866,121 +866,9 @@
             text-transform: lowercase;
         }
 
-        .drag-over .media-grid-download {
-            display: block !important;
-        }
-
-        /* Post Skeleton Loader */
-        .post-skeleton {
-            background: #fff;
-            border: 1px solid #f1f5f9;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            animation: pulse-skeleton 1.5s infinite ease-in-out;
-        }
-
-        .post-skeleton-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .post-skeleton-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f1f5f9;
-        }
-
-        .post-skeleton-meta {
-            flex: 1;
-        }
-
-        .post-skeleton-name {
-            width: 40%;
-            height: 12px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-
-        .post-skeleton-time {
-            width: 20%;
-            height: 10px;
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-
-        .post-skeleton-content {
-            margin-bottom: 16px;
-        }
-
-        .post-skeleton-line {
-            width: 100%;
-            height: 10px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-
-        .post-skeleton-line.short {
-            width: 60%;
-        }
-
-        .post-skeleton-media {
-            width: 100%;
-            aspect-ratio: 4/5;
-            background: #f1f5f9;
-            border-radius: 12px;
-        }
-
-        @keyframes pulse-skeleton {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .img-placeholder {
-            background-color: #f1f5f9 !important;
-        }
-
-        .img-placeholder img,
-        .img-placeholder video {
-            opacity: 0;
-            transition: opacity 0.1s ease-in-out;
-        }
-
-        .img-loaded img,
-        .img-loaded video {
-            opacity: 1 !important;
-        }
-
-        .progressive-reveal {
-            position: relative;
-        }
-
-        .progressive-reveal::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: #f1f5f9;
-            z-index: 1;
-            transition: opacity 0.3s ease;
-        }
-
-        .progressive-reveal.img-loaded::after {
-            opacity: 0;
-            pointer-events: none;
+        .drag-over {
+            border: 2px dashed #065fd4 !important;
+            background-color: rgba(6, 95, 212, 0.05) !important;
         }
 
         border-color: #d1d5db;
@@ -2588,6 +2476,8 @@
         window.profileSort = 'latest'; window.isDesktopThreadMode = false;
         window.currentDownloadImages = []; window.selectedDownloadIndices = new Set();
         window.currentCommentFilter = 'latest';
+        window.trackInteraction = async (pid, type, weight = 1) => { if (!currentUser) return; const r = doc(db, "users", currentUser.id), p = posts.find(x => x.id === pid); if (!p) return; const s = currentUser.interests || {}; s.authors = s.authors || {}; s.tags = s.tags || {}; s.disliked = s.disliked || []; if (type === 'not_interested') { if (!s.disliked.includes(pid)) s.disliked.push(pid); weight = -20 } if (p.authorId) s.authors[p.authorId] = (s.authors[p.authorId] || 0) + weight; const tags = p.content.match(/#(\w+)/g); if (tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); s.tags[tn] = (s.tags[tn] || 0) + weight }); await updateDoc(r, { interests: s }); currentUser.interests = s; if (type === 'not_interested') { renderFeed(); showToast("We'll show you less of this") } else if (type === 'show_more') showToast("We'll show you more of this") };
+        const getPostScore = (p) => { if (!currentUser) return 0; const s = currentUser.interests || {}; if (s.disliked && s.disliked.includes(p.id)) return -1000; let score = 0; const ts = p.timestamp?.toDate ? p.timestamp.toDate().getTime() : new Date(p.timestamp || 0).getTime(), age = (Date.now() - ts) / 3600000; score -= age * 2; if (p.authorId && s.authors && s.authors[p.authorId]) score += s.authors[p.authorId] * 5; const tags = p.content.match(/#(\w+)/g); if (tags && s.tags) tags.forEach(t => { const tn = t.substring(1).toLowerCase(); if (s.tags[tn]) score += s.tags[tn] * 3 }); score += (p.likes?.length || 0) * 2; score += (p.comments?.length || 0) * 3; return score };
         window.commentSearchTerm = ''; window.isCommentSearchOpen = false;
         window.currentClaimLink = null;
         const feedView = document.getElementById('view-feed'), exploreView = document.getElementById('view-explore'), ptrSpinner = document.getElementById('ptr-spinner'), refreshIcons = () => window.lucide?.createIcons();
@@ -2671,78 +2561,11 @@
         window.switchView = async (v, direction = 'none') => { ['feed', 'events', 'saved', 'network', 'profile', 'explore', 'notifications'].forEach(n => { const e = document.getElementById(`view-${n}`); if (e) e.classList.add('hidden', 'slide-in-right', 'slide-in-left') }); const tp = document.getElementById('trending-panel'), mh = document.getElementById('main-header'), mbn = document.getElementById('mobile-bottom-nav'), mnh = document.getElementById('mobile-notifications-header'); window.currentViewName = v; if (mh) { mh.classList.remove('hidden'); mh.style.transform = 'translateY(0)' } if (mbn) mbn.classList.remove('hidden'); if (mnh) mnh.classList.add('hidden', 'flex'); if (v === 'profile' && mh) mh.classList.add('hidden'); if (window.innerWidth < 768) { if (v === 'notifications') { if (mh) mh.classList.add('hidden'); if (mnh) mnh.classList.remove('hidden'), mnh.classList.add('flex') } else if (v === 'explore' && mh) mh.classList.add('hidden') } if (window.innerWidth >= 1280) tp.classList.remove('hidden'), tp.classList.add('xl:flex'); if (v !== 'ai') { const el = document.getElementById(`view-${v}`); if (el) { el.classList.remove('hidden'); if (direction === 'left') el.classList.add('slide-in-left'); if (direction === 'right') el.classList.add('slide-in-right') } } document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(e => e.classList.remove('active')); const nav = document.getElementById(`nav-${v}`), mnav = document.querySelectorAll('.mobile-nav-item'); if (nav) nav.classList.add('active'); if (v === 'feed') { mnav[0]?.classList.add('active'); if (document.getElementById('feed-container').children.length === 0) renderFeed() } else if (v === 'explore') { mnav[1]?.classList.add('active'); switchExploreMainTab('explore') } else if (v === 'network') { if (nav) nav.classList.add('active'); if (document.getElementById('network-content').children.length === 0) renderNetwork() } else if (v === 'notifications') { if (nav) nav.classList.add('active'); mnav[3]?.classList.add('active'); renderNotifications(); const un = notifications.filter(n => !n.read); if (un.length > 0) { const b = writeBatch(db); un.forEach(n => b.update(doc(db, "notifications", n.id), { read: !0 })); await b.commit() } } else if (v === 'saved') { if (nav) nav.classList.add('active'); if (document.getElementById('saved-container').children.length === 0) renderSaved() } else if (v === 'profile') { mnav[4]?.classList.add('active') } setTimeout(() => refreshIcons(), 10) };
         window.switchNetworkTab = t => { activeNetworkTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(`net-tab-${t}`)?.classList.add('active'); renderNetwork() };
         window.renderNetwork = () => { const c = document.getElementById('network-content'), isP = activeNetworkTab === 'people'; c.innerHTML = ""; if (isP) { const f = users.filter(u => currentUser.following.includes(u.id)); if (!f.length) c.innerHTML = '<div class="flex flex-col items-center justify-center py-10 opacity-60"><p>You aren\'t following anyone yet.</p></div>'; else { const g = document.createElement('div'); g.className = "grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0"; f.forEach(u => { const d = document.createElement('div'); d.className = "bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer"; d.onclick = () => showProfile(u.id); d.innerHTML = `<div class="img-placeholder w-12 h-12 rounded-full border border-gray-100 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${u.id}')"></div><div><h4 class="font-bold text-gray-900 flex items-center gap-1">${u.name} ${u.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${u.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500"></i>' : ''}</h4><p class="text-xs text-gray-500 line-clamp-1">${u.bio}</p></div><button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="ml-auto text-xs border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Unfollow</button>`; g.appendChild(d) }); c.appendChild(g) } } else { const fp = posts.filter(p => currentUser.following.includes(p.authorId) && canSeePost(p)); if (!fp.length) c.innerHTML = '<div class="text-center py-10 text-gray-400">No posts.</div>'; else { const pc = document.createElement('div'); pc.className = "space-y-4 px-4 md:px-0"; fp.forEach(p => pc.appendChild(createPostElement(p, 'network'))); c.appendChild(pc) } } refreshIcons() };
-        window.renderFeed = t => {
-            const c = document.getElementById('feed-container');
-            const filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms });
-
-            if (c.children.length === 0 && filtered.length > 0) {
-                c.innerHTML = Array(3).fill(0).map(() => `
-                    <div class="post-skeleton">
-                        <div class="post-skeleton-header">
-                            <div class="post-skeleton-avatar"></div>
-                            <div class="post-skeleton-meta">
-                                <div class="post-skeleton-name"></div>
-                                <div class="post-skeleton-time"></div>
-                            </div>
-                        </div>
-                        <div class="post-skeleton-content">
-                            <div class="post-skeleton-line"></div>
-                            <div class="post-skeleton-line"></div>
-                        </div>
-                        <div class="post-skeleton-media"></div>
-                    </div>
-                `).join('');
-            }
-
-            // Small delay to let icons load, but faster than before
-            setTimeout(() => {
-                c.innerHTML = "";
-                if (filtered.length === 0) {
-                    let msg = "No posts found", sub = "Try adjusting filters", icon = "inbox";
-                    if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet."; icon = "user-plus" }
-                    else if (window.activeFeedFilter === 'friends') { msg = "No friends' posts"; sub = "Friends haven't posted yet."; icon = "users" }
-                    c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center text-gray-400"><i data-lucide="${icon}" class="w-10 h-10 mb-4 opacity-20"></i><p class="font-bold text-gray-900">${msg}</p><p class="text-sm">${sub}</p></div>`;
-                } else {
-                    filtered.forEach(p => {
-                        const el = createPostElement(p, 'feed');
-                        c.appendChild(el);
-                    });
-                }
-                refreshIcons();
-            }, filtered.length > 0 ? 150 : 0);
-        };
+        window.renderFeed = t => { const c = document.getElementById('feed-container'); c.innerHTML = ""; let filtered = posts.filter(p => { if (!canSeePost(p)) return false; const a = users.find(u => u.id === p.authorId); const fol = currentUser.following.includes(p.authorId); let pf = true; if (window.activeFeedFilter === 'following') pf = fol; else if (window.activeFeedFilter === 'friends') { const isF = fol && (a.following && a.following.includes(currentUser.id)); pf = isF } const ms = (!t || p.content.toLowerCase().includes(t.toLowerCase())); return pf && ms }); if (window.activeFeedFilter === 'all') { filtered.sort((a, b) => getPostScore(b) - getPostScore(a)) } if (filtered.length === 0) { let msg = "No posts found"; let sub = "Try adjusting filters"; let icon = "inbox"; if (window.activeFeedFilter === 'following') { msg = "Follow someone"; sub = "You aren't following anyone yet or they haven't posted."; icon = "user-plus" } else if (window.activeFeedFilter === 'friends') { msg = "No posts from friends"; sub = "Your friends haven't posted anything yet."; icon = "users" } else if (window.activeFeedFilter === 'all') { msg = "Welcome to EduLink"; sub = "Be the first to share something!"; icon = "pen-tool" } c.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"><i data-lucide="${icon}" class="w-8 h-8"></i></div><h3 class="text-gray-900 font-bold text-lg">${msg}</h3><p class="text-gray-500 text-sm mt-1 max-w-xs">${sub}</p></div>` } else { filtered.forEach(p => c.appendChild(createPostElement(p, 'feed'))) } refreshIcons() };
         window.openFeedFilter = () => { manageHistory('feed-filter-overlay'); toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !0) }; window.closeFeedFilter = () => toggleModalAnim('feed-filter-overlay', 'feed-filter-modal', !1); window.switchFeedFilter = f => { window.activeFeedFilter = f; closeFeedFilter(); renderFeed(); const m = { all: 'All Posts', following: 'Following', friends: 'Friends Only' }; showToast(`Filter: ${m[f]}`) };
         let touchStartX = 0, touchEndX = 0; window.handleTouchStart = e => touchStartX = e.changedTouches[0].screenX; window.handleTouchEnd = (e, pid, ov) => { touchEndX = e.changedTouches[0].screenX; const w = e.currentTarget.closest('.post-carousel'); if (w && Math.abs(touchStartX - touchEndX) > 50) moveCarousel(w.id, touchStartX > touchEndX ? 1 : -1) };
         function createPostElement(p, ctx = 'feed') {
-            const a = users.find(u => u.id === p.authorId) || { name: 'Unknown', avatar: '', isOfficial: false, id: p.authorId };
-            const st = p.settings || { privacy: 'public', showLikes: true, showComments: true };
-            const d = document.createElement('article');
-            d.id = `post-card-${ctx}-${p.id}`;
-            d.className = "post-card group overflow-hidden fade-in";
-            d.onclick = () => openPostView(p.id);
-
-            // Fast profile pic loading
-            const avatarHtml = `<div class="w-10 h-10 rounded-full border border-gray-100 bg-gray-100 overflow-hidden shrink-0 cursor-pointer progressive-reveal">
-                <img src="${a.avatar}" class="w-full h-full object-cover opacity-0 transition-opacity duration-200" onload="this.classList.remove('opacity-0');this.parentElement.style.background='white'" onclick="event.stopPropagation();showProfile('${a.id}')">
-            </div>`;
-
-            let mh = "", lh = "";
-            if (p.media) {
-                const ma = Array.isArray(p.media) ? p.media : [p.media];
-                if (ma.length === 1) {
-                    const s = ma[0], iv = s.includes('video') || s.includes('.mp4');
-                    mh = `<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv ? 'bg-black flex items-center justify-center' : 'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv ? '' : `openLightbox('${s}','image')`}">${iv ? `<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()" onloadstart="this.parentElement.classList.add('img-loaded')"></video>` : `<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-200" onload="this.classList.remove('opacity-0');this.parentElement.classList.add('img-loaded')">`}</div>`
-                } else {
-                    const cid = `carousel-${ctx}-${p.id}`, iid = `inner-${ctx}-${p.id}`, cntId = `counter-${ctx}-${p.id}`;
-                    let sl = '', dt = '';
-                    ma.forEach((s, i) => {
-                        sl += `<div class="post-carousel-item img-placeholder">${(s.includes('video') || s.includes('.mp4')) ? `<video src="${s}" controls onloadstart="this.parentElement.classList.add('img-loaded')"></video>` : `<img src="${s}" class="opacity-0 transition-opacity duration-200 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.classList.add('img-loaded')">`}</div>`;
-                        dt += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" id="dot-${ctx}-${p.id}-${i}"></div>`
-                    });
-                    mh = `<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`;
-                    (window.carouselStates = window.carouselStates || {})[cid] = { index: 0, total: ma.length }
-                }
-            } if (p.likes?.length && currentUser.following) { const f = p.likes.filter(id => currentUser.following.includes(id) && id !== currentUser.id), ff = f.length && users.find(u => u.id === f[0]); if (ff) lh = `<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length > 1 ? ` and ${f.length - 1} others` : ''}</span></div>` } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
+            const a = users.find(u => u.id === p.authorId) || { name: 'Unknown', avatar: '', isOfficial: false, id: p.authorId }, st = p.settings || { privacy: 'public', showLikes: true, showComments: true }, d = document.createElement('article'); d.id = `post-card-${ctx}-${p.id}`; d.className = "post-card group overflow-hidden fade-in"; d.onclick = () => { openPostView(p.id); trackInteraction(p.id, 'view', 1) }; let mh = "", lh = ""; if (p.media) { const ma = Array.isArray(p.media) ? p.media : [p.media]; if (ma.length === 1) { const s = ma[0], iv = s.includes('video') || s.includes('.mp4'); mh = `<div class="mt-3 rounded-xl overflow-hidden aspect-[4/5] ${iv ? 'bg-black flex items-center justify-center' : 'bg-gray-100 cursor-pointer img-placeholder'}" onclick="event.stopPropagation();${iv ? '' : `openLightbox('${s}','image')`}">${iv ? `<video src="${s}" class="w-full h-full object-cover" controls onclick="event.stopPropagation()"></video>` : `<img src="${s}" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>` } else { const cid = `carousel-${ctx}-${p.id}`, iid = `inner-${ctx}-${p.id}`, cntId = `counter-${ctx}-${p.id}`; let sl = '', dt = ''; ma.forEach((s, i) => { sl += `<div class="post-carousel-item img-placeholder">${(s.includes('video') || s.includes('.mp4')) ? `<video src="${s}" controls></video>` : `<img src="${s}" class="opacity-0 transition-opacity duration-300 w-full h-full object-cover" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'">`}</div>`; dt += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" id="dot-${ctx}-${p.id}-${i}"></div>` }); mh = `<div class="carousel-wrapper"><div class="mt-3 rounded-xl overflow-hidden post-carousel touch-pan-y" id="${cid}" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event,'${p.id}',false)"><div class="post-carousel-inner" id="${iid}">${sl}</div><button class="carousel-nav-btn prev hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button class="carousel-nav-btn next hidden md:flex" onclick="event.stopPropagation();moveCarousel('${cid}',1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div><div class="carousel-dots-outside">${dt}</div></div>`; (window.carouselStates = window.carouselStates || {})[cid] = { index: 0, total: ma.length } } } if (p.likes?.length && currentUser.following) { const f = p.likes.filter(id => currentUser.following.includes(id) && id !== currentUser.id), ff = f.length && users.find(u => u.id === f[0]); if (ff) lh = `<div class="flex items-center mt-3 ml-1"><img src="${ff.avatar}" class="w-5 h-5 rounded-full border border-white -mr-1 z-10"><span class="text-[11px] text-gray-500 ml-2">Liked by <span class="font-bold text-gray-900">${ff.name}</span>${f.length > 1 ? ` and ${f.length - 1} others` : ''}</span></div>` } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
             let rightActionBtn = '';
             if (p.claimLink) {
                 rightActionBtn = `<button class="action-btn text-[#0b57d0] border-blue-100 bg-blue-50 hover:bg-blue-100" onclick="event.stopPropagation(); confirmAndOpenLink('${p.claimLink}')"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Claim</button>`;
@@ -2751,43 +2574,7 @@
             }
             const urlMatch = p.content.match(/(https?:\/\/[^\s]+)/), previewId = `preview-${ctx}-${p.id}`, previewHtml = urlMatch ? `<div id="${previewId}"></div>` : '';
             if (urlMatch) setTimeout(() => window.renderLinkPreview(urlMatch[0], previewId), 100);
-            d.innerHTML = `
-                <div class="px-4 py-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            ${avatarHtml}
-                            <div class="cursor-pointer" onclick="event.stopPropagation();showProfile('${a.id}')">
-                                <div class="font-bold text-gray-900 text-[14px] flex items-center mb-0.5">
-                                    ${a.name}${a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}
-                                </div>
-                                <div class="text-[11px] text-gray-500 font-medium">@${a.username || 'user'} • ${formatDate(p.timestamp)}</div>
-                            </div>
-                        </div>
-                        <button onclick="showPostOptions(event, '${p.id}', '${p.authorId}')" class="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors">
-                            <i data-lucide="more-horizontal" class="w-5 h-5 text-gray-600"></i>
-                        </button>
-                    </div>
-                    <div class="text-[14px] text-gray-800 leading-relaxed mt-3 whitespace-pre-wrap js-post-body-${p.id}">${formatContent(p.content || '')}</div>
-                    ${previewHtml}
-                    ${mh}
-                    <div class="post-actions mt-1">
-                        <button class="action-btn like js-like-btn-${p.id} ${isLiked ? 'active' : ''}" onclick="toggleLike('${p.id}')">
-                            <i data-lucide="heart"></i> 
-                            <span class="js-like-count-${p.id}">${likeText}</span>
-                        </button>
-                        <button class="action-btn comment">
-                            <i data-lucide="message-circle"></i> 
-                            <span class="js-comment-count-${p.id}">${commentText}</span>
-                        </button>
-                        <button class="action-btn share-btn" onclick="sharePost('${p.id}')">
-                            <i data-lucide="redo-2"></i>
-                        </button>
-                        <div class="flex-1"></div>
-                        ${rightActionBtn}
-                    </div>
-                </div>
-            `;
-            return d;
+            d.innerHTML = `<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container img-placeholder w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${a.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>' : ''}${st.privacy === 'private' ? '<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>' : ''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${previewHtml}${mh}</div>${lh}<div class="post-actions"><button class="action-btn like js-like-btn-${p.id} ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart"></i> <span class="js-like-count-${p.id}">${likeText}</span></button><button class="action-btn comment" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments === false ? 'message-circle-off' : 'message-circle'}"></i> <span class="js-comment-count-${p.id}">${commentText}</span></button><button class="action-btn share-btn" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2"></i> <span class="hidden sm:inline">Share</span></button><div class="flex-1"></div>${rightActionBtn}</div></div>`; return d
         }
         window.moveCarousel = (cid, dir) => { const s = window.carouselStates[cid]; if (!s) return; let n = s.index + dir; if (n < 0) n = 0; if (n >= s.total) n = s.total - 1; s.index = n; const outer = document.getElementById(cid), inner = outer ? outer.querySelector('.post-carousel-inner') : null; if (inner) inner.style.transform = `translateX(-${n * 100}%)`; const dc = document.getElementById(cid).nextElementSibling; if (dc) dc.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === n)); const ctid = cid.replace('carousel-', 'counter-'), cnt = document.getElementById(ctid); if (cnt) cnt.innerText = n + 1 };
         window.switchExploreMainTab = t => { window.activeExploreTab = t; const m = t === 'explore' ? 'main' : t;['main', 'video', 'people', 'tags'].forEach(x => { const el = document.getElementById(`tab-explore-${x}`), ed = document.getElementById(`tab-explore-${x}-d`); if (el) el.classList.remove('active'); if (ed) ed.classList.remove('active') }); document.getElementById(`tab-explore-${m}`)?.classList.add('active'); document.getElementById(`tab-explore-${m}-d`)?.classList.add('active'); window.activeExploreCategory = t === 'video' ? 'All' : 'For You'; handleSearch(document.getElementById('mobile-explore-search').value) };
@@ -2797,7 +2584,7 @@
         window.toggleCollaborator = u => { const i = window.selectedCollaborators.findIndex(x => x.id === u.id); if (i > -1) window.selectedCollaborators.splice(i, 1); else window.selectedCollaborators.push({ id: u.id, name: u.name, avatar: u.avatar, username: u.username, status: 'pending' }); closeUserList(); openCollabSelector(); renderCollabChips() }; window.renderCollabChips = () => { const c = document.getElementById('collab-chips-container'); c.innerHTML = ''; window.selectedCollaborators.forEach(u => { const ch = document.createElement('div'); ch.className = 'collab-chip'; ch.innerHTML = `<img src="${u.avatar}" class="w-4 h-4 rounded-full mr-2"> <span>${u.name}</span> <i onclick="event.stopPropagation(); removeCollaborator('${u.id}')" data-lucide="x" class="w-3 h-3 ml-2 text-gray-500 hover:text-red-500 cursor-pointer"></i>`; c.appendChild(ch) }); refreshIcons() }; window.removeCollaborator = id => { window.selectedCollaborators = window.selectedCollaborators.filter(u => u.id !== id); renderCollabChips() };
         window.openCollabList = pid => { manageHistory('user-list-overlay'); const p = posts.find(x => x.id === pid); if (!p || !p.collaborators) return; const c = document.getElementById('user-list-content'); document.getElementById('user-list-title').innerText = "Collaborators"; c.innerHTML = ''; p.collaborators.filter(x => x.status === 'accepted').forEach(u => { const d = document.createElement('div'); d.className = "flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer"; d.onclick = () => { closeUserList(); showProfile(u.id) }; d.innerHTML = `<div class="flex items-center gap-3"><img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500">@${u.username || 'user'}</div></div></div>`; c.appendChild(d) }); document.getElementById('user-list-overlay').classList.remove('hidden') };
         window.openUserList = (type, uid) => { const u = users.find(x => x.id === uid); if (!u) return; manageHistory('user-list-overlay'); const m = document.getElementById('user-list-overlay'), c = document.getElementById('user-list-content'); document.getElementById('user-list-title').innerText = type === 'following' ? 'Following' : 'Followers'; const me = uid === currentUser.id, fol = currentUser.following.includes(uid), priv = u.settings?.privateNetwork, hide = u.settings?.hideConnections; if (!me && (hide || (priv && !fol))) { c.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 opacity-60"><i data-lucide="${hide ? 'eye-off' : 'lock'}" class="w-16 h-16 mb-2"></i><p>${hide ? 'Connections hidden' : 'Account is private'}</p></div>` } else { const ids = type === 'following' ? (u.following || []) : (u.followers || []); if (!ids.length) c.innerHTML = '<div class="text-center text-gray-400 py-8">No users found.</div>'; else { c.innerHTML = ''; ids.forEach(id => { const user = users.find(x => x.id === id); if (user) { const d = document.createElement('div'); d.className = "flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl cursor-pointer"; d.onclick = () => { closeUserList(); showProfile(user.id) }; d.innerHTML = `<div class="flex items-center gap-3"><img src="${user.avatar}" class="w-10 h-10 rounded-full border border-gray-200 object-cover"><div><div class="font-bold text-sm text-gray-900">${user.name}</div><div class="text-xs text-gray-500">@${user.username || 'user'}</div></div></div>`; c.appendChild(d) } }) } } toggleModalAnim('user-list-overlay', 'user-list-modal', !0); refreshIcons() }; window.closeUserList = () => toggleModalAnim('user-list-overlay', 'user-list-modal', !1);
-        window.toggleLike = async (pid) => { const isLiking = !document.querySelector(`.js-like-btn-${pid}`)?.classList.contains('active'); document.querySelectorAll(`.js-like-btn-${pid}`).forEach(b => b.classList.toggle('active', isLiking)); document.querySelectorAll(`.js-like-count-${pid}`).forEach(el => { let t = el.innerText; let c = parseInt(t); if (isNaN(c)) c = 0; let nc = Math.max(0, c + (isLiking ? 1 : -1)); el.innerText = nc === 0 ? 'Like' : nc }); const ovBtn = document.getElementById('post-view-like-btn'); if (ovBtn) { if (isLiking) { ovBtn.classList.add('fill-red-500', 'text-red-500'); ovBtn.classList.remove('text-gray-700') } else { ovBtn.classList.remove('fill-red-500', 'text-red-500'); ovBtn.classList.add('text-gray-700') } } const movBtn = document.getElementById(`mobile-overlay-like-btn-${pid}`); if (movBtn) { if (isLiking) { movBtn.classList.add('fill-red-500', 'text-red-500'); movBtn.classList.remove('text-900') } else { movBtn.classList.remove('fill-red-500', 'text-red-500'); movBtn.classList.add('text-900') } } const r = doc(db, "posts", pid), p = posts.find(x => x.id === pid); if (p.likes && p.likes.includes(currentUser.id)) await updateDoc(r, { likes: arrayRemove(currentUser.id) }); else { await updateDoc(r, { likes: arrayUnion(currentUser.id) }); if (p.authorId !== currentUser.id) sendNotification(p.authorId, 'like', 'liked your post', pid) } };
+        window.toggleLike = async (pid) => { const isLiking = !document.querySelector(`.js-like-btn-${pid}`)?.classList.contains('active'); document.querySelectorAll(`.js-like-btn-${pid}`).forEach(b => b.classList.toggle('active', isLiking)); document.querySelectorAll(`.js-like-count-${pid}`).forEach(el => { let t = el.innerText; let c = parseInt(t); if (isNaN(c)) c = 0; let nc = Math.max(0, c + (isLiking ? 1 : -1)); el.innerText = nc === 0 ? 'Like' : nc }); const ovBtn = document.getElementById('post-view-like-btn'); if (ovBtn) { if (isLiking) { ovBtn.classList.add('fill-red-500', 'text-red-500'); ovBtn.classList.remove('text-gray-700') } else { ovBtn.classList.remove('fill-red-500', 'text-red-500'); ovBtn.classList.add('text-gray-700') } } const movBtn = document.getElementById(`mobile-overlay-like-btn-${pid}`); if (movBtn) { if (isLiking) { movBtn.classList.add('fill-red-500', 'text-red-500'); movBtn.classList.remove('text-900') } else { movBtn.classList.remove('fill-red-500', 'text-red-500'); movBtn.classList.add('text-900') } } const r = doc(db, "posts", pid), p = posts.find(x => x.id === pid); if (p.likes && p.likes.includes(currentUser.id)) await updateDoc(r, { likes: arrayRemove(currentUser.id) }); else { await updateDoc(r, { likes: arrayUnion(currentUser.id) }); if (p.authorId !== currentUser.id) sendNotification(p.authorId, 'like', 'liked your post', pid) } if (isLiking) trackInteraction(pid, 'like', 2); };
         const toggleModalAnim = (oid, mid, s) => { const o = document.getElementById(oid), m = document.getElementById(mid); if (s) { o.classList.remove('hidden'); m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) } else { o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); setTimeout(() => o.classList.add('hidden'), 200) } };
         window.openLikes = pid => { manageHistory('likes-overlay'); const p = posts.find(x => x.id === pid), c = document.getElementById('likes-list-content'); const searchInput = document.getElementById('likes-search-input'); if (searchInput) searchInput.value = ''; if (p.settings?.allowLikeView === false && p.authorId !== currentUser.id) { c.innerHTML = '<div class="text-center text-gray-400 py-8">Creator hid likes.</div>'; toggleModalAnim('likes-overlay', 'likes-modal', true); return } renderLikesList(p.likes || []); searchInput.oninput = (e) => { const term = e.target.value.toLowerCase(); const allLikes = p.likes || []; if (!term) { renderLikesList(allLikes) } else { const filtered = allLikes.filter(uid => { const u = users.find(x => x.id === uid); return u && (u.name.toLowerCase().includes(term) || (u.username && u.username.toLowerCase().includes(term))) }); renderLikesList(filtered) } }; toggleModalAnim('likes-overlay', 'likes-modal', true) };
         window.renderLikesList = (idList) => { const c = document.getElementById('likes-list-content'); if (!idList || !idList.length) { c.innerHTML = '<div class="text-center text-gray-400 py-8">No matching users.</div>'; return } c.innerHTML = idList.map(uid => { const u = users.find(x => x.id === uid); return u ? `<div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer" onclick="closeLikes();showProfile('${u.id}')"><div class="img-placeholder rounded-full w-10 h-10 shrink-0"><img src="${u.avatar}" class="w-full h-full rounded-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0');this.parentElement.style.animation='none'"></div><div><div class="font-bold text-sm text-gray-900">${u.name}</div><div class="text-xs text-gray-500 truncate w-32">${u.bio}</div></div></div>` : '' }).join('') };
@@ -2884,7 +2671,7 @@
         window.sendAnnouncement = async () => { const t = document.getElementById('announcement-text').value.trim(); if (!t) return; showAlert("Broadcast?", async () => { for (const u of users) if (u.id !== currentUser.id) await addDoc(collection(db, "notifications"), { receiverId: u.id, senderId: currentUser.id, type: 'system', content: t, timestamp: serverTimestamp(), read: !1 }); showToast("Sent"); document.getElementById('announcement-text').value = ""; closeAnnouncement() }) };
         window.openCreateMenu = () => { manageHistory('create-menu-overlay'); toggleModalAnim('create-menu-overlay', 'create-menu-modal', !0) }; window.closeCreateMenu = () => { toggleModalAnim('create-menu-overlay', 'create-menu-modal', !1) }; window.openEventComposer = () => { manageHistory('event-overlay'); closeCreateMenu(); removeEventCover(); document.getElementById('event-overlay').classList.remove('opacity-0', 'pointer-events-none'); document.getElementById('event-modal-box').classList.remove('scale-95') }; window.closeEventComposer = () => { document.getElementById('event-overlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('event-modal-box').classList.add('scale-95') };
         window.handleEventCoverSelect = e => { const f = e.target.files[0]; if (f) { currentEventCoverBlob = f; const r = new FileReader(); r.onload = x => { window.currentEventCover = x.target.result; document.getElementById('event-cover-preview').src = window.currentEventCover; document.getElementById('event-cover-preview-container').classList.remove('hidden'); document.getElementById('add-cover-btn').classList.add('hidden') }; r.readAsDataURL(f) } }; window.removeEventCover = () => { window.currentEventCover = null; currentEventCoverBlob = null; document.getElementById('event-cover-preview').src = ""; document.getElementById('event-cover-preview-container').classList.add('hidden'); document.getElementById('add-cover-btn').classList.remove('hidden'); document.getElementById('event-cover-input').value = "" }; window.publishEvent = () => { showToast("Coming soon!", !1); closeEventComposer() };
-        window.showPostOptions = (e, pid, aid) => { e.stopPropagation(); manageHistory('post-options-overlay'); const o = document.getElementById('post-options-overlay'), m = document.getElementById('post-options-modal'), c = document.getElementById('post-options-content'), me = aid === currentUser.id, adm = currentUser.email === 'edulinkbht@gmail.com', p = posts.find(x => x.id === pid); const postTime = p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp); const canEdit = me && (Date.now() - postTime.getTime() < 604800000); let h = ''; if (me) { if (canEdit) h += `<button onclick="editPost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="edit-2" class="w-5 h-5"></i> Edit Post</button>`; } if (me || adm) h += `<button onclick="deletePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="trash-2" class="w-5 h-5"></i> Delete Post</button>`; if (!me) { const s = savedPosts.includes(pid); h += `<button onclick="toggleSave('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="bookmark" class="w-5 h-5 ${s ? 'fill-yellow-500 text-yellow-500' : ''}"></i> ${s ? 'Unsave' : 'Save'} Post</button>`; h += `<button onclick="showToast('Reported'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="flag" class="w-5 h-5"></i> Report Post</button>` } h += `<button onclick="sharePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="link" class="w-5 h-5"></i> Copy Link</button>`; c.innerHTML = h; refreshIcons(); m.style.transform = ''; m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); o.classList.remove('hidden'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) };
+        window.showPostOptions = (e, pid, aid) => { e.stopPropagation(); manageHistory('post-options-overlay'); const o = document.getElementById('post-options-overlay'), m = document.getElementById('post-options-modal'), c = document.getElementById('post-options-content'), me = aid === currentUser.id, adm = currentUser.email === 'edulinkbht@gmail.com', p = posts.find(x => x.id === pid); const postTime = p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp); const canEdit = me && (Date.now() - postTime.getTime() < 604800000); let h = ''; if (me) { if (canEdit) h += `<button onclick="editPost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="edit-2" class="w-5 h-5"></i> Edit Post</button>`; } if (me || adm) h += `<button onclick="deletePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="trash-2" class="w-5 h-5"></i> Delete Post</button>`; if (!me) { const s = savedPosts.includes(pid); h += `<button onclick="toggleSave('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="bookmark" class="w-5 h-5 ${s ? 'fill-yellow-500 text-yellow-500' : ''}"></i> ${s ? 'Unsave' : 'Save'} Post</button>`; h += `<button onclick="trackInteraction('${pid}','not_interested'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="eye-off" class="w-5 h-5"></i> Not Interested</button>`; h += `<button onclick="trackInteraction('${pid}','show_more',10); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="trending-up" class="w-5 h-5"></i> Show me more of this</button>`; h += `<button onclick="showToast('Reported'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-xl transition-colors font-bold text-red-600 text-left"><i data-lucide="flag" class="w-5 h-5"></i> Report Post</button>` } h += `<button onclick="sharePost('${pid}'); hidePostMenu()" class="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-xl transition-colors font-bold text-gray-800 text-left"><i data-lucide="link" class="w-5 h-5"></i> Copy Link</button>`; c.innerHTML = h; refreshIcons(); m.style.transform = ''; m.style.transition = 'none'; o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); o.classList.remove('hidden'); void m.offsetWidth; m.style.transition = ''; setTimeout(() => { o.classList.remove('opacity-0'); m.classList.remove('translate-y-full', 'md:scale-95'); m.classList.add('translate-y-0', 'md:scale-100') }, 20) };
         window.hidePostMenu = () => { const o = document.getElementById('post-options-overlay'), m = document.getElementById('post-options-modal'); o.classList.add('opacity-0'); m.classList.add('translate-y-full', 'md:scale-95'); m.classList.remove('translate-y-0', 'md:scale-100'); setTimeout(() => o.classList.add('hidden'), 200) };
         window.editPost = pid => { const p = posts.find(x => x.id === pid); if (!p) return; document.getElementById('compose-text').value = p.content; window.editingPostId = pid; document.getElementById('compose-header-title').innerText = "Edit Post"; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null]; if (p.media) { const m = Array.isArray(p.media) ? p.media : [p.media]; m.forEach((url, i) => { if (i < 4) window.composeImages[i] = url }) } renderMediaGrid(); window.composeStep = 1; document.getElementById('compose-step-1').classList.remove('hidden'); document.getElementById('compose-step-2').classList.add('hidden'); document.getElementById('compose-footer-settings').classList.add('hidden'); const hasImage = window.composeImages.some(x => x !== null), btn = document.getElementById('compose-action-btn'); btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction; openCompose(!0) }; window.deletePost = async pid => { showAlert("Delete post?", async () => { await deleteDoc(doc(db, "posts", pid)); showToast("Deleted") }) };
         window.openCompose = (isEdit = false) => {
@@ -2922,7 +2709,7 @@
         window.closeCompose = () => { document.getElementById('compose-overlay').classList.add('opacity-0', 'pointer-events-none'); const modal = document.getElementById('compose-modal'); modal.classList.add('scale-95'); modal.classList.add('translate-y-full'); setTimeout(() => { window.editingPostId = null; document.getElementById('compose-text').value = ""; window.composeImages = [null, null, null, null]; window.composeImageBlobs = [null, null, null, null] }, 200) };
         window.toggleComposeSettings = () => { const a = document.getElementById('compose-settings-area'), ar = document.getElementById('compose-settings-arrow'); a.classList.toggle('hidden'); ar.style.transform = a.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)' };
         window.openUploadOptions = () => document.getElementById('upload-options-modal').classList.remove('hidden'); window.triggerUpload = m => { window.uploadMode = m; document.getElementById('upload-options-modal').classList.add('hidden'); const i = document.getElementById('media-input'); if (m === 'multiple') i.setAttribute('multiple', ''); else i.removeAttribute('multiple'); i.click() }; window.handleFileSelect = e => { const f = e.target.files; if (f.length > 0) { window.currentMediaBlob = []; window.currentMedia = []; const c = document.getElementById('media-preview-container'), inr = document.getElementById('preview-inner'); c.classList.remove('hidden'); inr.innerHTML = ''; const ps = Array.from(f).map(file => { window.currentMediaBlob.push(file); return new Promise(r => { const d = new FileReader(); d.onload = ev => { window.currentMedia.push(ev.target.result); const iv = file.type.startsWith('video'), el = document.createElement(iv ? 'video' : 'img'); el.src = ev.target.result; el.className = "h-20 w-20 object-cover rounded-md border border-gray-200 shrink-0"; inr.appendChild(el); r() }; d.readAsDataURL(file) }) }); Promise.all(ps).then(() => showToast(`${f.length} file(s) ready`)) } }; window.removeMedia = () => { window.currentMedia = []; window.currentMediaBlob = []; document.getElementById('media-preview-container').classList.add('hidden'); document.getElementById('media-input').value = "" };
-        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400 media-grid-plus absolute"></i><i data-lucide="download" class="w-8 h-8 text-[#0b57d0] media-grid-download absolute hidden"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
+        window.renderMediaGrid = () => { const grid = document.getElementById('media-grid-container'), btn = document.getElementById('compose-action-btn'); grid.innerHTML = ''; let hasImage = false; for (let i = 0; i < 4; i++) { const url = window.composeImages[i], div = document.createElement('div'); div.className = "aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-gray-50 transition-colors"; if (url) { hasImage = true; div.className = "aspect-square rounded-xl overflow-hidden relative shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"; div.onclick = () => openImageAdjust(i); if (url.includes('video') || url.endsWith('.mp4') || (window.composeImageBlobs[i] && window.composeImageBlobs[i].type.startsWith('video'))) div.innerHTML = `<video src="${url}" class="w-full h-full object-cover pointer-events-none"></video><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>`; else div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" id="compose-img-${i}"><button onclick="event.stopPropagation();removeGridImage(${i})" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80"><i data-lucide="x" class="w-4 h-4"></i></button>` } else { const isNext = (i === 0) || (window.composeImages[i - 1] !== null); if (isNext) { div.innerHTML = `<i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>`; div.classList.add('cursor-pointer', 'hover:bg-gray-100'); div.onclick = () => window.handleGridUpload(i) } else { div.innerHTML = ''; div.className = "aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-transparent" } } grid.appendChild(div) } if (window.composeStep === 1) { btn.innerText = hasImage ? "Next" : "Skip"; btn.onclick = window.handleComposeAction } refreshIcons() };
         window.openImageAdjust = i => {
             const url = window.composeImages[i]; if (!url || url.includes('video') || url.endsWith('.mp4')) return; window.adjustingImageIndex = i; window.adjustZoom = 1; window.adjustX = 0; window.adjustY = 0; manageHistory('adjust-image-overlay'); const o = document.getElementById('adjust-image-overlay'), img = document.getElementById('adjust-image-target'); img.src = url; img.style.transform = `translate(0px, 0px) scale(1)`; document.getElementById('adjust-zoom-range').value = 1; o.classList.remove('hidden'); setTimeout(() => o.classList.remove('opacity-0'), 20);
             const wrap = document.getElementById('adjust-image-wrapper');
