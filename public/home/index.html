@@ -2697,31 +2697,76 @@
 
                     // Injection logic: Post-like Spotlight
                     // Wait until 7th post, then show every 12 posts
+                    // Injection logic: Dual Spotlight System (Vertical & Horizontal)
+                    // Show less often: Start at 7th, then every 20 posts
                     const spotIndex = index + 1;
-                    if (spotIndex === 7 || (spotIndex > 7 && (spotIndex - 7) % 12 === 0)) {
+                    if (spotIndex === 7 || (spotIndex > 7 && (spotIndex - 7) % 20 === 0)) {
                         const spot = document.createElement('article');
                         spot.className = "post-card bg-white overflow-hidden mb-4";
-                        const suggestions = users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).sort(() => .5 - Math.random()).slice(0, 10);
-                        if (suggestions.length > 2) {
-                            spot.innerHTML = `
-                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-[15px] font-bold text-gray-900">Community Spotlight</div>
-                                        <div class="text-xs text-gray-500">People you may know</div>
-                                    </div>
-                                    <button onclick="switchView('explore')" class="text-xs font-bold text-blue-600 hover:text-blue-700">See all</button>
-                                </div>
-                                <div class="flex overflow-x-auto gap-3 p-4 no-scrollbar pb-6" style="scroll-padding-left: 16px;">
-                                    ${suggestions.map(u => `
-                                        <div class="flex-shrink-0 w-[140px] border border-gray-200 rounded-xl p-3 flex flex-col items-center bg-white cursor-pointer hover:border-gray-300 transition-colors" onclick="showProfile('${u.id}')">
-                                            <div class="w-16 h-16 rounded-full mb-3 relative">
-                                                <img src="${u.avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">
-                                            </div>
-                                            <div class="text-sm font-bold text-gray-900 text-center truncate w-full mb-0.5">${u.name}</div>
-                                            <div class="text-xs text-gray-500 text-center truncate w-full mb-3">@${u.username || 'user'}</div>
-                                            <button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="w-full bg-[#0b57d0] text-white text-xs font-bold py-1.5 rounded-lg hover:bg-blue-700 transition-colors">Follow</button>
+
+                        // Determine type: Odd occurrences = Horizontal (People You May Know), Even = Vertical (Influencer Spotlight)
+                        const occurrence = (spotIndex === 7) ? 1 : ((spotIndex - 7) / 20) + 1;
+                        const useHorizontal = occurrence % 2 !== 0;
+
+                        if (useHorizontal) {
+                            // NEW HORIZONTAL LIST (People You May Know)
+                            const suggestions = users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).sort(() => .5 - Math.random()).slice(0, 10);
+                            if (suggestions.length > 2) {
+                                spot.innerHTML = `
+                                    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                        <div>
+                                            <div class="text-[15px] font-bold text-gray-900">Community Spotlight</div>
+                                            <div class="text-xs text-gray-500">People you may know</div>
                                         </div>
-                                    `).join('')}
+                                        <button onclick="switchView('explore')" class="text-xs font-bold text-blue-600 hover:text-blue-700">See all</button>
+                                    </div>
+                                    <div class="flex overflow-x-auto gap-3 p-4 no-scrollbar pb-6" style="scroll-padding-left: 16px;">
+                                        ${suggestions.map(u => {
+                                    const isFollowing = currentUser.following.includes(u.id);
+                                    return `
+                                            <div class="flex-shrink-0 w-[140px] border border-gray-200 rounded-xl p-3 flex flex-col items-center bg-white cursor-pointer hover:border-gray-300 transition-colors" onclick="showProfile('${u.id}')">
+                                                <div class="w-16 h-16 rounded-full mb-3 relative">
+                                                    <img src="${u.avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">
+                                                </div>
+                                                <div class="text-sm font-bold text-gray-900 text-center truncate w-full mb-0.5">${u.name}</div>
+                                                <div class="text-xs text-gray-500 text-center truncate w-full mb-3">@${u.username || 'user'}</div>
+                                                <button id="ul-btn-${u.id}" onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="w-full ${isFollowing ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-[#0b57d0] text-white hover:bg-blue-700'} text-xs font-bold py-1.5 rounded-lg transition-colors">${isFollowing ? 'Following' : 'Follow'}</button>
+                                            </div>
+                                        `}).join('')}
+                                    </div>
+                                `;
+                                c.appendChild(spot);
+                            }
+                        } else {
+                            // OLD VERTICAL LIST (Influencer/Specific Spotlight)
+                            const qualityUsers = users.filter(u => {
+                                const name = u.name?.toLowerCase() || "";
+                                const hasFullPfp = u.avatar && (u.avatar.startsWith('data:') || u.avatar.length > 100);
+                                const isSpecific = name.includes('ngawang') || name.includes('tshogyal') || name.includes('soname') || name.includes('yangtshel') || name.includes('jigdral');
+                                return hasFullPfp || isSpecific;
+                            });
+                            const displayUsers = qualityUsers.slice(0, 5);
+
+                            spot.innerHTML = `
+                                <div class="p-4 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="text-[15px] font-bold text-gray-900 line-height-1">Community Spotlight</div>
+                                        <div class="text-[13px] text-gray-500 line-height-1 mt-0.5">Suggestions based on your interests</div>
+                                    </div>
+                                </div>
+                                <div class="px-4 pb-4">
+                                    <p class="text-[15px] text-gray-800 leading-relaxed mb-4">Discover influential educators and top-performing creators on EduLink. Connect with people who share your passion for learning.</p>
+                                    <div class="flex -space-x-3 overflow-hidden mb-1">
+                                        ${displayUsers.map(u => `<img class="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="${u.avatar}" alt="${u.name}">`).join('')}
+                                        ${qualityUsers.length > 5 ? `<div class="flex items-center justify-center h-9 w-9 rounded-full ring-2 ring-white bg-gray-100 text-[11px] font-bold text-gray-500">+${qualityUsers.length - 5}</div>` : ''}
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors" onclick="switchExploreMainTab('people')">
+                                    <span class="text-[13px] font-bold text-gray-500">See more creators like this</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
                                 </div>
                             `;
                             c.appendChild(spot);
@@ -2744,9 +2789,11 @@
                     if (f.length === 1) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span>`;
                     else if (f.length === 2) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and others`;
                     else txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and ${f.length - 1} others`;
-                    lh = `<div class="px-4 pb-3 pt-0 flex items-center gap-2.5 cursor-pointer" onclick="openLikes('${p.id}')">
+                    lh = `<div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors group" onclick="openLikes('${p.id}')">
                             <div class="flex items-center pl-1">${avatars}</div>
                             <div class="text-[13px] text-gray-500">${txt}</div>
+                            <div class="flex-1"></div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
                           </div>`;
                 }
             } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
