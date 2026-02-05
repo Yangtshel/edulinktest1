@@ -2790,8 +2790,8 @@
                     else if (f.length === 2) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and others`;
                     else txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and ${f.length - 1} others`;
                     lh = `<div class="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100 flex items-center gap-2.5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="openLikes('${p.id}')">
-                            <div class="flex items-center -space-x-1.5 pl-1">
-                                ${fri.map(u => `<img src="${u.avatar}" class="w-4 h-4 rounded-full border border-white object-cover">`).join('')}
+                            <div class="flex items-center -space-x-2 pl-1">
+                                ${fri.map(u => `<img src="${u.avatar}" class="w-5 h-5 rounded-full border border-white object-cover">`).join('')}
                             </div>
                             <div class="text-[12px] font-medium text-gray-600">Your friends interacted with this</div>
                             <div class="flex-1"></div>
