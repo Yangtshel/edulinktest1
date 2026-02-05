@@ -2701,39 +2701,31 @@
                     if (spotIndex === 7 || (spotIndex > 7 && (spotIndex - 7) % 12 === 0)) {
                         const spot = document.createElement('article');
                         spot.className = "post-card bg-white overflow-hidden mb-4";
-
-                        // Filter for "complete" pfps and specific high-quality creators
-                        const qualityUsers = users.filter(u => {
-                            const name = u.name?.toLowerCase() || "";
-                            const hasFullPfp = u.avatar && (u.avatar.startsWith('data:') || u.avatar.length > 100);
-                            const isSpecific = name.includes('ngawang') || name.includes('tshogyal') || name.includes('soname') || name.includes('yangtshel') || name.includes('jigdral');
-                            return hasFullPfp || isSpecific;
-                        });
-                        const displayUsers = qualityUsers.slice(0, 5);
-
-                        spot.innerHTML = `
-                            <div class="p-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
-                                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        const suggestions = users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).sort(() => .5 - Math.random()).slice(0, 10);
+                        if (suggestions.length > 2) {
+                            spot.innerHTML = `
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-[15px] font-bold text-gray-900">Community Spotlight</div>
+                                        <div class="text-xs text-gray-500">People you may know</div>
+                                    </div>
+                                    <button onclick="switchView('explore')" class="text-xs font-bold text-blue-600 hover:text-blue-700">See all</button>
                                 </div>
-                                <div class="flex-1">
-                                    <div class="text-[15px] font-bold text-gray-900 line-height-1">Community Spotlight</div>
-                                    <div class="text-[13px] text-gray-500 line-height-1 mt-0.5">Suggestions based on your interests</div>
+                                <div class="flex overflow-x-auto gap-3 p-4 no-scrollbar pb-6" style="scroll-padding-left: 16px;">
+                                    ${suggestions.map(u => `
+                                        <div class="flex-shrink-0 w-[140px] border border-gray-200 rounded-xl p-3 flex flex-col items-center bg-white cursor-pointer hover:border-gray-300 transition-colors" onclick="showProfile('${u.id}')">
+                                            <div class="w-16 h-16 rounded-full mb-3 relative">
+                                                <img src="${u.avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">
+                                            </div>
+                                            <div class="text-sm font-bold text-gray-900 text-center truncate w-full mb-0.5">${u.name}</div>
+                                            <div class="text-xs text-gray-500 text-center truncate w-full mb-3">@${u.username || 'user'}</div>
+                                            <button onclick="event.stopPropagation(); toggleFollow('${u.id}')" class="w-full bg-[#0b57d0] text-white text-xs font-bold py-1.5 rounded-lg hover:bg-blue-700 transition-colors">Follow</button>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            </div>
-                            <div class="px-4 pb-4">
-                                <p class="text-[15px] text-gray-800 leading-relaxed mb-4">Discover influential educators and top-performing creators on EduLink. Connect with people who share your passion for learning.</p>
-                                <div class="flex -space-x-3 overflow-hidden mb-1">
-                                    ${displayUsers.map(u => `<img class="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="${u.avatar}" alt="${u.name}">`).join('')}
-                                    ${qualityUsers.length > 5 ? `<div class="flex items-center justify-center h-9 w-9 rounded-full ring-2 ring-white bg-gray-100 text-[11px] font-bold text-gray-500">+${qualityUsers.length - 5}</div>` : ''}
-                                </div>
-                            </div>
-                            <div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors" onclick="switchExploreMainTab('people')">
-                                <span class="text-[13px] font-bold text-gray-500">See more creators like this</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
-                            </div>
-                        `;
-                        c.appendChild(spot);
+                            `;
+                            c.appendChild(spot);
+                        }
                     }
                 });
             }
@@ -2747,12 +2739,15 @@
                 if (f.length > 0) {
                     const fri = f.map(id => users.find(u => u.id === id)).filter(Boolean).slice(0, 3);
                     let avatars = '';
-                    fri.forEach((u, i) => { avatars += `<img src="${u.avatar}" class="w-5 h-5 rounded-full border border-white ${i > 0 ? '-ml-2' : ''} z-${30 - i * 10} object-cover">` });
+                    fri.forEach((u, i) => { avatars += `<img src="${u.avatar}" class="w-6 h-6 rounded-full border-2 border-white ${i > 0 ? '-ml-3' : ''} z-${30 - i * 10} object-cover">` });
                     let txt = '';
-                    if (f.length === 1) txt = `<span class="font-bold text-gray-900">${fri[0].name}</span>`;
-                    else if (f.length === 2) txt = `<span class="font-bold text-gray-900">${fri[0].name}</span> and <span class="font-bold text-gray-900">${fri[1].name}</span>`;
-                    else txt = `<span class="font-bold text-gray-900">${fri[0].name}</span>, <span class="font-bold text-gray-900">${fri[1].name}</span> and ${f.length - 2} others`;
-                    lh = `<div class="flex items-center mt-3 ml-1 text-[13px] text-gray-500"><div class="flex mr-2">${avatars}</div>Liked by ${txt}</div>`
+                    if (f.length === 1) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span>`;
+                    else if (f.length === 2) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and others`;
+                    else txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and ${f.length - 1} others`;
+                    lh = `<div class="px-4 pb-3 pt-0 flex items-center gap-2.5 cursor-pointer" onclick="openLikes('${p.id}')">
+                            <div class="flex items-center pl-1">${avatars}</div>
+                            <div class="text-[13px] text-gray-500">${txt}</div>
+                          </div>`;
                 }
             } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
             let rightActionBtn = '';
@@ -2763,7 +2758,7 @@
             }
             const urlMatch = p.content.match(/(https?:\/\/[^\s]+)/), previewId = `preview-${ctx}-${p.id}`, previewHtml = urlMatch ? `<div id="${previewId}"></div>` : '';
             if (urlMatch) setTimeout(() => window.renderLinkPreview(urlMatch[0], previewId), 100);
-            d.innerHTML = `<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${a.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>' : ''}${st.privacy === 'private' ? '<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>' : ''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${previewHtml}${mh}</div>${lh}<div class="post-actions"><button class="action-btn like js-like-btn-${p.id} ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart"></i> <span class="js-like-count-${p.id}">${likeText}</span></button><button class="action-btn comment" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments === false ? 'message-circle-off' : 'message-circle'}"></i> <span class="js-comment-count-${p.id}">${commentText}</span></button><button class="action-btn share-btn" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2"></i> <span class="hidden sm:inline">Share</span></button><div class="flex-1"></div>${rightActionBtn}</div></div>`; return d
+            d.innerHTML = `<div class="p-4 md:p-5"><div class="post-header"><div class="flex gap-3"><div class="post-avatar-container w-10 h-10 rounded-full"><img src="${a.avatar}" class="post-avatar cursor-pointer w-full h-full" onclick="event.stopPropagation();openProfilePreview('${a.id}')"></div><div><div class="flex items-center"><span class="post-author-name" onclick="event.stopPropagation(); showProfile('${a.id}')">${a.name}</span>${a.isOfficial ? '<i data-lucide="badge-check" class="w-4 h-4 official-badge ml-1"></i>' : ''}${a.banned ? '<i data-lucide="ban" class="w-3 h-3 text-red-500 ml-1"></i>' : ''}${st.privacy === 'private' ? '<i data-lucide="lock" class="w-3 h-3 text-gray-400 ml-1"></i>' : ''}</div><div class="post-meta flex items-center">${formatDate(p.timestamp)}</div></div></div><button class="icon-btn w-8 h-8 -mr-2" onclick="showPostOptions(event,'${p.id}','${p.authorId}')"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button></div><div class="post-content"><div class="post-body js-post-body-${p.id}">${window.renderTextWithReadMore(p.content, `post-${p.id}`)}</div>${previewHtml}${mh}</div><div class="post-actions"><button class="action-btn like js-like-btn-${p.id} ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')"><i data-lucide="heart"></i> <span class="js-like-count-${p.id}">${likeText}</span></button><button class="action-btn comment" onclick="event.stopPropagation(); openPostView('${p.id}')"><i data-lucide="${st.allowComments === false ? 'message-circle-off' : 'message-circle'}"></i> <span class="js-comment-count-${p.id}">${commentText}</span></button><button class="action-btn share-btn" onclick="event.stopPropagation(); sharePost('${p.id}')"><i data-lucide="redo-2"></i> <span class="hidden sm:inline">Share</span></button><div class="flex-1"></div>${rightActionBtn}</div>${lh}</div>`; return d
         }
         window.moveCarousel = (cid, dir) => { const s = window.carouselStates[cid]; if (!s) return; let n = s.index + dir; if (n < 0) n = 0; if (n >= s.total) n = s.total - 1; s.index = n; const outer = document.getElementById(cid), inner = outer ? outer.querySelector('.post-carousel-inner') : null; if (inner) inner.style.transform = `translateX(-${n * 100}%)`; const dc = document.getElementById(cid).nextElementSibling; if (dc) dc.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === n)); const ctid = cid.replace('carousel-', 'counter-'), cnt = document.getElementById(ctid); if (cnt) cnt.innerText = n + 1 };
         window.switchExploreMainTab = t => { window.activeExploreTab = t; const m = t === 'explore' ? 'main' : t;['main', 'video', 'people', 'tags'].forEach(x => { const el = document.getElementById(`tab-explore-${x}`), ed = document.getElementById(`tab-explore-${x}-d`); if (el) el.classList.remove('active'); if (ed) ed.classList.remove('active') }); document.getElementById(`tab-explore-${m}`)?.classList.add('active'); document.getElementById(`tab-explore-${m}-d`)?.classList.add('active'); window.activeExploreCategory = t === 'video' ? 'All' : 'For You'; handleSearch(document.getElementById('mobile-explore-search').value); syncURLState() };
