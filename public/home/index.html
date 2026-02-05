@@ -2700,12 +2700,12 @@
                     // Injection logic: Dual Spotlight System (Vertical & Horizontal)
                     // Show less often: Start at 7th, then every 20 posts
                     const spotIndex = index + 1;
-                    if (spotIndex === 7 || (spotIndex > 7 && (spotIndex - 7) % 20 === 0)) {
+                    if (spotIndex === 5 || (spotIndex > 5 && (spotIndex - 5) % 10 === 0)) {
                         const spot = document.createElement('article');
                         spot.className = "post-card bg-white overflow-hidden mb-4";
 
                         // Determine type: Odd occurrences = Horizontal (People You May Know), Even = Vertical (Influencer Spotlight)
-                        const occurrence = (spotIndex === 7) ? 1 : ((spotIndex - 7) / 20) + 1;
+                        const occurrence = (spotIndex === 5) ? 1 : ((spotIndex - 5) / 10) + 1;
                         const useHorizontal = occurrence % 2 !== 0;
 
                         if (useHorizontal) {
@@ -2789,11 +2789,11 @@
                     if (f.length === 1) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span>`;
                     else if (f.length === 2) txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and others`;
                     else txt = `Liked by <span class="font-bold text-gray-900">${fri[0].name}</span> and ${f.length - 1} others`;
-                    lh = `<div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors group" onclick="openLikes('${p.id}')">
-                            <div class="flex items-center pl-1">${avatars}</div>
-                            <div class="text-[13px] text-gray-500">${txt}</div>
-                            <div class="flex-1"></div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
+                    lh = `<div class="px-4 py-2 flex items-center gap-2 cursor-pointer" onclick="openLikes('${p.id}')">
+                            <div class="flex items-center -space-x-2 mr-1">
+                                ${fri.map(u => `<img src="${u.avatar}" class="w-5 h-5 rounded-full border border-white object-cover">`).join('')}
+                            </div>
+                            <div class="text-[13px] text-gray-900">${txt}</div>
                           </div>`;
                 }
             } const isLiked = p.likes?.includes(currentUser.id), isSaved = savedPosts.includes(p.id); const likeText = (p.likes?.length > 0) ? p.likes.length : (st.showLikes ? 'Like' : ''); const commentText = (p.comments?.length > 0) ? p.comments.length : (st.showComments ? 'Comment' : '');
